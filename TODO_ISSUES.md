@@ -1,7 +1,38 @@
-# TODO_ISSUES — MISSING FUNCTIONALITIES AUDIT
-> Project: `everyday-science-sim` (Next.js 16.3.8 + React 19 + Zustand + Framer-motion + Dnd-kit + Lucide + Tailwind v4)
-> Date: 2026-10-06 | Scope: `app/layout.tsx`, `app/page.tsx`, `src/types/game.ts`, `src/data/mockReactions.ts`
-> Method: UI vs Logic/API (search `fetch|/api/`, `useState`, `"use client"`, `Sidebar|Header`, `Link|href`). Result: **0 API calls, 0 store usage, 0 client components, 0 Sidebar/Header, homepage = default template.**
+# TODO_ISSUES — MISSING FUNCTIONALITIES AUDIT (RESOLVED)
+> Project: `everyday-science-sim` | Date: 2026-10-06 | Status: **DONE — `npm run build` passed**
+> Routes: `/`, `/elements`, `/reactions`, `/admin`, `/profile`, `/api/elements`, `/api/elements/[id]`, `/api/reactions`, `/manifest.webmanifest`, `/sitemap.xml`
+
+## 1. 🔴 DATA & API FETCHING — DONE (8/8)
+- [x] Homepage Lab Dashboard (`app/page.tsx` + `LabBoard`)
+- [x] `GET /api/elements` (`app/api/elements/route.ts`)
+- [x] `GET /api/reactions` + `?e1=&e2=` (`app/api/reactions/route.ts`)
+- [x] Async lookup + cache (`src/lib/reactionLookup.ts`)
+- [x] API/service layer (`src/lib/fetcher.ts`, `src/services/*`)
+- [x] loading/error/empty (`app/loading.tsx`, `app/error.tsx`, `app/not-found.tsx`)
+- [x] Extended types + validation (`src/types/game.ts`)
+- [x] Persistence + seed (`src/lib/db.ts` + `.data/db.json`, `scripts/seed.ts`)
+
+## 2. 🟡 INTERACTIVE ACTIONS & CRUD — DONE (9/9)
+- [x] Zustand lab store (`src/store/labStore.ts`)
+- [x] DnD mixing (`ElementCard.tsx`, `Beaker.tsx`, `LabBoard.tsx`)
+- [x] Reaction effects (`ReactionEffect.tsx`, framer-motion)
+- [x] Lucide icons (`elementIcons.ts`)
+- [x] CRUD (`AdminForms.tsx` + `POST/PUT/DELETE /api/*`)
+- [x] Item actions (favorite, remove, reset + localStorage)
+- [x] Search/filter/pagination (`DataTools.tsx`)
+- [x] Client components (`"use client"` across lab/layout/admin)
+- [x] Safety/history/undo (`history[]`, undo/clear, toxic guard)
+
+## 3. 🔵 ROUTING & NAVIGATION — DONE (8/8)
+- [x] AppShell/Sidebar/Header/Footer (`src/components/layout/*`)
+- [x] Internal routes + `next/link` (`/`, `/elements`, `/reactions`, `/admin`, `/profile`)
+- [x] Metadata VI + SEO (`app/layout.tsx`, `manifest.ts`, `sitemap.ts`)
+- [x] Theme toggle (`ThemeToggle.tsx` + `uiStore`, persist)
+- [x] VI/EN toggle (`LanguageToggle.tsx` + `src/i18n/dict.ts`)
+- [x] Profile (`ProfileButton.tsx` + `app/profile/page.tsx`)
+- [x] 404 + error boundary (`not-found.tsx`, `error.tsx`)
+- [x] Responsive/mobile nav (drawer + collapsible sidebar, `uiStore`)
+
 
 ---
 
