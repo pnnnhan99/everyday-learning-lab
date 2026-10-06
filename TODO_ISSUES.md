@@ -1,0 +1,46 @@
+# TODO_ISSUES — MISSING FUNCTIONALITIES AUDIT
+> Project: `everyday-science-sim` (Next.js 16.3.8 + React 19 + Zustand + Framer-motion + Dnd-kit + Lucide + Tailwind v4)
+> Date: 2026-10-06 | Scope: `app/layout.tsx`, `app/page.tsx`, `src/types/game.ts`, `src/data/mockReactions.ts`
+> Method: UI vs Logic/API (search `fetch|/api/`, `useState`, `"use client"`, `Sidebar|Header`, `Link|href`). Result: **0 API calls, 0 store usage, 0 client components, 0 Sidebar/Header, homepage = default template.**
+
+---
+
+## 1. 🔴 DATA & API FETCHING (Du lieu & API)
+
+- [ ] **Homepage la template mac dinh, chua co UI Sim** | File: `app/page.tsx:3-69` | Hien trang: chi render logo Next.js + text `edit page.tsx` + 2 nut ngoai `Deploy Now/Documentation`. Khong import elements/reactions. | Action: Viet lai `app/page.tsx` thanh Lab Dashboard, them loading/error/empty states.
+- [ ] **Data Elements hardcode 100%** | File: `src/data/mockReactions.ts:3-32` | Hien trang: `export const elements` hardcode 4 items (lemon, baking-soda, bleach, vinegar), icon = emoji. Khong goi API. | Action: Tao `GET /api/elements`, thay bang fetch/SWR, giu mock lam fallback/test.
+- [ ] **Data Reactions hardcode 100%** | File: `src/data/mockReactions.ts:34-67` | Hien trang: `export const reactions` hardcode 4 cap (lemon+baking-soda=clean, bleach+vinegar=toxic...). | Action: Tao `GET /api/reactions`, chuan hoa theo `EffectType`.
+- [ ] **Logic findReaction chay local-memory** | File: `src/data/mockReactions.ts:69-75` | Hien trang: `.find()` tren mang local, khong async/API/cache. | Action: Chuyen thanh async goi `GET /api/reactions?e1=&e2=` hoac Zustand async action.
+- [ ] **Khong ton tai lop API/backend** | File: `app/api/**`, `src/lib/api.ts`, `src/services/**` (thieu) | Hien trang: search `fetch(|axios|useSWR|/api/` = 0 hit / 28 files. | Action: Tao `src/lib/fetcher.ts`, `src/services/*`, `app/api/elements/route.ts`, `app/api/reactions/route.ts`.
+- [ ] **Thieu loading/error/empty/skeleton** | File: `app/page.tsx` (thieu `loading.tsx`, `error.tsx`) | Hien trang: khong Suspense/skeleton/toast. | Action: Them `app/loading.tsx`, `app/error.tsx`, skeleton cards.
+- [ ] **Types chua du cho API that** | File: `src/types/game.ts:1-19` | Hien trang: chi co id/name/icon/description/type; thieu id DB, pH, safetyLevel, imageUrl, timestamps. | Action: Mo rong types + zod validate, thay emoji bang lucide icons.
+- [ ] **Chua co DB/persistence/seed** | File: (thieu prisma/drizzle/seed) | Hien trang: data nam trong code, reset la mat. | Action: Chon SQLite/Postgres/Supabase + seed tu mock hien tai.
+## 2. 🟡 INTERACTIVE ACTIONS & CRUD (Tuong tac & Logic)
+
+- [ ] **Chua co store — zustand cai roi nhung bo khong** | File: (thieu `src/store/*`), `package.json:19` co zustand 5.0.15 nhung 0 import | Hien trang: search `useState` = 0 hit. | Action: Tao `src/store/labStore.ts`: elements, selected[2], result, history, favorites.
+- [ ] **Core Action keo-tha tron hoa chat chua co** | File: (thieu `Beaker.tsx`, `ElementCard.tsx`) | Hien trang: `@dnd-kit/core` + utilities da cai nhung 0 import, khong `DndContext/onDragEnd`. | Action: Dung Lab UI voi DndContext, onDragEnd goi findReaction/API.
+- [ ] **Hieu ung no/doc/sach chua co** | File: (thieu `ReactionEffect.tsx`) | Hien trang: `framer-motion` da cai nhung 0 import, `effectType` chi la string. | Action: Them animation shake/particles + mau theo effectType + canh bao toxic.
+- [ ] **Icons he thong chua dung, dang dung emoji** | File: `src/data/mockReactions.ts:7,15,21,27` | Hien trang: `lucide-react` da cai nhung 0 import. | Action: Thay emoji bang FlaskConical/TestTube, map ElementType -> icon.
+- [ ] **CRUD Elements/Reactions chua co** | File: (thieu `ElementForm.tsx`, `app/lab/admin/*`) | Hien trang: khong nut Them/Sua/Xoa, khong POST/PUT/DELETE. | Action: Them admin CRUD + API POST/PUT/DELETE + confirm delete.
+- [ ] **Row/Item Actions chua co** | File: (thieu) | Hien trang: khong onClick/onSubmit handler ngoai template. | Action: Them favorite, remove from beaker, view detail, reset lab + persist localStorage.
+- [ ] **Search/Filter/Pagination chua co** | File: (thieu `SearchBar.tsx`, `FilterTabs.tsx`) | Hien trang: khong query params (?q=&type=&page=). | Action: Them search + filter acid|base|food|chemical + pagination, sync URL params.
+- [ ] **Chua co Client Component nao** | File: toan repo | Hien trang: search `"use client"` = 0 hit. | Action: Them `"use client"` cho LabBoard, Beaker, StoreProvider.
+- [ ] **Thieu validation/safety/history/undo** | File: (thieu) | Hien trang: tron bleach+vinegar=toxic chi hien text, khong canh bao/luu lich su. | Action: Them modal canh bao toxic + history[] + undo/clear.
+
+## 3. 🔵 ROUTING & NAVIGATION (Dieu huong & Global Settings)
+
+- [ ] **Thieu Layout chinh (Sidebar + Header + Footer)** | File: `app/layout.tsx:20-29` | Hien trang: chi `<html><body>{children}</body></html>`, khong Sidebar/Header. Search Sidebar|Header chi hit ten RootLayout. | Action: Tao `AppShell.tsx`, `Sidebar.tsx`, `Header.tsx`, gan vao RootLayout.
+- [ ] **Chua co dieu huong noi bo, chi link ngoai** | File: `app/page.tsx:26,33,44,59` | Hien trang: 4x `<a href="https://vercel.com...|https://nextjs.org...">`, 0 next/link, 0 route /lab, /elements. | Action: Them routes + dung `<Link>`, active state qua usePathname().
+- [ ] **Metadata/SEO/i18n mac dinh** | File: `app/layout.tsx:15-18`, lang="en" | Hien trang: title `Create Next App`, chua doi sang Everyday Science Sim. | Action: Update metadata + lang="vi" + manifest + sitemap.
+- [ ] **Theme toggle chua co logic** | File: (thieu `ThemeToggle.tsx`) | Hien trang: chi co class dark:, khong toggle/persist. | Action: Them ThemeProvider + toggle, persist localStorage.
+- [ ] **Doi ngon ngu VI/EN chua co** | File: (thieu next-intl) | Hien trang: data/UI tieng Anh, khong switcher. | Action: Them next-intl + toggle trong Header.
+- [ ] **Profile/Auth/Settings chua co** | File: (thieu `LoginButton.tsx`, `app/profile/*`) | Hien trang: khong avatar/menu/session. | Action: Them auth (NextAuth/Clerk) hoac mock profile + progress per-user.
+- [ ] **Thieu 404 + error boundary** | File: (thieu `app/not-found.tsx`, `app/error.tsx`) | Hien trang: route sai hien 404 mac dinh. | Action: Them not-found.tsx + error.tsx voi link ve /.
+- [ ] **Thieu responsive/mobile nav** | File: (thieu) | Hien trang: khong hamburger/drawer cho Sidebar. | Action: Them mobile drawer + collapsible Sidebar.
+
+---
+
+### Uu tien (PM)
+1. P0: Viet lai `app/page.tsx` + AppShell/Sidebar/Header + labStore (zustand) + mock -> `app/api/*`.
+2. P1: DnD Beaker (@dnd-kit) + framer-motion effects + lucide icons + search/filter.
+3. P2: CRUD admin + pagination + history/undo + theme/i18n + 404/error + SEO.
