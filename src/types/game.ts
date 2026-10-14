@@ -8,12 +8,23 @@ export interface Element {
   type: ElementType;
 }
 
-export type EffectType = 'explosion' | 'clean' | 'toxic';
+export type EffectType = 'toxic' | 'informational';
+
+export interface ScientificReference {
+  title: string;
+  publisher: string;
+  url: string;
+}
 
 export interface Reaction {
   element1Id: string;
   element2Id: string;
   resultTitle: string;
-  resultDescription: string;
+  observation: string;
+  explanation: string;
   effectType: EffectType;
+  reviewStatus: 'reviewed' | 'hazard-reviewed' | 'unreviewed';
+  assumptions: string[];
+  safetyGuidance: string;
+  references: ScientificReference[];
 }
