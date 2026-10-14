@@ -1,3 +1,5 @@
+<img width="512" height="512" alt="everyday-science-sim" src="https://github.com/user-attachments/assets/2cff2a1b-35d2-46a9-99f7-66f0412aa292" />
+
 # Everyday Science Sim
 
 An interactive, browser-based science learning project that starts with a virtual chemistry lab. Explore how everyday substances are represented, combine selected elements, and learn from reaction outcomes and safety notes.
