@@ -1,36 +1,112 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Everyday Science Sim
 
-## Getting Started
+An interactive, browser-based science learning project that starts with a virtual chemistry lab. Explore how everyday substances are represented, combine selected elements, and learn from reaction outcomes and safety notes.
 
-First, run the development server:
+> **Status: early development.** The current app is a rule-based learning prototype, not a validated chemistry simulator. Reaction content and safety claims need scientific review before being treated as authoritative.
 
-```bash
+## Why this project?
+
+Everyday Science Sim aims to make science easier to explore through small, understandable experiments. The long-term direction is to build an extensible collection of interactive science simulations, starting with chemistry and potentially expanding into physics and biology.
+
+The guiding principles are:
+
+- **Science before spectacle:** explanations should be evidence-based, sourced, and clear about uncertainty.
+- **Safety by design:** hazardous combinations should be clearly marked; the app must never encourage real-world experimentation with dangerous substances.
+- **Learn by interacting:** make it easy to explore inputs, outcomes, and explanations.
+- **Small, reusable foundations:** keep simulation rules independent from UI code so new experiments can be added and tested.
+- **Open development:** document limitations, track work in GitHub Issues, and welcome constructive feedback.
+
+## Current features
+
+The current codebase includes:
+
+- An interactive chemistry-lab interface for selecting and combining elements.
+- Rule-based reaction lookup and result presentation.
+- Safety-oriented reaction warnings and reaction history/undo flows.
+- Element and reaction data APIs, plus element/reaction management UI.
+- Search, filtering, pagination, favorites, and interface preferences.
+- A Next.js App Router application built with TypeScript, React, Tailwind CSS, Zustand, dnd-kit, and Framer Motion.
+
+These features describe the current implementation, not a claim that every reaction is chemically complete or scientifically verified. See [open issues](https://github.com/pnnnhan99/everyday-science-sim/issues) for known quality, security, testing, and architecture work.
+
+## Getting started
+
+### Requirements
+
+- Node.js compatible with the installed Next.js version.
+- npm (the repository includes package-lock.json).
+
+### Install and run
+
+~~~bash
+git clone https://github.com/pnnnhan99/everyday-science-sim.git
+cd everyday-science-sim
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+~~~
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Available scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+~~~bash
+npm run dev    # Start the local development server
+npm run lint   # Run ESLint
+npm run build  # Build the production application
+npm run start  # Start the built application
+~~~
 
-## Learn More
+Automated test coverage and continuous integration are planned work; check the GitHub Issues before relying on the project in production.
 
-To learn more about Next.js, take a look at the following resources:
+## How the project is organized
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- app/ — Next.js routes, layouts, and API route handlers.
+- src/components/ — lab, layout, and admin UI.
+- src/data/ — initial/example reaction data.
+- src/lib/ and src/services/ — data access and application helpers.
+- src/store/ — client-side lab state.
+- src/types/ — shared TypeScript domain types.
+- scripts/ — project maintenance and seed scripts.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The intended direction is to separate simulation definitions and scientific rules from the React interface. Shared utilities should only move into a package when there is a real reuse case; the project should not become tightly coupled to another app or a monorepo's internal source paths.
 
-## Deploy on Vercel
+## Scientific accuracy and safety
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+This project is for education and software experimentation only.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Do not use it as a substitute for a teacher, lab protocol, Safety Data Sheet (SDS), or professional guidance.
+- Never mix household chemicals based on a simulation result. In particular, **never mix bleach with vinegar, acids, ammonia, or other cleaners**; dangerous gases or reactions may result.
+- Reaction outcomes in the prototype are authored rules, not a general-purpose chemical equation solver.
+- Scientific claims should be reviewed against reputable sources and include references, assumptions, and appropriate safety notes.
+- If you spot an inaccurate explanation or unsafe claim, please open an issue with the relevant reaction and supporting sources.
+
+## Roadmap
+
+The near-term priorities are:
+
+1. Review reaction rules and safety language against reliable scientific sources.
+2. Secure all mutation endpoints and clarify the trust boundary around administration.
+3. Make persistence reliable for the intended deployment environment.
+4. Add automated tests and CI checks.
+5. Define a typed simulation contract that allows new experiments without coupling scientific logic to UI components.
+6. Improve contribution documentation and prepare a stable public demo.
+
+GitHub Issues are the source of truth for actionable tasks: [browse issues](https://github.com/pnnnhan99/everyday-science-sim/issues).
+
+## Contributing
+
+Ideas, bug reports, scientific corrections, accessibility feedback, and code contributions are welcome.
+
+Before opening a pull request:
+
+1. Search existing issues to avoid duplicates.
+2. For science-related changes, include reputable references and explain the assumptions.
+3. Keep changes focused and avoid presenting unverified behavior as scientific fact.
+4. Run npm run lint and npm run build.
+5. Describe what changed and how it was validated.
+
+Please open an issue first for large changes or architectural proposals.
+
+## License
+
+No license has been confirmed in this repository yet. Until a license is added, assume that normal copyright restrictions apply; do not assume the code is open for reuse merely because the repository is public.
