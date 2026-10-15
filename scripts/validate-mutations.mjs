@@ -49,14 +49,17 @@ console.log('✓ validateReaction rejects stale effectType');
 console.log('✓ validateReaction rejects non-HTTPS reference');
 console.log('✓ validateReaction accepts valid reaction');
 
-const { isDuplicatePair } = await loadModule('../src/lib/db.ts', {
-  '@/data/mockReactions': { elements: [], reactions: [], findReaction: () => undefined, validatePublishedReactions: () => {} },
-});
+const { isDuplicatePair, normalizePair } = await loadModule('../src/lib/repository.ts');
 
 assert.equal(isDuplicatePair({ element1Id: 'a', element2Id: 'b' }, { element1Id: 'a', element2Id: 'b' }), true, 'same pair should be duplicate');
 assert.equal(isDuplicatePair({ element1Id: 'a', element2Id: 'b' }, { element1Id: 'b', element2Id: 'a' }), true, 'reversed pair should be duplicate');
 assert.equal(isDuplicatePair({ element1Id: 'a', element2Id: 'b' }, { element1Id: 'c', element2Id: 'd' }), false, 'different pairs should not be duplicate');
 console.log('✓ isDuplicatePair detects duplicates (order-independent)');
+
+assert.equal(normalizePair('a', 'b'), 'a|b', 'normalizePair sorts ascending');
+assert.equal(normalizePair('b', 'a'), 'a|b', 'normalizePair is order-independent');
+assert.equal(normalizePair('lemon', 'baking-soda'), 'baking-soda|lemon', 'normalizePair sorts by string comparison');
+console.log('✓ normalizePair produces order-independent keys');
 
 const { checkAuth } = await loadModule('../src/lib/auth.ts', {
   'next/server': { NextResponse: { json: (data, init) => ({ data, init }) } },
