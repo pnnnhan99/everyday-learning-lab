@@ -94,8 +94,8 @@ export class SqliteElementRepository implements ElementRepository {
         INSERT INTO elements (id, name, icon, description, type, ph, safety_level, image_url, created_at, updated_at)
         VALUES (@id, @name, @icon, @description, @type, @ph, @safety_level, @image_url, @created_at, @updated_at)
       `).run(fromElement(element));
-    } catch (err) {
-      if ((err as { code?: string }).code === 'SQLITE_CONSTRAINT') {
+     } catch (err) {
+      if ((err as { code?: string }).code?.startsWith('SQLITE_CONSTRAINT')) {
         throw new Error('Element id already exists');
       }
       throw err;
@@ -150,7 +150,7 @@ export class SqliteReactionRepository implements ReactionRepository {
           @effect_type, @review_status, @safety_guidance, @assumptions, @references, @created_at, @updated_at, @normalized_pair)
       `).run(fromReaction(reaction));
     } catch (err) {
-      if ((err as { code?: string }).code === 'SQLITE_CONSTRAINT') {
+      if ((err as { code?: string }).code?.startsWith('SQLITE_CONSTRAINT')) {
         throw new Error('Reaction pair already exists');
       }
       throw err;
