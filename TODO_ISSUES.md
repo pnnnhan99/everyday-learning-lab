@@ -10,7 +10,7 @@
 - [x] API/service layer (`src/lib/fetcher.ts`, `src/services/*`)
 - [x] loading/error/empty (`app/loading.tsx`, `app/error.tsx`, `app/not-found.tsx`)
 - [x] Extended types + validation (`src/types/game.ts`)
-- [x] Persistence + seed (`src/lib/db.ts` + `.data/db.json`, `scripts/seed.ts`)
+- [x] Persistence + seed (`src/lib/repository.ts` interfaces, `src/lib/sqlite.ts`, `src/lib/sqliteRepository.ts`, `src/lib/migrate.ts`, `scripts/migrate.mjs`, `docs/persistence.md`)
 
 ## 2. 🟡 INTERACTIVE ACTIONS & CRUD — DONE (9/9)
 - [x] Zustand lab store (`src/store/labStore.ts`)
@@ -45,7 +45,7 @@
 - [ ] **Khong ton tai lop API/backend** | File: `app/api/**`, `src/lib/api.ts`, `src/services/**` (thieu) | Hien trang: search `fetch(|axios|useSWR|/api/` = 0 hit / 28 files. | Action: Tao `src/lib/fetcher.ts`, `src/services/*`, `app/api/elements/route.ts`, `app/api/reactions/route.ts`.
 - [ ] **Thieu loading/error/empty/skeleton** | File: `app/page.tsx` (thieu `loading.tsx`, `error.tsx`) | Hien trang: khong Suspense/skeleton/toast. | Action: Them `app/loading.tsx`, `app/error.tsx`, skeleton cards.
 - [ ] **Types chua du cho API that** | File: `src/types/game.ts:1-19` | Hien trang: chi co id/name/icon/description/type; thieu id DB, pH, safetyLevel, imageUrl, timestamps. | Action: Mo rong types + zod validate, thay emoji bang lucide icons.
-- [ ] **Chua co DB/persistence/seed** | File: (thieu prisma/drizzle/seed) | Hien trang: data nam trong code, reset la mat. | Action: Chon SQLite/Postgres/Supabase + seed tu mock hien tai.
+- [x] **Co DB/persistence/seed** | `src/lib/repository.ts` + `src/lib/sqliteRepository.ts` + `src/lib/migrate.ts` — SQLite voi UNIQUE constraints, migrations/seeds, no credentials committed. |
 ## 2. 🟡 INTERACTIVE ACTIONS & CRUD (Tuong tac & Logic)
 
 - [ ] **Chua co store — zustand cai roi nhung bo khong** | File: (thieu `src/store/*`), `package.json:19` co zustand 5.0.15 nhung 0 import | Hien trang: search `useState` = 0 hit. | Action: Tao `src/store/labStore.ts`: elements, selected[2], result, history, favorites.
