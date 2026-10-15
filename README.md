@@ -30,7 +30,35 @@ The current codebase includes:
 - A Next.js App Router application built with TypeScript, React, Tailwind CSS, Zustand, dnd-kit, and Framer Motion.
 
 These features describe the current implementation, not a claim that every reaction is chemically complete or scientifically verified. See [open issues](https://github.com/pnnnhan99/everyday-science-sim/issues) for known quality, security, testing, and architecture work.
+## API Security
 
+The project implements server-side authorization for all mutation endpoints (POST, PUT, DELETE) to protect scientific content from unauthorized modification.
+
+### Local Development
+In development mode (`NODE_ENV !== 'production'`), authorization is bypassed for convenience. This allows unrestricted access to the API for testing and development purposes.
+
+**Warning:** This bypass is **not secure** and should never be used in production.
+
+### Production Deployment
+In production (`NODE_ENV === 'production'`), the following environment variable must be set:
+
+- `API_ADMIN_KEY`: A secret key used for authorization
+
+Clients must include this key in the `X-Admin-Key` header for all mutation requests:
+```
+X-Admin-Key: your-secret-key-here
+```
+
+### Endpoint Security
+- **GET endpoints** (reading elements/reactions): Publicly accessible, no authorization required
+- **POST/PUT/DELETE endpoints** (creating/updating/deleting elements/reactions): Requires valid admin authorization
+
+### Validation
+All mutation endpoints validate:
+- Input data structure and types
+- Referential integrity (elements must exist for reactions)
+- No duplicate reactions (normalized pair uniqueness)
+- Proper enum values and constraints
 ## Getting started
 
 ### Requirements

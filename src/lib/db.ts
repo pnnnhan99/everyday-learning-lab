@@ -30,6 +30,21 @@ async function save(): Promise<void> {
   } catch { /* ephemeral FS (serverless): keep memory only */ }
 }
 
+// Helper function to get an element by ID
+export async function getElementById(id: string): Promise<Element | null> {
+  const db = await load();
+  return db.elements.find(element => element.id === id) ?? null;
+}
+
+// Helper function to check if a reaction already exists (normalized pair)
+export async function reactionExists(element1Id: string, element2Id: string): Promise<boolean> {
+  const db = await load();
+  return db.reactions.some(reaction =>
+    (reaction.element1Id === element1Id && reaction.element2Id === element2Id) ||
+    (reaction.element1Id === element2Id && reaction.element2Id === element1Id)
+  );
+}
+
 export async function listElements(): Promise<Element[]> { return (await load()).elements; }
 export async function listReactions(): Promise<Reaction[]> { return (await load()).reactions; }
 
