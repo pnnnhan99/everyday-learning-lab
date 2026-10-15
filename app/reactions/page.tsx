@@ -12,7 +12,7 @@ export default async function ReactionsPage() {
           <div key={`${r.element1Id}-${r.element2Id}`} className="rounded-2xl border p-4">
             <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">{r.element1Id} + {r.element2Id} · {r.effectType}</p>
             <h2 className="mt-1 font-bold">{r.resultTitle}</h2>
-            <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">{r.resultDescription}</p>
+            <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">{r.observation}</p>
           </div>
         ))}
       </div>
