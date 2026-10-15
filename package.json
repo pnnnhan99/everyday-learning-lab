@@ -12,6 +12,8 @@
     "validate:reactions": "node scripts/validate-reactions.mjs",
     "validate:mutations": "node scripts/validate-mutations.mjs",
     "validate:persistence": "node scripts/validate-persistence.mjs",
+    "test": "vitest",
+    "test:run": "vitest run",
     "validate": "npm run validate:reactions && npm run validate:mutations && npm run validate:persistence"
   },
   "dependencies": {
@@ -34,6 +36,8 @@
     "eslint": "^9",
     "eslint-config-next": "16.3.8",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.4"
   }
 }
