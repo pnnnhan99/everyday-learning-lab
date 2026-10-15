@@ -7,11 +7,19 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "validate:reactions": "node scripts/validate-reactions.mjs"
+    "migrate": "node scripts/migrate.mjs",
+    "seed": "npm run migrate",
+    "validate:reactions": "node scripts/validate-reactions.mjs",
+    "validate:mutations": "node scripts/validate-mutations.mjs",
+    "validate:persistence": "node scripts/validate-persistence.mjs",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "validate": "npm run validate:reactions && npm run validate:mutations && npm run validate:persistence"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/utilities": "^3.2.2",
+    "better-sqlite3": "^13.0.3",
     "framer-motion": "^14.0.0",
     "lucide-react": "^1.52.0",
     "next": "16.3.8",
@@ -21,12 +29,15 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/better-sqlite3": "^9.6.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.8",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.4"
   }
 }
