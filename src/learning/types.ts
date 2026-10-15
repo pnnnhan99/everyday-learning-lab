@@ -52,22 +52,32 @@ export interface Reference {
 }
 
 // Domain-specific extensions can be added here
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface MathematicsContent extends LearningContent {
   // Mathematics-specific fields
 }
 
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface ChemistryContent extends LearningContent {
   // Chemistry-specific fields
 }
 
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface PhysicsContent extends LearningContent {
   // Physics-specific fields
 }
 
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface BiologyContent extends LearningContent {
   // Biology-specific fields
 }
 
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface RealworldContent extends LearningContent {
   // Real-world challenges-specific fields
 }
