@@ -1,3 +1,5 @@
+import { getMaintainerToken } from '@/lib/auth';
+
 export class ApiError extends Error {
   status: number;
   constructor(status: number, message: string) {
@@ -7,7 +9,10 @@ export class ApiError extends Error {
 }
 
 export async function fetcher<T>(input: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(input, { ...init, headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) } });
+  const token = getMaintainerToken();
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(input, { ...init, headers: { ...headers, ...(init?.headers ?? {}) } });
   if (!res.ok) {
     let message = `Request failed (${res.status})`;
     try {

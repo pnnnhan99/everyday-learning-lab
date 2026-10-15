@@ -33,6 +33,11 @@ async function save(): Promise<void> {
 export async function listElements(): Promise<Element[]> { return (await load()).elements; }
 export async function listReactions(): Promise<Reaction[]> { return (await load()).reactions; }
 
+export function isDuplicatePair(a: { element1Id: string; element2Id: string }, b: { element1Id: string; element2Id: string }): boolean {
+  return (a.element1Id === b.element1Id && a.element2Id === b.element2Id) ||
+    (a.element1Id === b.element2Id && a.element2Id === b.element1Id);
+}
+
 export async function findReactionPair(firstId: string, secondId: string): Promise<Reaction | null> {
   const { reactions } = await load();
   return reactions.find((r) =>
@@ -68,6 +73,7 @@ export async function deleteElement(id: string): Promise<boolean> {
 
 export async function createReaction(r: Reaction): Promise<Reaction> {
   const db = await load();
+  if (db.reactions.some((existing) => isDuplicatePair(existing, r))) throw new Error('Reaction pair already exists');
   db.reactions.push(r);
   await save();
   return r;
