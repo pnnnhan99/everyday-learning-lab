@@ -1,3 +1,5 @@
+import { Lesson } from '../types';
+
 export const chemistryAcidsBasesLesson: Lesson = {
   id: 'chem-acids-bases-101',
   title: 'Understanding Acids and Bases',

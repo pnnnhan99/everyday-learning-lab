@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 
-import { LearningContent, Lesson, Section } from '../learning/types';
-import { SimulationContract } from '../simulation/types';
+import { type Lesson } from '../../learning/types';
+
+export interface SimulationContract<TInit = unknown, TResult = unknown> {
+  initialize(): Promise<void> | void;
+  run(): Promise<TResult> | TResult;
+}
 
 interface LessonDetailProps {
   lesson: Lesson;

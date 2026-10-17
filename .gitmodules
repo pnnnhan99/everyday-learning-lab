@@ -1,0 +1,3 @@
+[submodule "external-packages/nhan-packages"]
+	path = external-packages/nhan-packages
+	url = https://github.com/pnnnhan99/nhan-packages.git

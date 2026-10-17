@@ -1,3 +1,5 @@
+import { Lesson } from '../types';
+
 export const mathematicsFractionsLesson: Lesson = {
   id: 'math-fractions-101',
   title: 'Introduction to Fractions',
