@@ -13,27 +13,33 @@ This roadmap is ordered by dependency, not by a promise of calendar dates. Exist
 
 **Exit criteria:** the existing chemistry prototype has clear limitations, reviewed safety messaging, protected mutations, and a testable foundation. ✅ Achieved.
 
-## Phase 1 — Shared learning experience (in progress)
+## Phase 1 — Shared learning experience (done)
 
-- Define validated lesson and learning-activity schemas.
-- Build subject/topic discovery and a lesson detail page.
-- Connect lesson objectives to a simulation.
-- Provide instructions, interactive controls, explanations, and a practical application.
-- Add a short reflection question or assessment.
+- [x] Define validated lesson and learning-activity schemas (`src/learning/types.ts`).
+- [x] Build subject/topic discovery (`app/explore`) and a lesson detail page (`app/learn/[slug]`).
+- [x] Connect lesson objectives to a simulation (registry + `LessonDetail`).
+- [x] Provide instructions, interactive controls, explanations, and a practical application.
+- [x] Add a short reflection question or assessment (Apply & Reflect section).
 
-**Exit criteria:** a user can complete one coherent learning journey without needing a separate app.
+**Exit criteria:** a user can complete one coherent learning journey without needing a separate app. Achieved.
 
 ## Phase 2 — Mathematics & Geometry
 
 Start with one small, testable learning experience, such as interactive geometry, coordinate graphs, or practical measurement. Prioritize clarity, correctness, and connection to everyday use over quantity.
 
-**Exit criteria:** lesson -> simulation -> practical task -> reflection works through the shared platform core.
+- [x] Fractions comparison simulation (`mathematics.fractions-compare`) with cross-multiplication and common denominators.
+
+**Exit criteria:** lesson -> simulation -> practical task -> reflection works through the shared platform core. Achieved.
 
 ## Phase 3 — Physics and Biology & Earth
 
 Add one verified simulation or visualization at a time. Every model must state its assumptions, valid ranges, units, limitations, and references where applicable.
 
-**Exit criteria:** both domains use the shared lesson and simulation contracts without forking the overall app architecture.
+- [x] Physics: projectile motion (`physics.projectile`) with parameters, units, assumptions, limitations, references.
+- [x] Biology: CO2-O2 balance (`biology.co2-o2`).
+- [x] 3D foundation: Three.js + @react-three/fiber + @react-three/drei verified with a smoke-test page at `/lab/3d`.
+
+**Exit criteria:** both domains use the shared lesson and simulation contracts without forking the overall app architecture. Achieved.
 
 ## Phase 4 — Real-world Challenges
 
