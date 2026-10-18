@@ -171,7 +171,7 @@ export default function Scene({
       <directionalLight position={[4, 5, 5]} intensity={1.2 + sunlight * 0.8} />
       <pointLight position={[-4, -2, -3]} intensity={0.7} color="#38bdf8" />
       {model === 'water' && <WaterMolecule />}
-      {model === 'projectile' && <ProjectilePath trajectory={trajectory} />}
+      {model === 'projectile' && trajectory.length > 1 && <ProjectilePath trajectory={trajectory} />}
       {model === 'plant-cell' && <PlantCell sunlight={sunlight} />}
       <OrbitControls
         makeDefault
