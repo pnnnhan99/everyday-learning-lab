@@ -39,6 +39,10 @@ const metadata: Simulation['metadata'] = {
     baseAmount: { min: 0.1, max: 20 },
     acidAmount: { min: 0.5, max: 50 },
   },
+  defaults: {
+    baseAmount: 2,
+    acidAmount: 10,
+  },
 };
 
 function clamp(value: number, range: { min: number; max: number }): number {

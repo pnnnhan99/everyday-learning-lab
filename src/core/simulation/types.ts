@@ -16,6 +16,7 @@ export interface SimulationMetadata {
   }>;
   units?: Record<string, string>;
   validInputRanges?: Record<string, { min: number; max: number }>;
+  defaults?: Record<string, number>;
   safetyNotes?: string[];
 }
 

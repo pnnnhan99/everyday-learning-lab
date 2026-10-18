@@ -1,15 +1,15 @@
+import { notFound } from 'next/navigation';
+
+import { LessonDetail } from '@/components/lesson-detail/LessonDetail';
 import { chemistryAcidsBasesLesson } from '@/learning/examples/chemistry-acids-bases';
 import { mathematicsFractionsLesson } from '@/learning/examples/mathematics-fractions';
-import { registerAllSimulations } from '@/simulations';
-import { LessonDetail } from '@/components/lesson-detail/LessonDetail';
-import { notFound } from 'next/navigation';
-import { globalRegistry } from '@/core/simulation/registry';
+import { physicsProjectileLesson } from '@/learning/examples/physics-projectile';
+import type { Lesson } from '@/learning/types';
 
-registerAllSimulations();
-
-const lessonsBySlug: Record<string, typeof chemistryAcidsBasesLesson> = {
+const lessonsBySlug: Record<string, Lesson> = {
   'chem-acids-bases-101': chemistryAcidsBasesLesson,
   'math-fractions-101': mathematicsFractionsLesson,
+  'phys-projectile-101': physicsProjectileLesson,
 };
 
 export default async function LearnLessonPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -20,18 +20,10 @@ export default async function LearnLessonPage({ params }: { params: Promise<{ sl
     notFound();
   }
 
-  const registry = new Map<string, import('@/core/simulation/types').SimulationContract<unknown, unknown>>();
-  for (const sim of globalRegistry.list()) {
-    registry.set(sim.id, {
-      initialize: async () => undefined,
-      run: (input?: unknown) => globalRegistry.create(sim.id)?.run(input),
-    });
-  }
-
   return (
     <div className="flex-1 p-6">
       <div className="mx-auto max-w-6xl">
-        <LessonDetail lesson={lesson} simulationRegistry={registry} />
+        <LessonDetail lesson={lesson} />
       </div>
     </div>
   );

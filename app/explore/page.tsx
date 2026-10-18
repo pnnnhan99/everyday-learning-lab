@@ -1,9 +1,9 @@
 import Link from 'next/link';
 
 const domains = [
-  { key: 'chemistry', label: 'Chemistry', href: '/learn/chem-acids-bases-101' },
-  { key: 'mathematics', label: 'Mathematics', href: '/learn/math-fractions-101' },
-  { key: 'physics', label: 'Physics', href: '/learn/physics-coming-soon', disabled: true },
+  { key: 'chemistry', label: 'Chemistry', href: '/learn/chem-acids-bases-101', disabled: false },
+  { key: 'mathematics', label: 'Mathematics', href: '/learn/math-fractions-101', disabled: false },
+  { key: 'physics', label: 'Physics', href: '/learn/phys-projectile-101', disabled: false },
   { key: 'biology', label: 'Biology & Earth', href: '/learn/biology-coming-soon', disabled: true },
   { key: 'realworld', label: 'Real-world Challenges', href: '/learn/realworld-coming-soon', disabled: true },
 ];
