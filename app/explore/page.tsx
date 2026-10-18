@@ -1,11 +1,11 @@
 import Link from 'next/link';
 
 const domains = [
-  { key: 'chemistry', label: 'Chemistry', href: '/learn/chem-acids-bases-101', disabled: false },
-  { key: 'mathematics', label: 'Mathematics', href: '/learn/math-fractions-101', disabled: false },
-  { key: 'physics', label: 'Physics', href: '/learn/phys-projectile-101', disabled: false },
-  { key: 'biology', label: 'Biology & Earth', href: '/learn/bio-co2-o2-101', disabled: false },
-  { key: 'realworld', label: 'Real-world Challenges', href: '/learn/realworld-coming-soon', disabled: true },
+  { key: 'chemistry', label: 'Chemistry', href: '/learn/chem-acids-bases-101', disabled: false, desc: 'Acids, bases, CO₂ simulation' },
+  { key: 'mathematics', label: 'Mathematics', href: '/learn/math-fractions-101', disabled: false, desc: 'Fractions fundamentals' },
+  { key: 'physics', label: 'Physics', href: '/learn/phys-projectile-101', disabled: false, desc: 'Projectile motion with parameters' },
+  { key: 'biology', label: 'Biology & Earth', href: '/learn/bio-co2-o2-101', disabled: false, desc: 'CO₂–O₂ balance model' },
+  { key: 'realworld', label: 'Real-world Challenges', href: '/learn/realworld-coming-soon', disabled: true, desc: 'Practical science scenarios' },
 ];
 
 export default function ExplorePage() {
@@ -13,23 +13,26 @@ export default function ExplorePage() {
     <div className="flex-1 p-6 text-white">
       <div className="mx-auto max-w-5xl space-y-6">
         <header className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">Explore Everyday Learning Lab</h1>
-          <p className="text-white/70">Discover lessons, simulations, and challenges across five learning domains.</p>
+          <h1 className="text-3xl font-bold tracking-tight">Explore</h1>
+          <p className="text-white/70">Pick a domain to start learning with simulations.</p>
         </header>
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {domains.map((domain) => (
-            <div key={domain.key} className="rounded-xl border border-white/10 bg-white/5 p-5 shadow-sm">
+            <div key={domain.key} className="rounded-xl border border-white/10 bg-white/5 p-5 shadow-sm transition hover:border-white/20">
               <h2 className="text-lg font-semibold">{domain.label}</h2>
-              <p className="mt-2 text-sm text-white/60">
-                {domain.disabled ? 'Content coming soon.' : 'Published and ready to explore.'}
-              </p>
-              <div className="mt-4">
+              <p className="mt-2 text-sm text-white/60">{domain.desc}</p>
+              <div className="mt-4 flex items-center gap-3">
                 {domain.disabled ? (
                   <span className="text-sm text-white/40">Coming soon</span>
                 ) : (
-                  <Link href={domain.href} className="text-sm text-blue-400 hover:text-blue-300">
-                    Go to lessons →
-                  </Link>
+                  <>
+                    <Link href={domain.href} className="text-sm text-blue-400 hover:text-blue-300">
+                      View lesson →
+                    </Link>
+                    <Link href="/lab" className="text-sm text-white/40 hover:text-white/60">
+                      Lab
+                    </Link>
+                  </>
                 )}
               </div>
             </div>

@@ -1,10 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { co2o2Simulation } from '../../../src/domains/biology/simulations/co2-o2';
 
-function run(opts: any) {
+import type { CO2O2Init } from '../../../src/domains/biology/simulations/co2-o2';
+
+function run(opts?: Partial<CO2O2Init>): Awaited<ReturnType<ReturnType<typeof co2o2Simulation.create>['run']>> {
   const contract = co2o2Simulation.create();
-  contract.initialize();
-  return contract.run(opts) as any;
+  void contract.initialize();
+  return contract.run(opts as CO2O2Init | undefined) as Awaited<ReturnType<ReturnType<typeof co2o2Simulation.create>['run']>>;
 }
 
 describe('co2o2Simulation', () => {
