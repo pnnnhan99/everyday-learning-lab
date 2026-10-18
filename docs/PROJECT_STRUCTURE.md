@@ -1,126 +1,105 @@
 # Project Structure
 
-This document distinguishes the **current implementation** from the **intended product architecture**. Do not create every proposed directory before a real feature needs it.
+This document distinguishes the current implementation from the intended product architecture. Add boundaries incrementally; do not create empty directories just to match a diagram.
 
 ## Current repository map
 
 ```text
 app/
-  api/
-    elements/           Element read/mutation endpoints
-    reactions/         Reaction read/mutation endpoints
-  admin/                Current content-management page
-  elements/             Element catalog route
-  reactions/            Reaction catalog route
-  profile/              Current profile/preferences route
+  api/                  Element and reaction read/mutation endpoints
+  admin/                Content-management page
+  elements/             Element catalog
+  reactions/            Reaction catalog
+  profile/              Profile/preferences page
   layout.tsx             Root layout and metadata
-  page.tsx               Current home route
-  loading.tsx            Route loading UI
-  error.tsx              Error boundary
-  not-found.tsx          Not-found UI
+  page.tsx               Current chemistry laboratory entry point
 src/
   components/
-    admin/               Admin forms and controls
-    lab/                 Chemistry lab cards, beaker, history, effects, data tools
-    laboratory/          Drag-and-drop laboratory workspace
-    layout/              App shell, header, sidebar, profile and preference controls
+    admin/               Admin UI
+    lab/                 Chemistry lab components
+    laboratory/          Drag-and-drop chemistry workspace
+    layout/              App shell and navigation
   data/                  Seed/example chemistry data
-  i18n/                  Current Vietnamese/English dictionaries
-  lib/                   Data access, fetcher, reaction lookup
+  i18n/                  Vietnamese/English UI dictionaries
+  lib/                   Repository, SQLite, API and domain utilities
   services/              Element and reaction application services
-  store/                 Zustand stores for lab and UI state
-  types/                 Domain types and input validation
-docs/
-  reaction-review.md     Chemistry reaction review notes
-scripts/
-  seed.ts                Seed script
-  validate-reactions.mjs Reaction data validation
-public/                   Static assets
+  store/                 Zustand state stores
+  types/                 Domain types and runtime validation
+docs/                     Product, architecture, persistence, science notes
+scripts/                  Data and persistence validation
 ```
 
-## Intended responsibility boundaries
+## Confirmed implementation notes
+
+- The chemistry laboratory uses drag-and-drop interactions and Zustand state.
+- Element and reaction routes use server-side validation; mutation routes use a maintainer-token guard.
+- Element and reaction persistence is abstracted behind repository interfaces and currently uses SQLite via `better-sqlite3`. See [persistence.md](persistence.md).
+- `three`, `@react-three/fiber`, and `@react-three/drei` are declared dependencies. Audit actual usage before introducing new 3D infrastructure.
+
+These notes describe source observed during a documentation audit. They do not guarantee the project currently passes lint, tests, validation, or production build.
+
+## Responsibility boundaries
 
 ### `app/` — routing and HTTP boundary
 
 - Keep route files focused on rendering pages and translating HTTP requests/responses.
 - Validate request payloads at API boundaries.
-- Apply authorization to every content mutation endpoint; hiding an admin page is not authorization.
+- Apply authorization to every content mutation endpoint; hiding an admin page alone is not authorization.
 - Delegate business rules to services/domain modules rather than duplicating them in route handlers.
 
 ### `src/components/` — presentation and interaction
 
-- Keep components responsible for displaying information and collecting user interaction.
-- Avoid embedding scientific truth tables or domain calculations in React components.
-- Shared layout components should not depend on a particular subject's data model.
+- Display information and collect user interaction.
+- Avoid embedding scientific rules or calculations in React components.
+- Keep shared layout components independent of subject-specific data models.
 
 ### `src/services/` and `src/lib/` — application and infrastructure logic
 
-- Services coordinate use cases for content and simulations.
+- Services coordinate use cases.
 - Data access owns persistence details.
-- Do not let pages/components directly depend on JSON file layout or database implementation.
-- Replace the current JSON/in-memory persistence when the target hosting and durability requirements are known.
+- Keep scientific logic testable without rendering React or starting Next.js.
 
 ### `src/types/` — explicit contracts
 
 - Keep domain types and runtime validation aligned.
-- Avoid claiming a payload is valid based on TypeScript types alone; runtime input must be validated.
-- Simulation contracts should include input/output, units, valid ranges, assumptions, limitations, references, and safety metadata where applicable.
+- TypeScript interfaces alone do not validate external or persisted data.
+- Simulation contracts should include input/output, units, valid ranges, assumptions, limitations, references, review status, and safety metadata where applicable.
 
 ### `src/data/` — seed and authored content
 
-- Treat current chemistry records as prototype content until reviewed.
-- Prefer content data separate from presentation code.
-- Keep references and review status with scientific claims.
+- Treat chemistry rules as authored educational rules, not a general-purpose reaction solver.
+- Keep references, assumptions, and review status with scientific claims.
+- Do not present unreviewed content as authoritative.
 
-## Target domain modules
+## Intended learning architecture
 
-Add these boundaries incrementally as features are implemented; do not scaffold empty folders just to match the diagram.
-
-- `mathematics/`: algebra, geometry, graphs, measurement, practical calculations.
-- `chemistry/`: elements, reactions, chemical concepts, and the existing lab.
-- `physics/`: force, motion, electricity, light, and energy.
-- `biology-earth/`: living systems, ecology, climate, Earth science, and geography.
-- `real-world-challenges/`: interdisciplinary scenarios that connect concepts from multiple subjects.
-
-Each domain should provide content and simulation definitions through shared contracts. The shared learning experience should not need subject-specific branching for every new lesson.
-
-## Target shared learning core
-
-The platform may grow toward the following logical components:
-
-- **Lesson model:** title, summary, objectives, sections, prerequisites, and references.
-- **Simulation contract:** metadata, input schema, output schema, execution function, assumptions, limits, and safety/review status.
-- **Learning activity:** links a lesson to one or more simulations and a real-world application.
-- **Assessment:** questions, expected answers or rubrics, and explanations.
-- **Content registry:** discoverable lessons and simulations with stable IDs and subject tags.
-
-Keep the implementation small. Introduce abstractions only when at least one concrete feature uses them and tests demonstrate their value.
-
-## Dependency direction
-
-Prefer this direction:
+Start with a modular monolith:
 
 ```text
-app routes -> application services -> domain contracts/rules -> data-access interface
-React components -> application services/contracts (through focused hooks or props)
-data adapters -> persistence provider
+Experience routes
+  -> shared learning core (lessons, activities, assessments, registry)
+  -> domain models (Chemistry, Physics, Biology & Biochemistry)
+  -> typed simulation contract
+  -> repository/data-access interfaces
 ```
 
-Scientific rules should be testable without rendering React or starting a browser. Domain modules must not import from route files or presentation components.
+A shared lesson should connect objectives and explanation to one or more simulations, a real-world application, and a short reflection. A simulation must be testable independently of its renderer. A 3D scene is a visualization, not evidence that its underlying science is correct.
 
 ## Validation expectations
 
 For meaningful changes, run:
 
 - `npm run lint`
+- `npx tsc --noEmit`
+- `npm run test:run`
+- `npm run validate`
 - `npm run build`
-- `npm run validate:reactions` for chemistry content/rule changes
 
-Add automated tests for scientific calculations, input validation, safety metadata, service behavior, and key user journeys as the test infrastructure is introduced.
+Add automated tests for scientific calculations, input validation, authorization, service behavior, and key learner journeys. Record commands and outcomes rather than assuming they passed.
 
 ## Non-goals for the current phase
 
 - Do not introduce microservices.
 - Do not create a separate repository or package for shared code without demonstrated reuse.
-- Do not implement accounts, LMS features, or a complex database before product requirements justify them.
-- Do not present a prototype reaction rule as experimentally validated chemistry.
+- Do not implement accounts, LMS features, or complex infrastructure before requirements justify them.
+- Do not present a prototype model as experimentally validated science.
