@@ -1,9 +1,11 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useMemo, useState, useSyncExternalStore } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { co2o2Simulation } from '@/domains/biology/simulations/co2-o2';
+import type { CO2O2Result } from '@/domains/biology/simulations/co2-o2';
 import { projectileSimulation } from '@/domains/physics/simulations/projectile';
+import type { ProjectileResult } from '@/domains/physics/simulations/projectile';
 import type { Lab3DModel } from '@/components/lab3d/Scene';
 
 const Scene = dynamic(() => import('@/components/lab3d/Scene'), {
@@ -38,14 +40,36 @@ export default function Lab3DPage() {
   const [angle, setAngle] = useState(45);
   const [sunlight, setSunlight] = useState(0.8);
 
-  const projectile = useMemo(
-    () => projectileSimulation.create().run({ speed, angle, gravity: 9.81 }),
-    [speed, angle],
-  );
-  const plant = useMemo(
-    () => co2o2Simulation.create().run({ sunlight, co2: 0.6, water: 0.7, leafArea: 100 }),
-    [sunlight],
-  );
+  const [projectile, setProjectile] = useState<ProjectileResult | null>(null);
+  const [plant, setPlant] = useState<CO2O2Result | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.resolve(projectileSimulation.create().run({ speed, angle, gravity: 9.81 }))
+      .then((result) => {
+        if (!cancelled) setProjectile(result);
+      })
+      .catch(() => {
+        if (!cancelled) setProjectile(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [speed, angle]);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.resolve(co2o2Simulation.create().run({ sunlight, co2: 0.6, water: 0.7, leafArea: 100 }))
+      .then((result) => {
+        if (!cancelled) setPlant(result);
+      })
+      .catch(() => {
+        if (!cancelled) setPlant(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [sunlight]);
   const selected = models.find((item) => item.id === model) ?? models[0];
 
   return (
@@ -84,7 +108,7 @@ export default function Lab3DPage() {
               key={model}
               model={model}
               reducedMotion={reducedMotion}
-              trajectory={projectile.trajectory}
+              trajectory={projectile?.trajectory ?? []}
               sunlight={sunlight}
             />
           </div>
@@ -133,9 +157,9 @@ export default function Lab3DPage() {
               </label>
             </div>
             <div className="grid grid-cols-3 gap-3">
-              <div className="rounded-lg bg-black/20 p-3"><p className="text-xs text-white/50">Range</p><p className="mt-1 text-lg font-semibold">{projectile.range.toFixed(1)} m</p></div>
-              <div className="rounded-lg bg-black/20 p-3"><p className="text-xs text-white/50">Peak height</p><p className="mt-1 text-lg font-semibold">{projectile.maxHeight.toFixed(1)} m</p></div>
-              <div className="rounded-lg bg-black/20 p-3"><p className="text-xs text-white/50">Flight time</p><p className="mt-1 text-lg font-semibold">{projectile.flightTime.toFixed(2)} s</p></div>
+              <div className="rounded-lg bg-black/20 p-3"><p className="text-xs text-white/50">Range</p><p className="mt-1 text-lg font-semibold">{projectile ? `${projectile.range.toFixed(1)} m` : 'Calculating…'}</p></div>
+              <div className="rounded-lg bg-black/20 p-3"><p className="text-xs text-white/50">Peak height</p><p className="mt-1 text-lg font-semibold">{projectile ? `${projectile.maxHeight.toFixed(1)} m` : 'Calculating…'}</p></div>
+              <div className="rounded-lg bg-black/20 p-3"><p className="text-xs text-white/50">Flight time</p><p className="mt-1 text-lg font-semibold">{projectile ? `${projectile.flightTime.toFixed(2)} s` : 'Calculating…'}</p></div>
             </div>
             <p className="text-xs leading-5 text-white/50">Assumptions: no air resistance, constant gravity (9.81 m/s²), and equal launch/landing heights. Educational model only; never use it to aim real projectiles.</p>
           </section>
@@ -152,9 +176,9 @@ export default function Lab3DPage() {
               <input className="w-full accent-lime-400" type="range" min="0" max="1" step="0.05" value={sunlight} onChange={(event) => setSunlight(Number(event.target.value))} />
             </label>
             <div className="grid gap-3 sm:grid-cols-3">
-              <div className="rounded-lg bg-black/20 p-3"><p className="text-xs text-white/50">Photosynthesis rate</p><p className="mt-1 text-lg font-semibold">{plant.photosynthesisRate.toFixed(1)}</p></div>
-              <div className="rounded-lg bg-black/20 p-3"><p className="text-xs text-white/50">Respiration rate</p><p className="mt-1 text-lg font-semibold">{plant.respirationRate.toFixed(1)}</p></div>
-              <div className="rounded-lg bg-black/20 p-3"><p className="text-xs text-white/50">Net rate</p><p className="mt-1 text-lg font-semibold">{plant.netRate.toFixed(1)}</p></div>
+              <div className="rounded-lg bg-black/20 p-3"><p className="text-xs text-white/50">Photosynthesis rate</p><p className="mt-1 text-lg font-semibold">{plant ? plant.photosynthesisRate.toFixed(1) : 'Calculating…'}</p></div>
+              <div className="rounded-lg bg-black/20 p-3"><p className="text-xs text-white/50">Respiration rate</p><p className="mt-1 text-lg font-semibold">{plant ? plant.respirationRate.toFixed(1) : 'Calculating…'}</p></div>
+              <div className="rounded-lg bg-black/20 p-3"><p className="text-xs text-white/50">Net rate</p><p className="mt-1 text-lg font-semibold">{plant ? plant.netRate.toFixed(1) : 'Calculating…'}</p></div>
             </div>
             <p className="text-xs leading-5 text-white/50">Model limits: heuristic relative rates, not calibrated physiological measurements. CO₂, water, and leaf area are held constant.</p>
           </section>
