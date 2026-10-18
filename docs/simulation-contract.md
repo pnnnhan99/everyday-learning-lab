@@ -24,6 +24,7 @@ interface SimulationMetadata {
   references: Array<{ title: string; url: string }>;
   units?: Record<string, string>;
   validInputRanges?: Record<string, { min: number; max: number }>;
+  defaults?: Record<string, number>;
   safetyNotes?: string[];
 }
 
@@ -58,6 +59,11 @@ or any browser API.
 | ID | Domain | File |
 |----|--------|------|
 | `chemistry.acid-base.co2` | chemistry | `src/domains/chemistry/simulations/acidBaseCO2.ts` |
+| `physics.projectile` | physics | `src/domains/physics/simulations/projectile.ts` |
+| `biology.co2-o2` | biology | `src/domains/biology/simulations/co2-o2.ts` |
+| `mathematics.fractions-compare` | mathematics | `src/domains/mathematics/simulations/fractions-compare.ts` |
+
+See `docs/SIMULATIONS.md` for the full registry reference (inputs, outputs, and where each renders).
 
 ## Known limitations
 
