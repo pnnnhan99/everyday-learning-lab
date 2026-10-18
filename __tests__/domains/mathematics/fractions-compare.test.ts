@@ -1,10 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { fractionsCompareSimulation } from '../../../src/domains/mathematics/simulations/fractions-compare';
+import type { FractionCompareInit } from '../../../src/domains/mathematics/simulations/fractions-compare';
 
-function run(opts: any) {
+function run(opts?: Partial<FractionCompareInit>) {
   const c = fractionsCompareSimulation.create();
   c.initialize();
-  return c.run(opts) as any;
+  return c.run(opts) as Awaited<ReturnType<ReturnType<typeof fractionsCompareSimulation.create>['run']>>;
 }
 
 describe('fractionsCompareSimulation', () => {
