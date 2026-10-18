@@ -81,7 +81,7 @@ function ProjectilePath({ trajectory }: { trajectory: TrajectoryPoint[] }) {
     return trajectory.map((point) => [point.x * scale, point.y * scale, 0] as Point3);
   }, [trajectory]);
 
-  const marker = points[Math.floor(points.length / 2)] ?? [2.5, 1, 0];
+  const marker: Point3 = points[Math.floor(points.length / 2)] ?? [2.5, 1, 0];
 
   return (
     <group>
