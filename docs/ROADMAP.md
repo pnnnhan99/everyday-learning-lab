@@ -4,16 +4,16 @@ This roadmap is ordered by dependency, not by a promise of calendar dates. Exist
 
 ## Phase 0 — Trust and foundations
 
-- Review chemistry claims and safety notes against reputable sources.
-- Protect element/reaction mutation endpoints.
-- Decide persistence requirements and replace prototype storage when justified.
-- Add automated tests and CI.
-- Define a typed simulation contract independent of React components.
-- Keep the repository documentation and issue backlog consistent with the actual code.
+- [x] Review chemistry claims and safety notes against reputable sources.
+- [x] Protect element/reaction mutation endpoints (POST/PUT/DELETE, with server-side auth tests).
+- [x] Decide persistence requirements and replace prototype storage when justified.
+- [x] Add automated tests and CI (lint, typecheck, test, build in `.github/workflows/ci.yml`).
+- [x] Define a typed simulation contract independent of React components (`src/core/simulation/`).
+- [x] Keep the repository documentation and issue backlog consistent with the actual code.
 
-**Exit criteria:** the existing chemistry prototype has clear limitations, reviewed safety messaging, protected mutations, and a testable foundation.
+**Exit criteria:** the existing chemistry prototype has clear limitations, reviewed safety messaging, protected mutations, and a testable foundation. ✅ Achieved.
 
-## Phase 1 — Shared learning experience
+## Phase 1 — Shared learning experience (in progress)
 
 - Define validated lesson and learning-activity schemas.
 - Build subject/topic discovery and a lesson detail page.

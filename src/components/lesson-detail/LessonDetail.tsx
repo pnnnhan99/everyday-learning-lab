@@ -1,19 +1,15 @@
 import React, { useState } from 'react';
 
 import { type Lesson } from '../../learning/types';
-
-export interface SimulationContract<TInit = unknown, TResult = unknown> {
-  initialize(): Promise<void> | void;
-  run(): Promise<TResult> | TResult;
-}
+import type { SimulationContract } from '../../core/simulation/types';
 
 interface LessonDetailProps {
   lesson: Lesson;
-  simulationRegistry: Map<string, SimulationContract<any, any>>;
+  simulationRegistry: Map<string, SimulationContract<unknown, unknown>>;
 }
 
 export const LessonDetail: React.FC<LessonDetailProps> = ({ lesson, simulationRegistry }) => {
-  const [simulationResults, setSimulationResults] = useState<any | null>(null);
+  const [simulationResults, setSimulationResults] = useState<unknown | null>(null);
   const [simulationError, setSimulationError] = useState<string | null>(null);
   const [isRunningSimulation, setIsRunningSimulation] = useState(false);
 
@@ -123,7 +119,7 @@ export const LessonDetail: React.FC<LessonDetailProps> = ({ lesson, simulationRe
         <h2 className='text-xl font-semibold text-white/80'>Practical Application &amp; Reflection</h2>
         <div className='space-y-4'>
           <div>
-            <h3 className='text-lg font-medium text-white'>Apply What You've Learned</h3>
+            <h3 className='text-lg font-medium text-white'>Apply What You Have Learned</h3>
             <p className='text-sm text-white/70'>
               Consider how the concepts in this lesson apply to everyday situations.
               Think about examples you might encounter at home, work, or in nature.

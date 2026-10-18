@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server';
-import { listElements, updateElement, deleteElement } from '@/lib/db';
+import { getElementById, updateElement, deleteElement } from '@/lib/db';
 import { validateElement } from '@/types/game';
 import { checkAuth, unauthorizedResponse } from '@/lib/auth';
 
-export async function GET() {
-  return NextResponse.json({ data: await listElements() });
+export async function GET(_request: Request, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
+  const element = await getElementById(id);
+  if (!element) return NextResponse.json({ error: 'Element not found' }, { status: 404 });
+  return NextResponse.json({ data: element });
 }
 
 export async function PUT(request: Request, context: { params: Promise<{ id: string }> }) {
@@ -29,7 +32,13 @@ export async function DELETE(request: Request, context: { params: Promise<{ id: 
     const removed = await deleteElement(id);
     if (!removed) return NextResponse.json({ error: 'Element not found' }, { status: 404 });
     return NextResponse.json({ data: { id } });
-  } catch {
+  } catch (err) {
+    if (err instanceof Error && err.message.includes('FOREIGN KEY')) {
+      return NextResponse.json(
+        { error: 'Element is referenced by reactions and cannot be deleted' },
+        { status: 409 },
+      );
+    }
     return NextResponse.json({ error: 'Delete failed' }, { status: 500 });
   }
 }

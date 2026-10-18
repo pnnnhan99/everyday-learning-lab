@@ -5,13 +5,7 @@ import {
   validateSection,
   validateApplication,
   validateAssessment,
-  validateReference,
-  type LearningContent,
-  type Lesson,
-  type Section,
-  type Application,
-  type Assessment,
-  type Reference
+  validateReference
 } from '../../src/learning/types';
 
 describe('Learning content validation', () => {

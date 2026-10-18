@@ -9,6 +9,7 @@ const elements: ElementRepository = getElementRepository();
 const reactions: ReactionRepository = getReactionRepository();
 
 export async function listElements(): Promise<Element[]> { return elements.getAll(); }
+export async function getElementById(id: string): Promise<Element | null> { return elements.getById(id); }
 export async function listReactions(): Promise<Reaction[]> { return reactions.getAll(); }
 export async function findReactionPair(firstId: string, secondId: string): Promise<Reaction | null> { return reactions.findByPair(firstId, secondId); }
 export async function createElement(el: Element): Promise<Element> { return elements.create(el); }

@@ -96,20 +96,29 @@ const VALID_DIFFICULTIES = ['beginner', 'intermediate', 'advanced'] as const;
 const VALID_APP_TYPES = ['simulation', 'interactive', 'video', 'text'] as const;
 const VALID_ASSESSMENT_TYPES = ['quiz', 'exercise', 'project'] as const;
 
-export function validateLearningContent(input: any): ValidationResult<LearningContent> {
-  if (!input || typeof input !== 'object') {
+type UnknownRecord = Record<string, unknown>;
+
+function asRecord(input: unknown): UnknownRecord | null {
+  return input !== null && typeof input === 'object' && !Array.isArray(input)
+    ? (input as UnknownRecord)
+    : null;
+}
+
+export function validateLearningContent(input: unknown): ValidationResult<LearningContent> {
+  const record = asRecord(input);
+  if (!record) {
     return { ok: false, error: 'Input must be an object' };
   }
-  if (!input.id || typeof input.id !== 'string') {
+  if (typeof record.id !== 'string' || record.id.length === 0) {
     return { ok: false, error: 'LearningContent.id is required and must be a string' };
   }
-  if (!VALID_DOMAINS.includes(input.domain)) {
+  if (!VALID_DOMAINS.includes(record.domain as (typeof VALID_DOMAINS)[number])) {
     return {
       ok: false,
       error: `LearningContent.domain must be one of: ${VALID_DOMAINS.join(', ')}`
     };
   }
-  if (!VALID_DIFFICULTIES.includes(input.difficulty)) {
+  if (!VALID_DIFFICULTIES.includes(record.difficulty as (typeof VALID_DIFFICULTIES)[number])) {
     return {
       ok: false,
       error: `LearningContent.difficulty must be one of: ${VALID_DIFFICULTIES.join(', ')}`
@@ -118,14 +127,15 @@ export function validateLearningContent(input: any): ValidationResult<LearningCo
   return { ok: true, value: input as LearningContent };
 }
 
-export function validateApplication(input: any): ValidationResult<Application> {
-  if (!input || typeof input !== 'object') {
+export function validateApplication(input: unknown): ValidationResult<Application> {
+  const record = asRecord(input);
+  if (!record) {
     return { ok: false, error: 'Input must be an object' };
   }
-  if (!input.id || typeof input.id !== 'string') {
+  if (typeof record.id !== 'string' || record.id.length === 0) {
     return { ok: false, error: 'Application.id is required and must be a string' };
   }
-  if (!VALID_APP_TYPES.includes(input.type)) {
+  if (!VALID_APP_TYPES.includes(record.type as (typeof VALID_APP_TYPES)[number])) {
     return {
       ok: false,
       error: `Application.type must be one of: ${VALID_APP_TYPES.join(', ')}`
@@ -134,14 +144,15 @@ export function validateApplication(input: any): ValidationResult<Application> {
   return { ok: true, value: input as Application };
 }
 
-export function validateAssessment(input: any): ValidationResult<Assessment> {
-  if (!input || typeof input !== 'object') {
+export function validateAssessment(input: unknown): ValidationResult<Assessment> {
+  const record = asRecord(input);
+  if (!record) {
     return { ok: false, error: 'Input must be an object' };
   }
-  if (!input.id || typeof input.id !== 'string') {
+  if (typeof record.id !== 'string' || record.id.length === 0) {
     return { ok: false, error: 'Assessment.id is required and must be a string' };
   }
-  if (!VALID_ASSESSMENT_TYPES.includes(input.type)) {
+  if (!VALID_ASSESSMENT_TYPES.includes(record.type as (typeof VALID_ASSESSMENT_TYPES)[number])) {
     return {
       ok: false,
       error: `Assessment.type must be one of: ${VALID_ASSESSMENT_TYPES.join(', ')}`
@@ -150,16 +161,17 @@ export function validateAssessment(input: any): ValidationResult<Assessment> {
   return { ok: true, value: input as Assessment };
 }
 
-export function validateReference(input: any): ValidationResult<Reference> {
-  if (!input || typeof input !== 'object') {
+export function validateReference(input: unknown): ValidationResult<Reference> {
+  const record = asRecord(input);
+  if (!record) {
     return { ok: false, error: 'Input must be an object' };
   }
-  if (!input.id || typeof input.id !== 'string') {
+  if (typeof record.id !== 'string' || record.id.length === 0) {
     return { ok: false, error: 'Reference.id is required and must be a string' };
   }
   if (
-    typeof input.url !== 'string' ||
-    (!input.url.startsWith('http://') && !input.url.startsWith('https://'))
+    typeof record.url !== 'string' ||
+    (!record.url.startsWith('http://') && !record.url.startsWith('https://'))
   ) {
     return {
       ok: false,
@@ -169,22 +181,24 @@ export function validateReference(input: any): ValidationResult<Reference> {
   return { ok: true, value: input as Reference };
 }
 
-export function validateSection(input: any): ValidationResult<Section> {
-  if (!input || typeof input !== 'object') {
+export function validateSection(input: unknown): ValidationResult<Section> {
+  const record = asRecord(input);
+  if (!record) {
     return { ok: false, error: 'Input must be an object' };
   }
-  if (!input.id || typeof input.id !== 'string') {
+  if (typeof record.id !== 'string' || record.id.length === 0) {
     return { ok: false, error: 'Section.id is required and must be a string' };
   }
   return { ok: true, value: input as Section };
 }
 
-export function validateLesson(input: any): ValidationResult<Lesson> {
+export function validateLesson(input: unknown): ValidationResult<Lesson> {
   const contentResult = validateLearningContent(input);
   if (!contentResult.ok) {
     return { ok: false, error: contentResult.error };
   }
-  if (!Array.isArray(input.sections)) {
+  const record = asRecord(input) as UnknownRecord;
+  if (!Array.isArray(record.sections)) {
     return { ok: false, error: 'Lesson.sections must be an array' };
   }
   return { ok: true, value: input as Lesson };

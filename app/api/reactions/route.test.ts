@@ -62,6 +62,10 @@ describe('POST /api/reactions', () => {
   it('returns 401 without authorization', async () => {
     const response = await POST(makeRequest('http://localhost/api/reactions', 'POST', validReaction))
     expect(response.status).toBe(401)
+    const list = await GET(makeRequest('http://localhost/api/reactions', 'GET'))
+    const listJson = await list.json()
+    expect(listJson.data).toHaveLength(2)
+    expect(listJson.data.some((r: Reaction) => r.element1Id === 'bleach' && r.element2Id === 'vinegar')).toBe(true)
   })
 
   it('returns 400 for invalid reaction data', async () => {
@@ -100,6 +104,9 @@ describe('DELETE /api/reactions', () => {
   it('returns 401 without authorization', async () => {
     const response = await DELETE(makeRequest('http://localhost/api/reactions?e1=lemon&e2=baking-soda', 'DELETE'))
     expect(response.status).toBe(401)
+    const list = await GET(makeRequest('http://localhost/api/reactions', 'GET'))
+    const listJson = await list.json()
+    expect(listJson.data).toHaveLength(2)
   })
 
   it('returns 400 when e1 or e2 is missing', async () => {

@@ -31,6 +31,10 @@ describe('POST /api/elements', () => {
     expect(response.status).toBe(401)
     const json = await response.json()
     expect(json.error).toBe('Unauthorized')
+    const after = await GET()
+    const afterJson = await after.json()
+    expect(afterJson.data).toHaveLength(4)
+    expect(afterJson.data.map((e: Element) => e.id)).not.toContain('x')
   })
 
   it('returns 400 for invalid element data', async () => {

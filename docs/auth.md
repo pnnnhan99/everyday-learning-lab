@@ -70,5 +70,9 @@ Read-only endpoints (GET) do not require authorization.
 | 400    | Malformed payload or validation error |
 | 401    | Unauthorized (no/wrong token)    |
 | 404    | Resource or referenced element not found |
-| 409    | Conflict (duplicate element or reaction pair) |
+| 409    | Conflict (duplicate element/reaction pair, or element still referenced by reactions) |
 | 500    | Internal error (message does not leak internals) |
+
+`DELETE /api/elements/[id]` returns `409` if the element is still referenced by one or more
+reactions (enforced by a foreign-key constraint in SQLite). This prevents silent orphaning
+of reaction rows. No partial data change occurs on any non-2xx response.
