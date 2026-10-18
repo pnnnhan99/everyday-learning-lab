@@ -5,7 +5,7 @@ const domains = [
   { key: 'mathematics', label: 'Mathematics', href: '/learn/math-fractions-101', disabled: false, desc: 'Fractions fundamentals' },
   { key: 'physics', label: 'Physics', href: '/learn/phys-projectile-101', disabled: false, desc: 'Projectile motion with parameters' },
   { key: 'biology', label: 'Biology & Earth', href: '/learn/bio-co2-o2-101', disabled: false, desc: 'CO₂–O₂ balance model' },
-  { key: 'realworld', label: 'Real-world Challenges', href: '/learn/realworld-coming-soon', disabled: true, desc: 'Practical science scenarios' },
+  { key: 'realworld', label: 'Real-world Challenges', href: '/challenges', disabled: false, desc: 'Interdisciplinary science tasks' },
 ];
 
 export default function ExplorePage() {

@@ -45,7 +45,11 @@ Add one verified simulation or visualization at a time. Every model must state i
 
 Create interdisciplinary activities only after the underlying subject experiences exist. Each challenge should state the real-world question, required concepts, steps, evidence/observations, constraints, and a way to explain or evaluate the solution.
 
-**Exit criteria:** at least one challenge meaningfully uses concepts from two or more domains and links back to its learning resources.
+- [x] `Challenge` schema + validator in `src/learning/types.ts`.
+- [x] Sample challenge "Measuring Plant Respiration with Chemistry and Biology" linking `biology.co2-o2` and `chemistry.acid-base.co2`.
+- [x] `/challenges` list and `/challenges/[id]` detail with embedded simulation runners.
+
+**Exit criteria:** at least one challenge meaningfully uses concepts from two or more domains and links back to its learning resources. Achieved.
 
 ## Defer until evidence supports it
 

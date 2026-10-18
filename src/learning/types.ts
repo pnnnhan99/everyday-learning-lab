@@ -51,6 +51,17 @@ export interface Reference {
   url: string;
 }
 
+export interface Challenge extends LearningContent {
+  realWorldQuestion: string;
+  requiredConcepts: string[];
+  steps: string[];
+  evidence: string[];
+  constraints: string[];
+  evaluation: string;
+  linkedSimulationIds: string[];
+  relatedLessonIds: string[];
+}
+
 // Domain-specific extensions can be added here
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -202,4 +213,37 @@ export function validateLesson(input: unknown): ValidationResult<Lesson> {
     return { ok: false, error: 'Lesson.sections must be an array' };
   }
   return { ok: true, value: input as Lesson };
+}
+
+export function validateChallenge(input: unknown): ValidationResult<Challenge> {
+  const contentResult = validateLearningContent(input);
+  if (!contentResult.ok) {
+    return { ok: false, error: contentResult.error };
+  }
+  const record = asRecord(input) as UnknownRecord;
+  if (typeof record.realWorldQuestion !== 'string' || record.realWorldQuestion.length === 0) {
+    return { ok: false, error: 'Challenge.realWorldQuestion is required and must be a string' };
+  }
+  if (!Array.isArray(record.requiredConcepts) || record.requiredConcepts.length === 0) {
+    return { ok: false, error: 'Challenge.requiredConcepts must be a non-empty array' };
+  }
+  if (!Array.isArray(record.steps) || record.steps.length === 0) {
+    return { ok: false, error: 'Challenge.steps must be a non-empty array' };
+  }
+  if (!Array.isArray(record.evidence)) {
+    return { ok: false, error: 'Challenge.evidence must be an array' };
+  }
+  if (!Array.isArray(record.constraints)) {
+    return { ok: false, error: 'Challenge.constraints must be an array' };
+  }
+  if (typeof record.evaluation !== 'string' || record.evaluation.length === 0) {
+    return { ok: false, error: 'Challenge.evaluation is required and must be a string' };
+  }
+  if (!Array.isArray(record.linkedSimulationIds) || record.linkedSimulationIds.length === 0) {
+    return { ok: false, error: 'Challenge.linkedSimulationIds must be a non-empty array' };
+  }
+  if (!Array.isArray(record.relatedLessonIds)) {
+    return { ok: false, error: 'Challenge.relatedLessonIds must be an array' };
+  }
+  return { ok: true, value: input as Challenge };
 }
