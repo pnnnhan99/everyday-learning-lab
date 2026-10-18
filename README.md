@@ -2,19 +2,17 @@
 
 **Learn the concept. Explore the simulation. Apply it to real life.**
 
-Everyday Learning Lab is an interactive learning platform for people who want to understand how the world works. It combines clear lessons, browser-based simulations, and practical challenges so learners can explore ideas, test variables, and connect scientific concepts to everyday situations.
+Everyday Learning Lab is an interactive science-learning platform for curious learners, from children to adults. The long-term goal is to connect clear lessons, interactive 3D models, practical challenges, and short reflections so learners can explore ideas and test variables safely.
 
-> **Status: early development.** The current application is a rule-based chemistry learning prototype. It is not a validated chemistry simulator, and its scientific content must be reviewed before being treated as authoritative.
+> **Status: early development.** The current application is a rule-based chemistry learning prototype. It is not a validated chemistry simulator, and its scientific content must be reviewed before being treated as authoritative. The broader learning domains are product goals, not claims that all experiences are already implemented.
 
 ## Learning areas
 
-- **Mathematics & Geometry** — algebra, geometry, graphs, measurement, and practical calculations.
-- **Chemistry** — elements, molecules, reactions, and chemical phenomena.
+- **Chemistry** — elements, atoms, molecules, reactions, and chemical phenomena.
 - **Physics** — forces, motion, electricity, light, and energy.
-- **Biology & Earth** — living systems, ecology, climate, Earth science, and geography.
-- **Real-world Challenges** — interdisciplinary activities that use knowledge from multiple subjects to explain or solve practical problems.
-
-These are the product's target areas, not a claim that every area is already implemented. Development should expand from the existing chemistry prototype through small, tested learning experiences.
+- **Biology & Biochemistry** — cells, biomolecules, living systems, and interactions.
+- **Mathematics & Geometry** — measurement, graphs, geometry, and practical calculations that support scientific learning.
+- **Real-world Challenges** — interdisciplinary activities grounded in everyday questions.
 
 ## Core learning loop
 
@@ -33,9 +31,10 @@ The repository currently uses:
 - Zustand for client-side state.
 - dnd-kit for drag-and-drop interactions.
 - Framer Motion for interface animation.
-- Local JSON-file persistence with in-memory fallback for current element/reaction data.
+- Three.js, React Three Fiber, and Drei dependencies for future/current 3D experiences; the presence of dependencies alone does not mean a complete 3D learning journey exists.
+- A repository abstraction with SQLite persistence via `better-sqlite3` for element and reaction data.
 
-The current persistence approach is suitable only as a prototype. Local file writes and process memory are not reliable shared storage for serverless or multi-instance production deployments. See the open GitHub Issues for security, persistence, testing, scientific review, and simulation architecture work.
+SQLite is suitable for traditional self-hosted/VPS deployments where the database file is persistent and writable. It is not automatically suitable for serverless or multi-instance deployments without a shared persistent storage strategy. See [docs/persistence.md](docs/persistence.md).
 
 ## Getting started
 
@@ -49,48 +48,39 @@ The current persistence approach is suitable only as a prototype. Local file wri
 ```bash
 git clone https://github.com/pnnnhan99/everyday-learning-lab.git
 cd everyday-learning-lab
-npm install
+npm ci
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
 
-### Scripts
+### Useful scripts
 
 ```bash
-npm run dev                 # Start the local development server
+npm run dev                 # Start the development server
 npm run lint                # Run ESLint
+npx tsc --noEmit            # Type-check TypeScript
+npm run test:run            # Run automated tests once
 npm run build               # Build the production application
-npm run start               # Start the built application
-npm run validate:reactions  # Validate reaction data
+npm run validate:reactions  # Validate authored reaction data
+npm run validate:mutations  # Validate mutation API safeguards
+npm run validate:persistence # Validate persistence behavior
+npm run validate            # Run the project's validation scripts
 ```
 
 ## Project structure
 
-The following describes the current repository at a high level. Some folders contain prototype code and may evolve as the learning platform grows.
-
 ```text
-app/                  Next.js routes, layouts, and API route handlers
-  api/                Element and reaction API endpoints
-  admin/              Current content-management interface
-  elements/           Element catalog page
-  reactions/          Reaction catalog page
-  profile/            Current profile/preferences page
-src/
-  components/
-    admin/            Admin UI components
-    lab/              Chemistry lab UI and interactions
-    laboratory/       Laboratory workspace components
-    layout/           App shell, navigation, and global controls
-  data/               Seed/example chemistry data
-  i18n/               Current Vietnamese/English UI dictionaries
-  lib/                Data access, fetching, and reaction lookup helpers
-  services/           Element and reaction service layer
-  store/              Zustand stores for lab and UI state
-  types/              Shared TypeScript domain types
-docs/                 Product and science documentation
-scripts/              Validation and seed scripts
-public/               Static assets
+app/                  Next.js routes, layouts, and API handlers
+src/components/       UI, chemistry laboratory, and shared layout
+src/data/             Seed and authored example chemistry content
+src/i18n/             Vietnamese/English UI dictionaries
+src/lib/              Persistence, repositories, API helpers, and domain utilities
+src/services/         Application services
+src/store/            Zustand state stores
+src/types/            Domain types and runtime validation
+docs/                 Product, architecture, persistence, and science notes
+scripts/              Data and persistence validation scripts
 ```
 
 See [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) for current boundaries and the intended direction, and [docs/PRODUCT_ARCHITECTURE.md](docs/PRODUCT_ARCHITECTURE.md) for the shared learning-platform architecture.
@@ -102,20 +92,20 @@ This project is for education and software experimentation only.
 - Do not use it as a substitute for a teacher, laboratory protocol, Safety Data Sheet (SDS), or professional guidance.
 - Never mix household chemicals based on a simulation result. In particular, never mix bleach with vinegar, acids, ammonia, or other cleaners.
 - Current reaction outcomes are authored rules, not a general-purpose chemical equation solver.
+- Clearly distinguish illustrative 3D models from quantitative simulations.
 - Scientific content should cite reputable sources, state assumptions and limitations, and be reviewed before it is presented as authoritative.
 - If you find an inaccurate explanation or unsafe claim, open an issue with the relevant content and supporting references.
 
 ## Roadmap
 
-1. Review chemistry rules and safety claims against reliable sources.
-2. Protect content mutation endpoints and define authorization boundaries.
-3. Replace prototype persistence with a deployment-safe data layer when the deployment requirements are known.
-4. Add automated tests and continuous integration.
-5. Define a typed simulation contract independent of React components.
-6. Build a reusable lesson-to-simulation learning flow.
-7. Add Mathematics & Geometry, Physics, Biology & Earth, and Real-world Challenges incrementally.
+1. Keep the existing chemistry prototype secure, accurate within its stated limits, and tested.
+2. Establish a reusable, typed simulation contract and a client-only 3D scene foundation.
+3. Build a shared lesson → simulation → application → reflection experience.
+4. Deliver a first 3D learning journey in Chemistry, Physics, and Biology & Biochemistry.
+5. Improve accessibility, performance, content review, and deployment readiness.
+6. Expand to Mathematics & Geometry and interdisciplinary challenges through the same learning core.
 
-Track actionable work in [GitHub Issues](https://github.com/pnnnhan99/everyday-learning-lab/issues).
+Track active work in [GitHub Issues](https://github.com/pnnnhan99/everyday-learning-lab/issues). Closed issues may describe work that was planned or marked done historically; verify the current source and CI results before treating every acceptance criterion as satisfied.
 
 ## Contributing
 
@@ -125,7 +115,7 @@ Bug reports, scientific corrections, accessibility feedback, learning-content id
 2. Keep pull requests focused on one issue or a small, coherent change.
 3. For science-related changes, include reputable references and explain assumptions.
 4. Do not present unverified behavior as scientific fact.
-5. Run `npm run lint`, `npm run build`, and `npm run validate:reactions` when relevant.
+5. Run lint, type-check, tests, relevant validation scripts, and the production build when possible.
 6. Explain what changed and how it was validated in the pull request.
 
 See [AGENTS.md](AGENTS.md) for repository-specific coding guidance.
