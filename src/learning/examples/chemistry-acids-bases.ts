@@ -10,8 +10,8 @@ export const chemistryAcidsBasesLesson: Lesson = {
   reviewStatus: 'draft',
   prerequisites: ['basic-matter-concepts'],
   references: [
-    'ref-chemistry-1',
-    'ref-chemistry-2'
+    'Khan Academy — Acids and bases tutorial (khanacademy.org)',
+    'USGS — pH and Water (usgs.gov)',
   ],
   sections: [
     {
@@ -25,18 +25,12 @@ export const chemistryAcidsBasesLesson: Lesson = {
       ],
       applications: [
         {
-          id: 'app-vinegar-test',
-          title: 'Testing Vinegar with pH Strips',
-          description: 'Use pH strips to test the acidity of vinegar and other household substances.',
-          type: 'interactive',
-          resourceId: 'activity-vinegar-ph'
-        },
-        {
-          id: 'app-simulation-ph-scale',
-          title: 'Interactive pH Scale Simulation',
-          description: 'Explore the pH scale with this interactive simulation.',
+          id: 'app-simulation-acid-base',
+          title: 'Acid–Base CO₂ Model',
+          description:
+            'Run the acid–base CO₂ simulation to see how inputs change the resulting state. This is a teaching model, not a reaction predictor.',
           type: 'simulation',
-          resourceId: 'sim-ph-scale'
+          resourceId: 'chemistry.acid-base.co2'
         }
       ],
       assessments: [
@@ -83,22 +77,15 @@ export const chemistryAcidsBasesLesson: Lesson = {
         'Read and interpret pH values',
         'Classify substances as acidic, neutral, or basic based on pH'
       ],
-      applications: [
-        {
-          id: 'app-household-ph',
-          title: 'Testing Household Substances',
-          description: 'Measure the pH of various household liquids using a digital pH meter.',
-          type: 'interactive',
-          resourceId: 'activity-household-ph'
-        }
-      ],
+      applications: [],
       assessments: [
         {
           id: 'ass-ph-exercise',
           title: 'pH Classification Exercise',
-          description: 'Classify given substances based on their pH values.',
+          description:
+            'Classify each substance as acidic, neutral, or basic: lemon juice (pH ≈ 2), pure water (pH = 7), bleach (pH ≈ 12.5). Explain one choice in a sentence.',
           type: 'exercise',
-          itemIds: ['exercise-ph-1', 'exercise-ph-2']
+          itemIds: ['exercise-ph-1', 'exercise-ph-2', 'exercise-ph-3']
         }
       ]
     }
