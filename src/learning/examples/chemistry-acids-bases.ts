@@ -7,6 +7,7 @@ export const chemistryAcidsBasesLesson: Lesson = {
   domain: 'chemistry',
   difficulty: 'beginner',
   language: 'en',
+  reviewStatus: 'draft',
   prerequisites: ['basic-matter-concepts'],
   references: [
     'ref-chemistry-1',
@@ -44,7 +45,33 @@ export const chemistryAcidsBasesLesson: Lesson = {
           title: 'Properties Quiz',
           description: 'Test your understanding of acid and base properties.',
           type: 'quiz',
-          itemIds: ['quiz-props-1', 'quiz-props-2']
+          itemIds: ['quiz-props-1', 'quiz-props-2'],
+          items: [
+            {
+              id: 'quiz-props-1',
+              prompt: 'In water, what does a base do?',
+              options: [
+                { id: 'a', text: 'It donates hydrogen ions (H⁺).' },
+                { id: 'b', text: 'It accepts hydrogen ions or donates hydroxide ions (OH⁻).' },
+                { id: 'c', text: 'It always has a pH below 7.' },
+              ],
+              correctOptionId: 'b',
+              explanation:
+                'Bases accept H⁺ or release OH⁻ in water, which raises the pH. Acids donate H⁺, and a pH below 7 indicates an acidic solution, not a base.',
+            },
+            {
+              id: 'quiz-props-2',
+              prompt: 'A solution has a pH of 3. How is it classified?',
+              options: [
+                { id: 'a', text: 'Acidic.' },
+                { id: 'b', text: 'Neutral.' },
+                { id: 'c', text: 'Basic.' },
+              ],
+              correctOptionId: 'a',
+              explanation:
+                'On the 0–14 pH scale, values below 7 are acidic, 7 is neutral, and above 7 are basic. A pH of 3 is strongly acidic.',
+            },
+          ],
         }
       ]
     },

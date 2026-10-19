@@ -1,3 +1,8 @@
+import type { QuizItem } from './quiz';
+import { validateQuizItem } from './quiz';
+
+export type ReviewStatus = 'draft' | 'in-review' | 'expert-reviewed';
+
 export interface LearningContent {
   id: string;
   title: string;
@@ -8,6 +13,9 @@ export interface LearningContent {
   // Common fields for all content types
   prerequisites: string[];
   references: string[];
+  // Scientific review state. Anything below 'expert-reviewed' must not be
+  // presented as authoritative. Defaults to 'draft' when omitted.
+  reviewStatus?: ReviewStatus;
   // To be extended by specific content types
 }
 
@@ -40,6 +48,9 @@ export interface Assessment {
   type: 'quiz' | 'exercise' | 'project';
   // Reference to assessment items
   itemIds: string[];
+  // Inline quiz items. Required for type === 'quiz' so a self-check can render
+  // and grade without a separate item bank.
+  items?: QuizItem[];
 }
 
 export interface Reference {
@@ -106,6 +117,7 @@ const VALID_DOMAINS = ['mathematics', 'chemistry', 'physics', 'biology', 'realwo
 const VALID_DIFFICULTIES = ['beginner', 'intermediate', 'advanced'] as const;
 const VALID_APP_TYPES = ['simulation', 'interactive', 'video', 'text'] as const;
 const VALID_ASSESSMENT_TYPES = ['quiz', 'exercise', 'project'] as const;
+const VALID_REVIEW_STATUSES: ReviewStatus[] = ['draft', 'in-review', 'expert-reviewed'];
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -133,6 +145,15 @@ export function validateLearningContent(input: unknown): ValidationResult<Learni
     return {
       ok: false,
       error: `LearningContent.difficulty must be one of: ${VALID_DIFFICULTIES.join(', ')}`
+    };
+  }
+  if (
+    record.reviewStatus !== undefined &&
+    !VALID_REVIEW_STATUSES.includes(record.reviewStatus as ReviewStatus)
+  ) {
+    return {
+      ok: false,
+      error: `LearningContent.reviewStatus must be one of: ${VALID_REVIEW_STATUSES.join(', ')}`
     };
   }
   return { ok: true, value: input as LearningContent };
@@ -168,6 +189,27 @@ export function validateAssessment(input: unknown): ValidationResult<Assessment>
       ok: false,
       error: `Assessment.type must be one of: ${VALID_ASSESSMENT_TYPES.join(', ')}`
     };
+  }
+  if (record.items !== undefined) {
+    if (!Array.isArray(record.items)) {
+      return { ok: false, error: 'Assessment.items must be an array when present' };
+    }
+    for (const item of record.items) {
+      const quizError = validateQuizItem(item);
+      if (quizError) {
+        return { ok: false, error: quizError };
+      }
+    }
+  }
+  if (record.type === 'quiz') {
+    const hasItems = Array.isArray(record.items) && record.items.length > 0;
+    const hasItemIds = Array.isArray(record.itemIds) && record.itemIds.length > 0;
+    if (!hasItems && !hasItemIds) {
+      return {
+        ok: false,
+        error: 'A quiz Assessment needs either inline items or at least one itemId'
+      };
+    }
   }
   return { ok: true, value: input as Assessment };
 }
