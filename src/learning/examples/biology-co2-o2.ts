@@ -8,6 +8,7 @@ export const biologyCO2O2Lesson: Lesson = {
   domain: 'biology',
   difficulty: 'beginner',
   language: 'en',
+  reviewStatus: 'draft',
   prerequisites: ['Basic cell biology ideas', 'Gas exchange in plants'],
   references: [
     'Photosynthesis — Britannica',
@@ -41,8 +42,34 @@ export const biologyCO2O2Lesson: Lesson = {
           id: 'predict-balance',
           type: 'quiz',
           title: 'Predict the balance',
-          description: 'Given low light and high CO₂, will the plant be a net O₂ producer?',
-          itemIds: ['q1'],
+          description: 'Given the conditions, decide whether the plant is a net O₂ producer or consumer.',
+          itemIds: ['q-low-light', 'q-dark'],
+          items: [
+            {
+              id: 'q-low-light',
+              prompt: 'A plant sits in dim light with high CO₂. What is the most likely net gas exchange?',
+              options: [
+                { id: 'a', text: 'Net O₂ production (photosynthesis exceeds respiration).' },
+                { id: 'b', text: 'Net O₂ consumption (respiration exceeds photosynthesis).' },
+                { id: 'c', text: 'Exactly zero net exchange.' },
+              ],
+              correctOptionId: 'b',
+              explanation:
+                'Photosynthesis needs light, so dim light keeps it low while respiration continues. When respiration exceeds photosynthesis, the plant consumes O₂ overall.',
+            },
+            {
+              id: 'q-dark',
+              prompt: 'In full darkness, which process still runs?',
+              options: [
+                { id: 'a', text: 'Photosynthesis only.' },
+                { id: 'b', text: 'Both photosynthesis and respiration.' },
+                { id: 'c', text: 'Respiration only.' },
+              ],
+              correctOptionId: 'c',
+              explanation:
+                'Photosynthesis requires light, so it stops in darkness. Respiration runs continuously to power the cell, so the plant consumes O₂ and releases CO₂ at night.',
+            },
+          ],
         },
       ],
     },

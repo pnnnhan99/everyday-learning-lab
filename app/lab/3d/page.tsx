@@ -1,7 +1,8 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Suspense, useEffect, useState, useSyncExternalStore } from 'react';
 import { co2o2Simulation } from '@/domains/biology/simulations/co2-o2';
 import type { CO2O2Result } from '@/domains/biology/simulations/co2-o2';
 import { projectileSimulation } from '@/domains/physics/simulations/projectile';
@@ -33,9 +34,17 @@ const models: Array<{ id: Lab3DModel; label: string; domain: string }> = [
   { id: 'plant-cell', label: 'Plant cell', domain: 'Biology' },
 ];
 
-export default function Lab3DPage() {
+const MODEL_IDS = models.map((item) => item.id) as string[];
+
+function isLab3DModel(value: string | null): value is Lab3DModel {
+  return value !== null && MODEL_IDS.includes(value);
+}
+
+function Lab3DPageInner() {
+  const searchParams = useSearchParams();
+  const initialModel = searchParams.get('model');
   const reducedMotion = useSyncExternalStore(subscribeReducedMotion, getReducedMotion, () => false);
-  const [model, setModel] = useState<Lab3DModel>('water');
+  const [model, setModel] = useState<Lab3DModel>(isLab3DModel(initialModel) ? initialModel : 'water');
   const [speed, setSpeed] = useState(20);
   const [angle, setAngle] = useState(45);
   const [sunlight, setSunlight] = useState(0.8);
@@ -185,5 +194,19 @@ export default function Lab3DPage() {
         )}
       </div>
     </main>
+  );
+}
+
+export default function Lab3DPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex h-full w-full items-center justify-center text-sm text-white/60" role="status">
+          Loading the 3D lab…
+        </div>
+      }
+    >
+      <Lab3DPageInner />
+    </Suspense>
   );
 }

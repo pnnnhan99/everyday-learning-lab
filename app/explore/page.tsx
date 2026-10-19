@@ -1,11 +1,11 @@
 import Link from 'next/link';
 
 const domains = [
-  { key: 'chemistry', label: 'Chemistry', href: '/learn/chem-acids-bases-101', disabled: false, desc: 'Acids, bases, CO₂ simulation' },
-  { key: 'mathematics', label: 'Mathematics', href: '/learn/math-fractions-101', disabled: false, desc: 'Fractions fundamentals' },
-  { key: 'physics', label: 'Physics', href: '/learn/phys-projectile-101', disabled: false, desc: 'Projectile motion with parameters' },
-  { key: 'biology', label: 'Biology & Earth', href: '/learn/bio-co2-o2-101', disabled: false, desc: 'CO₂–O₂ balance model' },
-  { key: 'realworld', label: 'Real-world Challenges', href: '/challenges', disabled: false, desc: 'Interdisciplinary science tasks' },
+  { key: 'chemistry', label: 'Chemistry', href: '/learn/chem-acids-bases-101', lab3d: '/lab/3d?model=water', disabled: false, desc: 'Acids, bases, water molecule in 3D' },
+  { key: 'mathematics', label: 'Mathematics', href: '/learn/math-fractions-101', lab3d: null, disabled: false, desc: 'Fractions fundamentals' },
+  { key: 'physics', label: 'Physics', href: '/learn/phys-projectile-101', lab3d: '/lab/3d?model=projectile', disabled: false, desc: 'Projectile motion with parameters' },
+  { key: 'biology', label: 'Biology & Earth', href: '/learn/bio-co2-o2-101', lab3d: '/lab/3d?model=plant-cell', disabled: false, desc: 'CO₂–O₂ balance and plant cell in 3D' },
+  { key: 'realworld', label: 'Real-world Challenges', href: '/challenges', lab3d: null, disabled: false, desc: 'Interdisciplinary science tasks' },
 ];
 
 export default function ExplorePage() {
@@ -32,6 +32,11 @@ export default function ExplorePage() {
                     <Link href="/lab" className="text-sm text-white/40 hover:text-white/60">
                       Lab
                     </Link>
+                    {domain.lab3d && (
+                      <Link href={domain.lab3d} className="text-sm text-sky-300 hover:text-sky-200">
+                        3D
+                      </Link>
+                    )}
                   </>
                 )}
               </div>

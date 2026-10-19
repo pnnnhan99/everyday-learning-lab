@@ -8,6 +8,7 @@ export const physicsProjectileLesson: Lesson = {
   domain: 'physics',
   difficulty: 'beginner',
   language: 'en',
+  reviewStatus: 'draft',
   prerequisites: ['Basic vector decomposition (sine and cosine of an angle)'],
   references: [
     'Halliday, Resnick, Walker — Fundamentals of Physics (projectile motion chapter)',
@@ -41,8 +42,35 @@ export const physicsProjectileLesson: Lesson = {
           id: 'predict-check',
           type: 'quiz',
           title: 'Predict then check',
-          description: 'Before running, write down your predicted range for the default settings.',
-          itemIds: ['q1'],
+          description: 'Check your understanding of how launch conditions shape the trajectory.',
+          itemIds: ['q-angle', 'q-assumption'],
+          items: [
+            {
+              id: 'q-angle',
+              prompt:
+                'Two projectiles are launched at the same speed: one at 30°, one at 60°. What happens to their range?',
+              options: [
+                { id: 'a', text: 'The 30° launch travels farther.' },
+                { id: 'b', text: 'They land at the same range.' },
+                { id: 'c', text: 'The 60° launch travels farther.' },
+              ],
+              correctOptionId: 'b',
+              explanation:
+                'Range depends on sin(2θ), and sin(2×30°) = sin(60°) = sin(2×60°) = sin(120°). Complementary angles (adding to 90°) give the same range, so 30° and 60° match.',
+            },
+            {
+              id: 'q-assumption',
+              prompt: 'Which assumption does this projectile model make?',
+              options: [
+                { id: 'a', text: 'Air resistance slows the projectile down.' },
+                { id: 'b', text: 'Gravity changes with altitude.' },
+                { id: 'c', text: 'There is no air resistance and launch/landing heights are equal.' },
+              ],
+              correctOptionId: 'c',
+              explanation:
+                'The model uses constant gravity and ignores air resistance, with equal launch and landing heights. Real throws deviate from this, which is why the model is for learning, not aiming.',
+            },
+          ],
         },
       ],
     },
