@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { registerAllSimulations, globalRegistry } from '@/simulations';
 import type { SimulationContract } from '@/core/simulation/types';
+import { validateSimulationInput } from '@/core/simulation/validation';
 
 registerAllSimulations();
 
@@ -11,14 +12,23 @@ export default function LabSimulationPage({ params }: { params: { simulationId: 
   const sim = globalRegistry.get(simulationId);
   const [result, setResult] = useState<unknown>(undefined);
   const [error, setError] = useState<string>('');
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [inputs, setInputs] = useState<Record<string, number>>(() => sim?.metadata.defaults ?? {});
 
   async function run() {
     if (!sim) { setError('Simulation not found'); return; }
+    const validation = validateSimulationInput(inputs, sim.metadata);
+    if (!validation.ok) {
+      setValidationErrors(validation.errors);
+      setResult(undefined);
+      setError('');
+      return;
+    }
+    setValidationErrors([]);
     const c: SimulationContract<unknown, unknown> = sim.create();
     await c.initialize();
     try {
-      const r = c.run(inputs as unknown);
+      const r = c.run(validation.values);
       setResult(r);
       setError('');
     } catch (e) {
@@ -63,10 +73,21 @@ export default function LabSimulationPage({ params }: { params: { simulationId: 
           ))}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <button onClick={run} className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-500">Run</button>
-          {error && <span className="text-sm text-red-400">{error}</span>}
+          {error && <span role="alert" className="text-sm text-red-400">{error}</span>}
         </div>
+
+        {validationErrors.length > 0 && (
+          <div role="alert" className="rounded-lg border border-red-400/40 bg-red-400/10 p-3 text-sm text-red-200">
+            <p className="font-medium">Fix the inputs before running:</p>
+            <ul className="mt-1 list-disc pl-5">
+              {validationErrors.map((message) => (
+                <li key={message}>{message}</li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {result !== undefined && (
           <div className="rounded-lg bg-white/5 p-3">
