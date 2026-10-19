@@ -10,8 +10,8 @@ export const mathematicsFractionsLesson: Lesson = {
   reviewStatus: 'draft',
   prerequisites: ['basic-arithmetic'],
   references: [
-    'ref-math-1',
-    'ref-math-2'
+    'Khan Academy — Visualizing equivalent fractions (khanacademy.org)',
+    'Math is Fun — Equivalent fractions (mathsisfun.com)',
   ],
   sections: [
     {
@@ -25,17 +25,11 @@ export const mathematicsFractionsLesson: Lesson = {
       applications: [
         {
           id: 'app-fraction-strips',
-          title: 'Using Fraction Strips',
-          description: 'Use physical or virtual fraction strips to visualize fractions.',
-          type: 'interactive',
+          title: 'Draw fraction strips',
+          description:
+            'Sketch a rectangle, split it into 5 equal parts, and shade 3. That shaded region is 3/5: the denominator counts equal parts, the numerator counts the parts you took. Try the same for 2/4 and compare it with 1/2.',
+          type: 'text',
           resourceId: 'activity-fraction-strips'
-        },
-        {
-          id: 'app-simulation-fraction-pizza',
-          title: 'Fraction Pizza Simulation',
-          description: 'Build pizzas with different toppings to learn about fractions.',
-          type: 'simulation',
-          resourceId: 'sim-fraction-pizza'
         }
       ],
       assessments: [
@@ -85,9 +79,10 @@ export const mathematicsFractionsLesson: Lesson = {
       applications: [
         {
           id: 'app-equivalent-fractions-interactive',
-          title: 'Matching Equivalent Fractions',
-          description: 'Match pairs of equivalent fractions in this interactive activity.',
-          type: 'interactive',
+          title: 'Multiply to build equivalents',
+          description:
+            'Start with 1/2. Multiply the top and bottom by 2 to get 2/4, then by 3 to get 3/6, then by 5 to get 5/10. All name the same amount. Now simplify 6/8 by dividing top and bottom by 2.',
+          type: 'text',
           resourceId: 'activity-eq-fractions'
         }
       ],
@@ -95,7 +90,8 @@ export const mathematicsFractionsLesson: Lesson = {
         {
           id: 'ass-equivalent-exercise',
           title: 'Equivalent Fractions Exercise',
-          description: 'Generate equivalent fractions and simplify given fractions.',
+          description:
+            'Write two fractions equivalent to 3/4, then simplify 9/12 to its lowest terms. Check each answer by cross-multiplying.',
           type: 'exercise',
           itemIds: ['exercise-eq-frac-1', 'exercise-eq-frac-2']
         }
