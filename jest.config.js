@@ -5,4 +5,5 @@ module.exports = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/',
   },
+  extensionsToTreatAsEsm: ['.ts'],
 };
