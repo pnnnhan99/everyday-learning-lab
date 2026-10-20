@@ -36,14 +36,14 @@ The repository currently uses:
 
 SQLite is suitable for traditional self-hosted/VPS deployments where the database file is persistent and writable. It is not automatically suitable for serverless or multi-instance deployments without a shared persistent storage strategy. See [docs/persistence.md](docs/persistence.md).
 
-## Getting started
+The current persistence approach is suitable only as a prototype. Local file writes and process memory are not reliable shared storage for serverless or multi-instance production deployments. See the open GitHub Issues for security, persistence, testing, scientific review, and simulation architecture work.
 
-### Requirements
+The project implements server-side authorization for all mutation endpoints (POST, PUT, DELETE) to protect scientific content from unauthorized modification.
 
 - A Node.js version supported by the installed Next.js version.
 - npm.
 
-### Install and run
+**Warning:** This bypass is **not secure** and should never be used in production.
 
 ```bash
 git clone https://github.com/pnnnhan99/everyday-learning-lab.git
@@ -52,7 +52,16 @@ npm ci
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+- `API_ADMIN_KEY`: A secret key used for authorization
+
+Clients must include this key in the `X-Admin-Key` header for all mutation requests:
+```
+X-Admin-Key: your-secret-key-here
+```
+
+### Endpoint Security
+- **GET endpoints** (reading elements/reactions): Publicly accessible, no authorization required
+- **POST/PUT/DELETE endpoints** (creating/updating/deleting elements/reactions): Requires valid admin authorization
 
 ### Useful scripts
 

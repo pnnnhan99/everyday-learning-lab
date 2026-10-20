@@ -13,6 +13,13 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
 export async function PUT(request: Request, context: { params: Promise<{ id: string }> }) {
   if (!checkAuth(request)) return unauthorizedResponse();
   const { id } = await context.params;
+   
+  // Check if element exists
+  const existingElement = await getElementById(id);
+  if (!existingElement) {
+    return NextResponse.json({ error: 'Element not found' }, { status: 404 });
+  }
+
   const body = await request.json().catch(() => null);
   const parsed = validateElement({ ...(typeof body === 'object' && body !== null ? body : {}), id });
   if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 });

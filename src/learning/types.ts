@@ -16,7 +16,7 @@ export interface LearningContent {
   // Scientific review state. Anything below 'expert-reviewed' must not be
   // presented as authoritative. Defaults to 'draft' when omitted.
   reviewStatus?: ReviewStatus;
-  // To be extended by specific content types
+  // To be extended by specific content typesf
 }
 
 export interface Lesson extends LearningContent {

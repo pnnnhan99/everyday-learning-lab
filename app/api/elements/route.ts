@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { listElements, createElement } from '@/lib/db';
 import { validateElement } from '@/types/game';
 import { checkAuth, unauthorizedResponse } from '@/lib/auth';
