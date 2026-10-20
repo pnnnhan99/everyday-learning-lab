@@ -5,14 +5,16 @@ import { usePathname } from 'next/navigation';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import { useUiStore } from '@/store/uiStore';
+import { useLabStore } from '@/store/labStore';
 
 const TITLES: Record<string, { title: string; subtitle: string }> = {
   '/': { title: 'Chemistry Lab', subtitle: 'Mix everyday chemicals safely in a virtual lab' },
   '/explore': { title: 'Explore', subtitle: 'Discover lessons across learning domains' },
   '/challenges': { title: 'Real-world Challenges', subtitle: 'Interdisciplinary science tasks' },
+  '/lab': { title: 'Lab', subtitle: 'Pick a simulation to run with disclosed assumptions' },
   '/lab/3d': { title: '3D Lab', subtitle: 'Visualization playground' },
-  '/elements': { title: 'Elements', subtitle: 'Browse the catalog backed by /api/elements' },
-  '/reactions': { title: 'Reactions', subtitle: 'All known pairs backed by /api/reactions' },
+  '/elements': { title: 'Elements', subtitle: 'Browse every reviewed substance in the catalog' },
+  '/reactions': { title: 'Reactions', subtitle: 'Reviewed pairs with safety notes and sources' },
   '/admin': { title: 'Admin', subtitle: 'Create and delete elements and reactions' },
   '/profile': { title: 'Profile', subtitle: 'Local progress, favorites and history' },
 };
@@ -22,8 +24,10 @@ export default function AppShell({ children }: { children: ReactNode }) {
   const sidebarOpen = useUiStore((s) => s.sidebarOpen);
   const closeSidebar = useUiStore((s) => s.closeSidebar);
   const hydrate = useUiStore((s) => s.hydrate);
+  const hydrateLab = useLabStore((s) => s.hydrate);
 
   useEffect(() => { hydrate(); }, [hydrate]);
+  useEffect(() => { hydrateLab(); }, [hydrateLab]);
   useEffect(() => { closeSidebar(); }, [pathname, closeSidebar]);
 
   const meta = TITLES[pathname] ?? resolveMeta(pathname);
