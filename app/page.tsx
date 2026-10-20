@@ -1,4 +1,4 @@
-import Laboratory from '@/src/components/laboratory/Laboratory';
+import Laboratory from '@/components/laboratory/Laboratory';
 
 export default function Home() {
   return (
