@@ -1,36 +1,41 @@
-<img width="512" height="512" alt="everyday-science-sim" src="https://github.com/user-attachments/assets/2cff2a1b-35d2-46a9-99f7-66f0412aa292" />
+# Everyday Learning Lab
 
-# Everyday Science Sim
+**Learn the concept. Explore the simulation. Apply it to real life.**
 
-An interactive, browser-based science learning project that starts with a virtual chemistry lab. Explore how everyday substances are represented, combine selected elements, and learn from reaction outcomes and safety notes.
+Everyday Learning Lab is an interactive learning platform for people who want to understand how the world works. It combines clear lessons, browser-based simulations, and practical challenges so learners can explore ideas, test variables, and connect scientific concepts to everyday situations.
 
-> **Status: early development.** The current app is a rule-based learning prototype, not a validated chemistry simulator. Reaction content and safety claims need scientific review before being treated as authoritative.
+> **Status: early development.** The current application is a rule-based chemistry learning prototype. It is not a validated chemistry simulator, and its scientific content must be reviewed before being treated as authoritative.
 
-## Why this project?
+## Learning areas
 
-Everyday Science Sim aims to make science easier to explore through small, understandable experiments. The long-term direction is to build an extensible collection of interactive science simulations, starting with chemistry and potentially expanding into physics and biology.
+- **Mathematics & Geometry** — algebra, geometry, graphs, measurement, and practical calculations.
+- **Chemistry** — elements, molecules, reactions, and chemical phenomena.
+- **Physics** — forces, motion, electricity, light, and energy.
+- **Biology & Earth** — living systems, ecology, climate, Earth science, and geography.
+- **Real-world Challenges** — interdisciplinary activities that use knowledge from multiple subjects to explain or solve practical problems.
 
-The guiding principles are:
+These are the product's target areas, not a claim that every area is already implemented. Development should expand from the existing chemistry prototype through small, tested learning experiences.
 
-- **Science before spectacle:** explanations should be evidence-based, sourced, and clear about uncertainty.
-- **Safety by design:** hazardous combinations should be clearly marked; the app must never encourage real-world experimentation with dangerous substances.
-- **Learn by interacting:** make it easy to explore inputs, outcomes, and explanations.
-- **Small, reusable foundations:** keep simulation rules independent from UI code so new experiments can be added and tested.
-- **Open development:** document limitations, track work in GitHub Issues, and welcome constructive feedback.
+## Core learning loop
 
-## Current features
+1. **Discover** a question or real-world phenomenon.
+2. **Learn** the relevant concept with a focused explanation.
+3. **Experiment** with a simulation and change its inputs.
+4. **Apply** the concept to a practical situation.
+5. **Reflect** with a question, prediction, or short assessment.
 
-The current codebase includes:
+## Current implementation
 
-- An interactive chemistry-lab interface for selecting and combining elements.
-- Rule-based reaction lookup and result presentation.
-- Safety-oriented reaction warnings and reaction history/undo flows.
-- Element and reaction data APIs, plus element/reaction management UI.
-- Search, filtering, pagination, favorites, and interface preferences.
-- A Next.js App Router application built with TypeScript, React, Tailwind CSS, Zustand, dnd-kit, and Framer Motion.
+The repository currently uses:
 
-These features describe the current implementation, not a claim that every reaction is chemically complete or scientifically verified. See [open issues](https://github.com/pnnnhan99/everyday-science-sim/issues) for known quality, security, testing, and architecture work.
-## API Security
+- Next.js App Router, React, and TypeScript.
+- Tailwind CSS for styling.
+- Zustand for client-side state.
+- dnd-kit for drag-and-drop interactions.
+- Framer Motion for interface animation.
+- Local JSON-file persistence with in-memory fallback for current element/reaction data.
+
+The current persistence approach is suitable only as a prototype. Local file writes and process memory are not reliable shared storage for serverless or multi-instance production deployments. See the open GitHub Issues for security, persistence, testing, scientific review, and simulation architecture work.
 
 The project implements server-side authorization for all mutation endpoints (POST, PUT, DELETE) to protect scientific content from unauthorized modification.
 
@@ -63,80 +68,95 @@ All mutation endpoints validate:
 
 ### Requirements
 
-- Node.js compatible with the installed Next.js version.
-- npm (the repository includes package-lock.json).
+- A Node.js version supported by the installed Next.js version.
+- npm.
 
 ### Install and run
 
-~~~bash
-git clone https://github.com/pnnnhan99/everyday-science-sim.git
-cd everyday-science-sim
+```bash
+git clone https://github.com/pnnnhan99/everyday-learning-lab.git
+cd everyday-learning-lab
 npm install
 npm run dev
-~~~
+```
 
 Open [http://localhost:3000](http://localhost:3000).
 
-### Available scripts
+### Scripts
 
-~~~bash
-npm run dev    # Start the local development server
-npm run lint   # Run ESLint
-npm run build  # Build the production application
-npm run start  # Start the built application
-~~~
+```bash
+npm run dev                 # Start the local development server
+npm run lint                # Run ESLint
+npm run build               # Build the production application
+npm run start               # Start the built application
+npm run validate:reactions  # Validate reaction data
+```
 
-Automated test coverage and continuous integration are planned work; check the GitHub Issues before relying on the project in production.
+## Project structure
 
-## How the project is organized
+The following describes the current repository at a high level. Some folders contain prototype code and may evolve as the learning platform grows.
 
-- app/ — Next.js routes, layouts, and API route handlers.
-- src/components/ — lab, layout, and admin UI.
-- src/data/ — initial/example reaction data.
-- src/lib/ and src/services/ — data access and application helpers.
-- src/store/ — client-side lab state.
-- src/types/ — shared TypeScript domain types.
-- scripts/ — project maintenance and seed scripts.
+```text
+app/                  Next.js routes, layouts, and API route handlers
+  api/                Element and reaction API endpoints
+  admin/              Current content-management interface
+  elements/           Element catalog page
+  reactions/          Reaction catalog page
+  profile/            Current profile/preferences page
+src/
+  components/
+    admin/            Admin UI components
+    lab/              Chemistry lab UI and interactions
+    laboratory/       Laboratory workspace components
+    layout/           App shell, navigation, and global controls
+  data/               Seed/example chemistry data
+  i18n/               Current Vietnamese/English UI dictionaries
+  lib/                Data access, fetching, and reaction lookup helpers
+  services/           Element and reaction service layer
+  store/              Zustand stores for lab and UI state
+  types/              Shared TypeScript domain types
+docs/                 Product and science documentation
+scripts/              Validation and seed scripts
+public/               Static assets
+```
 
-The intended direction is to separate simulation definitions and scientific rules from the React interface. Shared utilities should only move into a package when there is a real reuse case; the project should not become tightly coupled to another app or a monorepo's internal source paths.
+See [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) for current boundaries and the intended direction, and [docs/PRODUCT_ARCHITECTURE.md](docs/PRODUCT_ARCHITECTURE.md) for the shared learning-platform architecture.
 
-## Scientific accuracy and safety
+## Science, accuracy, and safety
 
 This project is for education and software experimentation only.
 
-- Do not use it as a substitute for a teacher, lab protocol, Safety Data Sheet (SDS), or professional guidance.
-- Never mix household chemicals based on a simulation result. In particular, **never mix bleach with vinegar, acids, ammonia, or other cleaners**; dangerous gases or reactions may result.
-- Reaction outcomes in the prototype are authored rules, not a general-purpose chemical equation solver.
-- Scientific claims should be reviewed against reputable sources and include references, assumptions, and appropriate safety notes.
-- If you spot an inaccurate explanation or unsafe claim, please open an issue with the relevant reaction and supporting sources.
+- Do not use it as a substitute for a teacher, laboratory protocol, Safety Data Sheet (SDS), or professional guidance.
+- Never mix household chemicals based on a simulation result. In particular, never mix bleach with vinegar, acids, ammonia, or other cleaners.
+- Current reaction outcomes are authored rules, not a general-purpose chemical equation solver.
+- Scientific content should cite reputable sources, state assumptions and limitations, and be reviewed before it is presented as authoritative.
+- If you find an inaccurate explanation or unsafe claim, open an issue with the relevant content and supporting references.
 
 ## Roadmap
 
-The near-term priorities are:
+1. Review chemistry rules and safety claims against reliable sources.
+2. Protect content mutation endpoints and define authorization boundaries.
+3. Replace prototype persistence with a deployment-safe data layer when the deployment requirements are known.
+4. Add automated tests and continuous integration.
+5. Define a typed simulation contract independent of React components.
+6. Build a reusable lesson-to-simulation learning flow.
+7. Add Mathematics & Geometry, Physics, Biology & Earth, and Real-world Challenges incrementally.
 
-1. Review reaction rules and safety language against reliable scientific sources.
-2. Secure all mutation endpoints and clarify the trust boundary around administration.
-3. Make persistence reliable for the intended deployment environment.
-4. Add automated tests and CI checks.
-5. Define a typed simulation contract that allows new experiments without coupling scientific logic to UI components.
-6. Improve contribution documentation and prepare a stable public demo.
-
-GitHub Issues are the source of truth for actionable tasks: [browse issues](https://github.com/pnnnhan99/everyday-science-sim/issues).
+Track actionable work in [GitHub Issues](https://github.com/pnnnhan99/everyday-learning-lab/issues).
 
 ## Contributing
 
-Ideas, bug reports, scientific corrections, accessibility feedback, and code contributions are welcome.
+Bug reports, scientific corrections, accessibility feedback, learning-content ideas, and code contributions are welcome.
 
-Before opening a pull request:
+1. Search existing issues before opening a new one.
+2. Keep pull requests focused on one issue or a small, coherent change.
+3. For science-related changes, include reputable references and explain assumptions.
+4. Do not present unverified behavior as scientific fact.
+5. Run `npm run lint`, `npm run build`, and `npm run validate:reactions` when relevant.
+6. Explain what changed and how it was validated in the pull request.
 
-1. Search existing issues to avoid duplicates.
-2. For science-related changes, include reputable references and explain the assumptions.
-3. Keep changes focused and avoid presenting unverified behavior as scientific fact.
-4. Run npm run lint and npm run build.
-5. Describe what changed and how it was validated.
-
-Please open an issue first for large changes or architectural proposals.
+See [AGENTS.md](AGENTS.md) for repository-specific coding guidance.
 
 ## License
 
-No license has been confirmed in this repository yet. Until a license is added, assume that normal copyright restrictions apply; do not assume the code is open for reuse merely because the repository is public.
+No license has been confirmed yet. Until a license is added, normal copyright restrictions apply; do not assume this code is open for reuse merely because the repository is visible.
