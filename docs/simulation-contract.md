@@ -42,6 +42,25 @@ registered simulations by ID and can instantiate a fresh `SimulationContract`
 via `create(id)`. A `globalRegistry` singleton is exported for app-level use;
 tests should create their own isolated `new SimulationRegistry()` instances.
 
+## Input validation (`src/core/simulation/validation.ts`)
+
+`validateSimulationInput(input, metadata)` is the explicit, UI-facing check
+against an simulation's declared `validInputRanges` and `defaults`:
+
+- `undefined`/`null` input falls back to `defaults`.
+- Provided keys must be declared in `validInputRanges`; undeclared keys are
+  rejected.
+- Values must be finite numbers inside `[min, max]`; every violation is
+  reported at once (`errors: string[]`) so the UI can show all problems.
+- Range keys without a `defaults` entry (e.g. `commonDenom`) are optional and
+  skipped when absent, but validated when supplied.
+- On success it returns a complete `values` record that is safe to pass to
+  `SimulationContract.run()`.
+
+Contracts additionally clamp defensively (see Known limitations) — clamping is
+the last-resort safety net, while `validateSimulationInput` is the deliberate,
+user-facing validation layer used by `/lab/[simulationId]`.
+
 ## Adding a new simulation
 
 1. Create a module under `src/domains/<domain>/simulations/`.

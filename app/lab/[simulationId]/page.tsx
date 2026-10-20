@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArrowLeft, Play, RotateCcw } from 'lucide-react';
 
 import { registerAllSimulations, globalRegistry } from '@/simulations';
+import { validateSimulationInput } from '@/core/simulation/validation';
 import type { SimulationContract, SimulationMetadata } from '@/core/simulation/types';
 
 registerAllSimulations();
@@ -64,6 +65,7 @@ export default function LabSimulationPage({ params }: { params: Promise<{ simula
 
   const [result, setResult] = useState<unknown>(undefined);
   const [error, setError] = useState<string>('');
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [running, setRunning] = useState(false);
   const [inputs, setInputs] = useState<Record<string, number>>(() => sim?.metadata.defaults ?? {});
 
@@ -88,34 +90,21 @@ export default function LabSimulationPage({ params }: { params: Promise<{ simula
 
   const metadata = sim.metadata;
 
-  function validate(): string | null {
-    for (const key of keys) {
-      const range = ranges[key];
-      if (!range) continue;
-      const value = inputs[key];
-      if (typeof value !== 'number' || Number.isNaN(value)) {
-        return `${humanize(key)} must be a number.`;
-      }
-      if (value < range.min || value > range.max) {
-        const unit = metadata.units?.[key] ?? '';
-        return `${humanize(key)} must be between ${range.min} and ${range.max} ${unit}`.trim();
-      }
-    }
-    return null;
-  }
-
   async function run() {
     if (!sim) return;
-    const problem = validate();
-    if (problem) {
-      setError(problem);
+    const validation = validateSimulationInput(inputs, metadata);
+    if (!validation.ok) {
+      setValidationErrors(validation.errors);
+      setResult(undefined);
+      setError('');
       return;
     }
+    setValidationErrors([]);
     setRunning(true);
     try {
       const contract: SimulationContract<unknown, unknown> = sim.create();
       await contract.initialize();
-      const value = await contract.run(inputs);
+      const value = await contract.run(validation.values);
       setResult(value);
       setError('');
     } catch (e) {
@@ -129,6 +118,7 @@ export default function LabSimulationPage({ params }: { params: Promise<{ simula
     setInputs(metadata.defaults ?? {});
     setResult(undefined);
     setError('');
+    setValidationErrors([]);
   }
 
   const view = result !== undefined ? describeResult(result, metadata) : null;
@@ -197,8 +187,26 @@ export default function LabSimulationPage({ params }: { params: Promise<{ simula
             >
               <RotateCcw size={14} /> Reset inputs
             </button>
-            {error && <span className="text-sm text-red-600 dark:text-red-400">{error}</span>}
+            {error && (
+              <span role="alert" className="text-sm text-red-600 dark:text-red-400">
+                {error}
+              </span>
+            )}
           </div>
+
+          {validationErrors.length > 0 && (
+            <div
+              role="alert"
+              className="mt-3 rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:border-red-900 dark:bg-red-950/50 dark:text-red-200"
+            >
+              <p className="font-medium">Fix the inputs before running:</p>
+              <ul className="mt-1 list-disc pl-5">
+                {validationErrors.map((message) => (
+                  <li key={message}>{message}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         </section>
 
         {view ? (

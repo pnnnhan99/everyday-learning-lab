@@ -1,12 +1,33 @@
 'use client';
 
+import Link from 'next/link';
 import React, { useMemo, useState } from 'react';
 
-import type { Lesson } from '@/learning/types';
+import type { Lesson, ReviewStatus } from '@/learning/types';
 import { registerAllSimulations } from '@/simulations';
 import { globalRegistry } from '@/core/simulation/registry';
+import { SelfCheck } from './SelfCheck';
 
 registerAllSimulations();
+
+// Maps a lesson to a 3D model on /lab/3d so learning flows into interaction.
+const LAB3D_MODEL_BY_LESSON: Record<string, string> = {
+  'chem-acids-bases-101': 'water',
+  'phys-projectile-101': 'projectile',
+  'bio-co2-o2-101': 'plant-cell',
+};
+
+const REVIEW_STATUS_LABEL: Record<ReviewStatus, string> = {
+  draft: 'Not yet scientifically reviewed',
+  'in-review': 'Scientific review in progress',
+  'expert-reviewed': 'Expert reviewed',
+};
+
+function reviewBadgeStyle(status: ReviewStatus): string {
+  return status === 'expert-reviewed'
+    ? 'border-emerald-400/40 bg-emerald-400/10 text-emerald-200'
+    : 'border-amber-400/40 bg-amber-400/10 text-amber-200';
+}
 
 export const LessonDetail: React.FC<{ lesson: Lesson }> = ({ lesson }) => {
   const [results, setResults] = useState<Record<string, unknown>>({});
@@ -54,12 +75,30 @@ export const LessonDetail: React.FC<{ lesson: Lesson }> = ({ lesson }) => {
     [lesson],
   );
 
+  const reviewStatus: ReviewStatus = lesson.reviewStatus ?? 'draft';
+  const lab3dModel = LAB3D_MODEL_BY_LESSON[lesson.id];
+
   return (
     <div className="space-y-10 text-white">
       <header className="space-y-2">
         <p className="text-xs uppercase tracking-wide text-white/40">{lesson.domain} · {lesson.difficulty}</p>
         <h1 className="text-3xl font-bold tracking-tight">{lesson.title}</h1>
         <p className="text-sm text-white/60">{lesson.description}</p>
+        <div className="flex flex-wrap items-center gap-3 pt-1">
+          <span
+            className={`rounded-full border px-2 py-0.5 text-xs ${reviewBadgeStyle(reviewStatus)}`}
+          >
+            {REVIEW_STATUS_LABEL[reviewStatus]}
+          </span>
+          {lab3dModel && (
+            <Link
+              href={`/lab/3d?model=${lab3dModel}`}
+              className="text-sm text-sky-300 hover:text-sky-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400"
+            >
+              Open the 3D model →
+            </Link>
+          )}
+        </div>
         {lesson.prerequisites.length > 0 && (
           <p className="text-xs text-white/40">Prerequisites: {lesson.prerequisites.join(', ')}</p>
         )}
@@ -166,13 +205,7 @@ export const LessonDetail: React.FC<{ lesson: Lesson }> = ({ lesson }) => {
             <div className="space-y-2">
               <h3 className="text-sm font-semibold uppercase tracking-wide text-white/50">Self-check</h3>
               {section.assessments.map((assessment) => (
-                <div key={assessment.id} className="rounded-lg border border-white/10 p-3">
-                  <h4 className="text-sm font-medium text-white">{assessment.title}</h4>
-                  <p className="text-sm text-white/60">{assessment.description}</p>
-                  <p className="mt-1 text-xs italic text-white/40">
-                    {assessment.itemIds.length} item(s) in this {assessment.type}.
-                  </p>
-                </div>
+                <SelfCheck key={assessment.id} assessment={assessment} />
               ))}
             </div>
           )}

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { FlaskConical, GraduationCap } from 'lucide-react';
+import { FlaskConical, GraduationCap, Boxes } from 'lucide-react';
 
 import { registerAllSimulations, globalRegistry } from '@/simulations';
 import { chemistryAcidsBasesLesson } from '@/learning/examples/chemistry-acids-bases';
@@ -15,13 +15,14 @@ interface DomainCard {
   desc: string;
   lessonSlug: string;
   lessonTitle: string;
+  lab3d: string | null;
 }
 
 const domains: DomainCard[] = [
-  { key: 'chemistry', label: 'Chemistry', desc: 'Acids, bases and the CO₂ released when they meet a carbonate.', lessonSlug: chemistryAcidsBasesLesson.id, lessonTitle: chemistryAcidsBasesLesson.title },
-  { key: 'mathematics', label: 'Mathematics', desc: 'Fractions fundamentals with a visual comparison tool.', lessonSlug: mathematicsFractionsLesson.id, lessonTitle: mathematicsFractionsLesson.title },
-  { key: 'physics', label: 'Physics', desc: 'Projectile motion: range, height and flight time from live parameters.', lessonSlug: physicsProjectileLesson.id, lessonTitle: physicsProjectileLesson.title },
-  { key: 'biology', label: 'Biology & Earth', desc: 'The CO₂–O₂ balance between photosynthesis and respiration.', lessonSlug: biologyCO2O2Lesson.id, lessonTitle: biologyCO2O2Lesson.title },
+  { key: 'chemistry', label: 'Chemistry', desc: 'Acids, bases, the CO₂ released when they meet a carbonate, and a water molecule in 3D.', lessonSlug: chemistryAcidsBasesLesson.id, lessonTitle: chemistryAcidsBasesLesson.title, lab3d: '/lab/3d?model=water' },
+  { key: 'mathematics', label: 'Mathematics', desc: 'Fractions fundamentals with a visual comparison tool.', lessonSlug: mathematicsFractionsLesson.id, lessonTitle: mathematicsFractionsLesson.title, lab3d: null },
+  { key: 'physics', label: 'Physics', desc: 'Projectile motion: range, height and flight time from live parameters.', lessonSlug: physicsProjectileLesson.id, lessonTitle: physicsProjectileLesson.title, lab3d: '/lab/3d?model=projectile' },
+  { key: 'biology', label: 'Biology & Earth', desc: 'The CO₂–O₂ balance between photosynthesis and respiration, plus a plant cell in 3D.', lessonSlug: biologyCO2O2Lesson.id, lessonTitle: biologyCO2O2Lesson.title, lab3d: '/lab/3d?model=plant-cell' },
 ];
 
 export default function ExplorePage() {
@@ -54,12 +55,31 @@ export default function ExplorePage() {
                 >
                   <GraduationCap size={14} aria-hidden /> Start lesson →
                 </Link>
-                <Link href="/challenges" className="text-xs text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200">
-                  Challenges
-                </Link>
+                {domain.lab3d && (
+                  <Link
+                    href={domain.lab3d}
+                    className="inline-flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
+                  >
+                    <Boxes size={13} aria-hidden /> 3D
+                  </Link>
+                )}
               </div>
             </article>
           ))}
+          <article className="flex flex-col rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/40">
+            <h2 className="text-lg font-semibold">Real-world Challenges</h2>
+            <p className="mt-2 flex-1 text-sm text-zinc-600 dark:text-zinc-300">
+              Interdisciplinary tasks that combine concepts from more than one domain.
+            </p>
+            <div className="mt-4 border-t border-zinc-100 pt-3 dark:border-zinc-800">
+              <Link
+                href="/challenges"
+                className="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
+              >
+                Open challenges →
+              </Link>
+            </div>
+          </article>
         </section>
 
         <section className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900/40">
