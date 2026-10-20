@@ -1,11 +1,27 @@
-export interface SimulationContract<S, R> {
+export interface SimulationInput {
+  // To be defined by each simulation
+}
+
+export interface SimulationOutput {
+  // To be defined by each simulation
+}
+
+export interface SimulationMetadata {
   id: string;
-  title: string;
+  name: string;
   description: string;
-  // Initialize the simulation with settings
-  initialize(settings?: S): Promise<void>;
-  // Run the simulation and get results
-  run(): Promise<R>;
-  // Reset the simulation to initial state
-  reset(): void;
+  // Scientific references, assumptions, safety notes, etc.
+  references: string[];
+  assumptions: string[];
+  safetyNotes: string;
+  // Units, valid input ranges, limitations, etc.
+  inputRanges: Record<string, { min: number; max: number; unit: string }>;
+  outputUnits: Record<string, string>;
+}
+
+export interface SimulationContract<I extends SimulationInput, O extends SimulationOutput> {
+  id: string;
+  metadata: SimulationMetadata;
+  validateInput: (input: unknown) => input is I;
+  simulate: (input: I) => Promise<O>;
 }
