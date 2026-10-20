@@ -89,6 +89,7 @@ export const useLabStore = create<LabState>((set, get) => ({
   setLoading: (v) => set({ loading: v }),
   setError: (msg) => set({ error: msg }),
   pushHistory: (entry) => {
+    if (!get().hydrated) get().hydrate();
     const full: HistoryEntry = { ...entry, id: `${Date.now()}-${Math.random().toString(36).slice(2)}`, at: Date.now() };
     const history = [full, ...get().history].slice(0, 50);
     set({ history });
@@ -105,6 +106,7 @@ export const useLabStore = create<LabState>((set, get) => ({
     try { localStorage.removeItem(HIST_KEY); } catch { /* ignore */ }
   },
   toggleFavorite: (id) => {
+    if (!get().hydrated) get().hydrate();
     const favs = get().favorites.includes(id)
       ? get().favorites.filter((f) => f !== id)
       : [...get().favorites, id];

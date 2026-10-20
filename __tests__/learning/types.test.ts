@@ -1,16 +1,11 @@
+import { describe, it, expect } from 'vitest';
 import {
   validateLearningContent,
   validateLesson,
   validateSection,
   validateApplication,
   validateAssessment,
-  validateReference,
-  type LearningContent,
-  type Lesson,
-  type Section,
-  type Application,
-  type Assessment,
-  type Reference
+  validateReference
 } from '../../src/learning/types';
 
 describe('Learning content validation', () => {

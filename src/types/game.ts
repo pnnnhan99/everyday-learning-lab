@@ -16,7 +16,8 @@ export interface Element {
   updatedAt?: string;
 }
 
-export type EffectType = 'informational' | 'toxic';
+export type EffectType = 'toxic' | 'informational';
+export type ReactionReviewStatus = 'reviewed' | 'hazard-reviewed' | 'unreviewed';
 
 export interface ScientificReference {
   title: string;
@@ -31,20 +32,17 @@ export interface Reaction {
   observation: string;
   explanation: string;
   effectType: EffectType;
-  /** Safety guidance for this reaction */
-  safetyGuidance: string;
-  /** Review status of the reaction */
-  reviewStatus: string;
-  /** Assumptions made in modeling this reaction */
+  reviewStatus: ReactionReviewStatus;
   assumptions: string[];
-  /** Scientific references for this reaction */
+  safetyGuidance: string;
   references: ScientificReference[];
   createdAt?: string;
   updatedAt?: string;
 }
 
 const ELEMENT_TYPES: ElementType[] = ['acid', 'base', 'food', 'chemical'];
-const EFFECT_TYPES: EffectType[] = ['informational', 'toxic'];
+const EFFECT_TYPES: EffectType[] = ['toxic', 'informational'];
+const REVIEW_STATUSES: ReactionReviewStatus[] = ['reviewed', 'hazard-reviewed', 'unreviewed'];
 
 export function isElementType(value: unknown): value is ElementType {
   return typeof value === 'string' && (ELEMENT_TYPES as string[]).includes(value);
@@ -52,6 +50,10 @@ export function isElementType(value: unknown): value is ElementType {
 
 export function isEffectType(value: unknown): value is EffectType {
   return typeof value === 'string' && (EFFECT_TYPES as string[]).includes(value);
+}
+
+export function isReactionReviewStatus(value: unknown): value is ReactionReviewStatus {
+  return typeof value === 'string' && (REVIEW_STATUSES as string[]).includes(value);
 }
 
 export function validateElement(input: unknown): { ok: true; value: Element } | { ok: false; error: string } {
@@ -76,46 +78,25 @@ export function validateElement(input: unknown): { ok: true; value: Element } | 
   };
 }
 
+export function isValidReference(r: unknown): r is ScientificReference {
+  if (typeof r !== 'object' || r === null) return false;
+  const ref = r as Record<string, unknown>;
+  return typeof ref.title === 'string' && ref.title.trim() !== ''
+    && typeof ref.publisher === 'string' && ref.publisher.trim() !== ''
+    && typeof ref.url === 'string' && ref.url.trim().startsWith('https://');
+}
+
 export function validateReaction(input: unknown): { ok: true; value: Reaction } | { ok: false; error: string } {
   if (typeof input !== 'object' || input === null) return { ok: false, error: 'Reaction must be an object' };
   const v = input as Record<string, unknown>;
-  
-  // Validate required string fields
-  for (const key of ['element1Id', 'element2Id', 'resultTitle', 'observation', 'explanation', 'safetyGuidance'] as const) {
+  for (const key of ['element1Id', 'element2Id', 'resultTitle', 'observation', 'explanation'] as const) {
     if (typeof v[key] !== 'string' || (v[key] as string).trim() === '') return { ok: false, error: `Reaction.${key} is required` };
   }
-  
-  // Validate reviewStatus is one of the allowed values
-  if (typeof v.reviewStatus !== 'string' || 
-      !['reviewed', 'hazard-reviewed'].includes(v.reviewStatus)) {
-    return { ok: false, error: 'Reaction.reviewStatus must be "reviewed" or "hazard-reviewed"' };
-  }
-  
-  // Validate assumptions is a non-empty array of non-empty strings
-  if (!Array.isArray(v.assumptions) || v.assumptions.length === 0) {
-    return { ok: false, error: 'Reaction.assumptions must be a non-empty array' };
-  }
-  for (const assumption of v.assumptions) {
-    if (typeof assumption !== 'string' || assumption.trim() === '') {
-      return { ok: false, error: 'Each assumption must be a non-empty string' };
-    }
-  }
-  
-  // Validate references is a non-empty array of valid ScientificReference objects
-  if (!Array.isArray(v.references) || v.references.length === 0) {
-    return { ok: false, error: 'Reaction.references must be a non-empty array' };
-  }
-  for (const reference of v.references) {
-    if (typeof reference !== 'object' || reference === null ||
-        typeof reference.title !== 'string' || reference.title.trim() === '' ||
-        typeof reference.publisher !== 'string' || reference.publisher.trim() === '' ||
-        typeof reference.url !== 'string' || !reference.url.startsWith('https://')) {
-      return { ok: false, error: 'Each reference must be a valid ScientificReference with title, publisher, and https URL' };
-    }
-  }
-  
-  if (!isEffectType(v.effectType)) return { ok: false, error: 'Reaction.effectType must be informational|toxic' };
-  
+  if (!isEffectType(v.effectType)) return { ok: false, error: 'Reaction.effectType must be toxic|informational' };
+  if (!isReactionReviewStatus(v.reviewStatus)) return { ok: false, error: 'Reaction.reviewStatus must be reviewed|hazard-reviewed|unreviewed' };
+  if (!Array.isArray(v.assumptions) || v.assumptions.length === 0 || v.assumptions.some((a) => typeof a !== 'string' || a.trim() === '')) return { ok: false, error: 'Reaction.assumptions must be a non-empty array of non-empty strings' };
+  if (typeof v.safetyGuidance !== 'string' || v.safetyGuidance.trim() === '') return { ok: false, error: 'Reaction.safetyGuidance is required' };
+  if (!Array.isArray(v.references) || v.references.length === 0 || !v.references.every(isValidReference)) return { ok: false, error: 'Reaction.references must be a non-empty array of HTTPS-referenced sources' };
   return {
     ok: true,
     value: {
@@ -125,14 +106,10 @@ export function validateReaction(input: unknown): { ok: true; value: Reaction } 
       observation: (v.observation as string).trim(),
       explanation: (v.explanation as string).trim(),
       effectType: v.effectType,
+      reviewStatus: v.reviewStatus,
+      assumptions: (v.assumptions as string[]).map((a) => a.trim()),
       safetyGuidance: (v.safetyGuidance as string).trim(),
-      reviewStatus: (v.reviewStatus as string).trim(),
-      assumptions: (v.assumptions as string[]).map(s => s.trim()),
-      references: (v.references as ScientificReference[]).map(r => ({
-        title: r.title.trim(),
-        publisher: r.publisher.trim(),
-        url: r.url.trim()
-      })),
+      references: v.references as ScientificReference[],
     },
   };
 }

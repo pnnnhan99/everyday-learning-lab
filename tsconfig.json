@@ -19,7 +19,46 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@pnnnhan99/ai": ["./external-packages/nhan-packages/packages/ai/src/index.ts"],
+      "@pnnnhan99/ai/*": ["./external-packages/nhan-packages/packages/ai/src/*"],
+      "@pnnnhan99/auth": ["./external-packages/nhan-packages/packages/auth/src/index.ts"],
+      "@pnnnhan99/auth/*": ["./external-packages/nhan-packages/packages/auth/src/*"],
+      "@pnnnhan99/common": ["./external-packages/nhan-packages/packages/common/src/index.ts"],
+      "@pnnnhan99/common/*": ["./external-packages/nhan-packages/packages/common/src/*"],
+      "@pnnnhan99/config": ["./external-packages/nhan-packages/packages/config/src/index.ts"],
+      "@pnnnhan99/config/*": ["./external-packages/nhan-packages/packages/config/src/*"],
+      "@pnnnhan99/core": ["./external-packages/nhan-packages/packages/core/src/index.ts"],
+      "@pnnnhan99/core/*": ["./external-packages/nhan-packages/packages/core/src/*"],
+      "@pnnnhan99/database": ["./external-packages/nhan-packages/packages/database/src/index.ts"],
+      "@pnnnhan99/database/*": ["./external-packages/nhan-packages/packages/database/src/*"],
+      "@pnnnhan99/firebase": ["./external-packages/nhan-packages/packages/firebase/src/index.ts"],
+      "@pnnnhan99/firebase/*": ["./external-packages/nhan-packages/packages/firebase/src/*"],
+      "@pnnnhan99/i18n": ["./external-packages/nhan-packages/packages/i18n/src/index.ts"],
+      "@pnnnhan99/i18n/*": ["./external-packages/nhan-packages/packages/i18n/src/*"],
+      "@pnnnhan99/logger": ["./external-packages/nhan-packages/packages/logger/src/index.ts"],
+      "@pnnnhan99/logger/*": ["./external-packages/nhan-packages/packages/logger/src/*"],
+      "@pnnnhan99/motion": ["./external-packages/nhan-packages/packages/motion/src/index.ts"],
+      "@pnnnhan99/motion/*": ["./external-packages/nhan-packages/packages/motion/src/*"],
+      "@pnnnhan99/social-core": ["./external-packages/nhan-packages/packages/social-core/src/index.ts"],
+      "@pnnnhan99/social-core/*": ["./external-packages/nhan-packages/packages/social-core/src/*"],
+      "@pnnnhan99/social-providers": ["./external-packages/nhan-packages/packages/social-providers/src/index.ts"],
+      "@pnnnhan99/social-providers/*": ["./external-packages/nhan-packages/packages/social-providers/src/*"],
+      "@pnnnhan99/storage": ["./external-packages/nhan-packages/packages/storage/src/index.ts"],
+      "@pnnnhan99/storage/*": ["./external-packages/nhan-packages/packages/storage/src/*"],
+      "@pnnnhan99/supabase": ["./external-packages/nhan-packages/packages/supabase/src/index.ts"],
+      "@pnnnhan99/supabase/*": ["./external-packages/nhan-packages/packages/supabase/src/*"],
+      "@pnnnhan99/tailwind-config": ["./external-packages/nhan-packages/packages/tailwind-config/tailwind.config.ts"],
+      "@pnnnhan99/theme": ["./external-packages/nhan-packages/packages/theme/src/index.ts"],
+      "@pnnnhan99/theme/*": ["./external-packages/nhan-packages/packages/theme/src/*"],
+      "@pnnnhan99/tts": ["./external-packages/nhan-packages/packages/tts/src/index.ts"],
+      "@pnnnhan99/tts/*": ["./external-packages/nhan-packages/packages/tts/src/*"],
+      "@pnnnhan99/types": ["./external-packages/nhan-packages/packages/types/src/index.ts"],
+      "@pnnnhan99/types/*": ["./external-packages/nhan-packages/packages/types/src/*"],
+      "@pnnnhan99/ui": ["./external-packages/nhan-packages/packages/ui/src/index.ts"],
+      "@pnnnhan99/ui/*": ["./external-packages/nhan-packages/packages/ui/src/*"],
+      "@pnnnhan99/utils": ["./external-packages/nhan-packages/packages/utils/src/index.ts"],
+      "@pnnnhan99/utils/*": ["./external-packages/nhan-packages/packages/utils/src/*"]
     }
   },
   "include": [
@@ -30,7 +69,7 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "external-packages"]
 }
 
 

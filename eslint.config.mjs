@@ -12,6 +12,12 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Git submodule with its own workspace, lint config, and tooling.
+    // Not imported by this app; linted inside its own package.
+    "external-packages/**",
+    // Runtime data and generated artifacts.
+    ".data/**",
+    "drizzle/**",
   ]),
 ]);
 

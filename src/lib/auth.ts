@@ -1,41 +1,38 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
-export enum AuthLevel {
-  NONE,
-  ADMIN
+export function checkAuth(request: Request): boolean {
+  const expected = process.env.MAINTAINER_TOKEN;
+  if (!expected) return false;
+  const header = request.headers.get('authorization');
+  if (!header || !header.startsWith('Bearer ')) return false;
+  return timingSafeEqual(header.slice(7), expected);
 }
 
-export function authorizeRequest(request: NextRequest, _requiredLevel: AuthLevel = AuthLevel.ADMIN) {
-  // In development, bypass authorization for convenience
-  // NOTE: This is NOT secure and should only be used in local development
-  if (process.env.NODE_ENV !== 'production') {
-    return { authorized: true };
-  }
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return result === 0;
+}
 
-  // In production, require admin key
-  const adminKey = process.env.API_ADMIN_KEY;
-  if (!adminKey) {
-    // Misconfiguration - admin key not set
-    return {
-      authorized: false,
-      response: NextResponse.json(
-        { error: 'Server misconfiguration: admin key not configured' },
-        { status: 500 }
-      )
-    }
-  }
+export function unauthorizedResponse(): NextResponse {
+  return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+}
 
-  // Check for admin key in headers
-  const providedKey = request.headers.get('X-Admin-Key');
-  if (!providedKey || providedKey !== adminKey) {
-    return {
-      authorized: false,
-      response: NextResponse.json(
-        { error: 'Unauthorized: admin key required' },
-        { status: 401 }
-      )
-    }
-  }
+export function getMaintainerToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem('maintainerToken');
+}
 
-  return { authorized: true }
+export function setMaintainerToken(token: string): void {
+  if (typeof window !== 'undefined') localStorage.setItem('maintainerToken', token);
+}
+
+export function clearMaintainerToken(): void {
+  if (typeof window !== 'undefined') localStorage.removeItem('maintainerToken');
+}
+
+export function isMaintainer(): boolean {
+  if (typeof window === 'undefined') return false;
+  return localStorage.getItem('maintainerToken') !== null;
 }

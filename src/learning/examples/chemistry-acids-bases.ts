@@ -1,3 +1,5 @@
+import { Lesson } from '../types';
+
 export const chemistryAcidsBasesLesson: Lesson = {
   id: 'chem-acids-bases-101',
   title: 'Understanding Acids and Bases',
@@ -5,10 +7,11 @@ export const chemistryAcidsBasesLesson: Lesson = {
   domain: 'chemistry',
   difficulty: 'beginner',
   language: 'en',
+  reviewStatus: 'draft',
   prerequisites: ['basic-matter-concepts'],
   references: [
-    'ref-chemistry-1',
-    'ref-chemistry-2'
+    'Khan Academy — Acids and bases tutorial (khanacademy.org)',
+    'USGS — pH and Water (usgs.gov)',
   ],
   sections: [
     {
@@ -22,18 +25,12 @@ export const chemistryAcidsBasesLesson: Lesson = {
       ],
       applications: [
         {
-          id: 'app-vinegar-test',
-          title: 'Testing Vinegar with pH Strips',
-          description: 'Use pH strips to test the acidity of vinegar and other household substances.',
-          type: 'interactive',
-          resourceId: 'activity-vinegar-ph'
-        },
-        {
-          id: 'app-simulation-ph-scale',
-          title: 'Interactive pH Scale Simulation',
-          description: 'Explore the pH scale with this interactive simulation.',
+          id: 'app-simulation-acid-base',
+          title: 'Acid–Base CO₂ Model',
+          description:
+            'Run the acid–base CO₂ simulation to see how inputs change the resulting state. This is a teaching model, not a reaction predictor.',
           type: 'simulation',
-          resourceId: 'sim-ph-scale'
+          resourceId: 'chemistry.acid-base.co2'
         }
       ],
       assessments: [
@@ -42,7 +39,33 @@ export const chemistryAcidsBasesLesson: Lesson = {
           title: 'Properties Quiz',
           description: 'Test your understanding of acid and base properties.',
           type: 'quiz',
-          itemIds: ['quiz-props-1', 'quiz-props-2']
+          itemIds: ['quiz-props-1', 'quiz-props-2'],
+          items: [
+            {
+              id: 'quiz-props-1',
+              prompt: 'In water, what does a base do?',
+              options: [
+                { id: 'a', text: 'It donates hydrogen ions (H⁺).' },
+                { id: 'b', text: 'It accepts hydrogen ions or donates hydroxide ions (OH⁻).' },
+                { id: 'c', text: 'It always has a pH below 7.' },
+              ],
+              correctOptionId: 'b',
+              explanation:
+                'Bases accept H⁺ or release OH⁻ in water, which raises the pH. Acids donate H⁺, and a pH below 7 indicates an acidic solution, not a base.',
+            },
+            {
+              id: 'quiz-props-2',
+              prompt: 'A solution has a pH of 3. How is it classified?',
+              options: [
+                { id: 'a', text: 'Acidic.' },
+                { id: 'b', text: 'Neutral.' },
+                { id: 'c', text: 'Basic.' },
+              ],
+              correctOptionId: 'a',
+              explanation:
+                'On the 0–14 pH scale, values below 7 are acidic, 7 is neutral, and above 7 are basic. A pH of 3 is strongly acidic.',
+            },
+          ],
         }
       ]
     },
@@ -54,22 +77,15 @@ export const chemistryAcidsBasesLesson: Lesson = {
         'Read and interpret pH values',
         'Classify substances as acidic, neutral, or basic based on pH'
       ],
-      applications: [
-        {
-          id: 'app-household-ph',
-          title: 'Testing Household Substances',
-          description: 'Measure the pH of various household liquids using a digital pH meter.',
-          type: 'interactive',
-          resourceId: 'activity-household-ph'
-        }
-      ],
+      applications: [],
       assessments: [
         {
           id: 'ass-ph-exercise',
           title: 'pH Classification Exercise',
-          description: 'Classify given substances based on their pH values.',
+          description:
+            'Classify each substance as acidic, neutral, or basic: lemon juice (pH ≈ 2), pure water (pH = 7), bleach (pH ≈ 12.5). Explain one choice in a sentence.',
           type: 'exercise',
-          itemIds: ['exercise-ph-1', 'exercise-ph-2']
+          itemIds: ['exercise-ph-1', 'exercise-ph-2', 'exercise-ph-3']
         }
       ]
     }

@@ -117,7 +117,7 @@ When creating new learning content:
 ## Related Components
 
 - LessonDetail (src/components/lesson-detail/LessonDetail.tsx): Displays a full lesson with sections, applications, and assessments
-- Simulation contracts (src/simulation/types.ts): Define the interface for interactive simulations referenced in applications
+- Simulation contracts (src/core/simulation/): Typed contract and registry for interactive simulations referenced in applications — see `docs/simulation-contract.md`
 
 ## Future Extensions
 
