@@ -2,13 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FlaskConical, Atom, TestTubes, ShieldPlus, User, Compass, Puzzle, Boxes } from 'lucide-react';
+import { FlaskConical, Atom, TestTubes, ShieldPlus, User, Compass, Puzzle, Boxes, Beaker } from 'lucide-react';
 import { useUiStore } from '@/store/uiStore';
 
 const LINKS = [
   { href: '/', label: 'Lab', icon: FlaskConical },
   { href: '/explore', label: 'Explore', icon: Compass },
   { href: '/challenges', label: 'Challenges', icon: Puzzle },
+  { href: '/lab', label: 'Simulations', icon: Beaker },
   { href: '/lab/3d', label: '3D Lab', icon: Boxes },
   { href: '/elements', label: 'Elements', icon: Atom },
   { href: '/reactions', label: 'Reactions', icon: TestTubes },
@@ -35,7 +36,8 @@ export default function Sidebar() {
       </div>
       <nav aria-label="Sections" className="flex flex-col gap-1 px-2">
         {LINKS.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href || (href !== '/' && pathname.startsWith(href));
+          const isSectionRoot = href === '/' || href === '/lab';
+          const active = isSectionRoot ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
           return (
             <Link
               key={href}
