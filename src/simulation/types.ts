@@ -1,10 +1,6 @@
-export interface SimulationInput {
-  // To be defined by each simulation
-}
+export type SimulationInput = object;
 
-export interface SimulationOutput {
-  // To be defined by each simulation
-}
+export type SimulationOutput = object;
 
 export interface SimulationMetadata {
   id: string;

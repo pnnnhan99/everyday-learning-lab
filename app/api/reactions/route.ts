@@ -3,7 +3,7 @@ import { listReactions, findReactionPair, createReaction, deleteReaction, listEl
 import { validateReaction } from '@/types/game';
 import { checkAuth, unauthorizedResponse } from '@/lib/auth';
 
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const e1 = searchParams.get('e1');
   const e2 = searchParams.get('e2');
