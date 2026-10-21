@@ -1,5 +1,5 @@
 import { SimulationContract } from '../types';
-import { getElementById, findReactionPair } from '../../lib/db';
+import { findReactionPair } from '../../lib/db';
 
 export interface ReactionSimulationInput {
   element1Id: string;
@@ -66,5 +66,5 @@ export const reactionSimulation: SimulationContract<ReactionSimulationInput, Rea
 };
 
 // Register the simulation
-import { registerSimulation } from './simulationRegistry';
+import { registerSimulation } from '../simulationRegistry';
 registerSimulation(reactionSimulation);

@@ -1,3 +1,5 @@
+import { describe, it, expect } from 'vitest';
+
 describe('LessonDetail', () => {
   it('should render without crashing', () => {
     // This is a placeholder test. We will implement a proper test later.
