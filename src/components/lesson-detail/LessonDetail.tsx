@@ -34,6 +34,7 @@ export const LessonDetail: React.FC<{ lesson: Lesson }> = ({ lesson }) => {
   const [results, setResults] = useState<Record<string, unknown>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [inputs, setInputs] = useState<Record<string, Record<string, number>>>({});
+  const [running, setRunning] = useState<Record<string, boolean>>({});
 
   const handleRunSimulation = async (simulationId: string) => {
     const simulation = globalRegistry.get(simulationId);
@@ -53,6 +54,7 @@ export const LessonDetail: React.FC<{ lesson: Lesson }> = ({ lesson }) => {
       });
       return;
     }
+    setRunning((prev) => ({ ...prev, [simulationId]: true }));
     try {
       await contract.initialize();
       const result = await contract.run(validation.values);
@@ -64,6 +66,7 @@ export const LessonDetail: React.FC<{ lesson: Lesson }> = ({ lesson }) => {
         [simulationId]: err instanceof Error ? err.message : 'Unknown error',
       }));
     } finally {
+      setRunning((prev) => ({ ...prev, [simulationId]: false }));
       setInputs((prev) => ({
         ...prev,
         [simulationId]: prev[simulationId] ?? input,
@@ -176,15 +179,16 @@ export const LessonDetail: React.FC<{ lesson: Lesson }> = ({ lesson }) => {
                       <button
                         type="button"
                         onClick={() => handleRunSimulation(app.resourceId)}
-                        className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-500"
+                        disabled={running[app.resourceId]}
+                        className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-500 disabled:cursor-wait disabled:opacity-60"
                       >
-                        Run simulation
+                        {running[app.resourceId] ? 'Running…' : 'Run simulation'}
                       </button>
 
-                      {error && <p className="text-sm text-red-400">{error}</p>}
+                      {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
 
                       {result !== undefined && (
-                        <div className="rounded-lg bg-white/5 p-3">
+                        <div aria-live="polite" className="rounded-lg bg-white/5 p-3">
                           <h5 className="text-xs font-semibold uppercase tracking-wide text-white/50">Result</h5>
                           <pre className="mt-1 overflow-auto text-xs text-white/80">
                             {JSON.stringify(result, null, 2)}
@@ -196,6 +200,7 @@ export const LessonDetail: React.FC<{ lesson: Lesson }> = ({ lesson }) => {
                         type="button"
                         className="text-xs text-white/40 underline"
                         onClick={() => handleRunSimulation(app.resourceId)}
+                        disabled={running[app.resourceId]}
                       >
                         Re-run
                       </button>

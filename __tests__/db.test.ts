@@ -1,8 +1,19 @@
-import { describe, it, expect } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { getElementById } from '@/lib/db';
+import { resetDb } from '@/lib/sqlite';
 
 describe('getElementById', () => {
+  beforeEach(() => resetDb());
+
   it('should return an element if it exists', async () => {
-    // This is a placeholder test. We will implement a proper test later.
-    expect(true).toBe(true);
+    await expect(getElementById('lemon')).resolves.toMatchObject({
+      id: 'lemon',
+      name: 'Lemon Juice',
+      type: 'acid',
+    });
+  });
+
+  it('should return null if the element does not exist', async () => {
+    await expect(getElementById('missing-element')).resolves.toBeNull();
   });
 });

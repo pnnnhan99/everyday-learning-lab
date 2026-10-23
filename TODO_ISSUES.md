@@ -63,7 +63,7 @@ Tracking issue: [#49 — First 3D learning journey across three domains](https:/
 - `npm ci` — passed after synchronizing the stale `esbuild` entries in `package-lock.json` with `package.json`.
 - `npm run lint` — passed with no errors.
 - `npx tsc --noEmit` — passed with no errors.
-- `npm run test:run` — 20 test files passed; 174 tests passed.
+- `npm run test:run` — 20 test files passed; 175 tests passed, including real lesson-rendering and database lookup coverage (the former placeholder tests were removed).
 - `npm run validate` — reaction, mutation-security, and persistence validation passed; persistence reported 21 passed and 0 failed.
 - `npm run build` — Next.js 16.4.2 production build passed and generated all application routes.
 - `npm audit --omit=dev` — passed with 0 production vulnerabilities after upgrading Next.js from 16.3.8 to 16.4.2. The full audit still reports advisory chains in lint/Drizzle development tooling; npm's suggested fixes downgrade major packages, so they were not applied automatically.
