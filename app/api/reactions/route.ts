@@ -29,8 +29,10 @@ export async function POST(request: Request) {
     const created = await createReaction(parsed.value);
     return NextResponse.json({ data: created }, { status: 201 });
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Create failed';
-    return NextResponse.json({ error: message }, { status: message.includes('already exists') ? 409 : 400 });
+    if (err instanceof Error && err.message === 'Reaction pair already exists') {
+      return NextResponse.json({ error: 'Reaction pair already exists' }, { status: 409 });
+    }
+    return NextResponse.json({ error: 'Create failed' }, { status: 500 });
   }
 }
 

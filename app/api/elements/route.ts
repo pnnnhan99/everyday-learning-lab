@@ -17,6 +17,9 @@ export async function POST(request: Request) {
     const created = await createElement(parsed.value);
     return NextResponse.json({ data: created }, { status: 201 });
   } catch (err) {
-    return NextResponse.json({ error: err instanceof Error ? err.message : 'Create failed' }, { status: 409 });
+    if (err instanceof Error && err.message === 'Element id already exists') {
+      return NextResponse.json({ error: 'Element id already exists' }, { status: 409 });
+    }
+    return NextResponse.json({ error: 'Create failed' }, { status: 500 });
   }
 }

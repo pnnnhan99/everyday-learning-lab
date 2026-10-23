@@ -6,6 +6,7 @@ import React, { useMemo, useState } from 'react';
 import type { Lesson, ReviewStatus } from '@/learning/types';
 import { registerAllSimulations } from '@/simulations';
 import { globalRegistry } from '@/core/simulation/registry';
+import { validateSimulationInput } from '@/core/simulation/validation';
 import { SelfCheck } from './SelfCheck';
 
 registerAllSimulations();
@@ -42,9 +43,19 @@ export const LessonDetail: React.FC<{ lesson: Lesson }> = ({ lesson }) => {
     }
     const contract = simulation.create();
     const input = inputs[simulationId] ?? simulation.metadata.defaults ?? {};
+    const validation = validateSimulationInput(input, simulation.metadata);
+    if (!validation.ok) {
+      setErrors((prev) => ({ ...prev, [simulationId]: validation.errors.join(' ') }));
+      setResults((prev) => {
+        const next = { ...prev };
+        delete next[simulationId];
+        return next;
+      });
+      return;
+    }
     try {
       await contract.initialize();
-      const result = contract.run(input);
+      const result = await contract.run(validation.values);
       setResults((prev) => ({ ...prev, [simulationId]: result }));
       setErrors((prev) => ({ ...prev, [simulationId]: '' }));
     } catch (err) {

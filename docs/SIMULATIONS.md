@@ -23,9 +23,10 @@ const result = contract.run({ speed: 20, angle: 45, gravity: 9.81 });
 
 ## Where it renders
 
-- Lesson detail (`app/learn/[slug]`) — parameters generated from `validInputRanges`/`defaults`.
+- Lesson detail (`app/learn/[slug]`) — parameters generated from `validInputRanges`/`defaults`, validated with the shared validator, and awaited for both synchronous and asynchronous contracts.
 - Lab runner (`app/lab/[simulationId]`) — generic controls + metadata viewer.
 - Challenge detail (`app/challenges/[id]`) — runs linked simulations with defaults to collect evidence.
+- 3D lab (`app/lab/3d`) — client-only illustrative water/plant-cell scenes and a quantitative projectile visualization. The page labels the model type and retains text, controls, and model notes when WebGL is unavailable.
 
 ## Adding a simulation
 
