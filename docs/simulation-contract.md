@@ -59,7 +59,8 @@ against an simulation's declared `validInputRanges` and `defaults`:
 
 Contracts additionally clamp defensively (see Known limitations) — clamping is
 the last-resort safety net, while `validateSimulationInput` is the deliberate,
-user-facing validation layer used by `/lab/[simulationId]`.
+user-facing validation layer used by `/lab/[simulationId]` and the simulation
+runner embedded in lesson detail pages.
 
 ## Adding a new simulation
 

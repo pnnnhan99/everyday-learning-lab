@@ -30,10 +30,10 @@ function getReducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
-const models: Array<{ id: Lab3DModel; label: string; domain: string }> = [
-  { id: 'water', label: 'Water molecule', domain: 'Chemistry' },
-  { id: 'projectile', label: 'Projectile motion', domain: 'Physics' },
-  { id: 'plant-cell', label: 'Plant cell', domain: 'Biology' },
+const models: Array<{ id: Lab3DModel; label: string; domain: string; modelType: 'Illustrative' | 'Quantitative' }> = [
+  { id: 'water', label: 'Water molecule', domain: 'Chemistry', modelType: 'Illustrative' },
+  { id: 'projectile', label: 'Projectile motion', domain: 'Physics', modelType: 'Quantitative' },
+  { id: 'plant-cell', label: 'Plant cell', domain: 'Biology', modelType: 'Illustrative' },
 ];
 
 // A short, non-visual description of each scene. Announced to assistive tech
@@ -136,6 +136,12 @@ function Lab3DPageInner() {
         </div>
 
         <section aria-label={`Interactive 3D ${selected.label} model`} className="overflow-hidden rounded-2xl border border-zinc-200 bg-slate-950 dark:border-zinc-800">
+          <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3 text-white">
+            <p className="text-sm font-medium">{selected.domain}: {selected.label}</p>
+            <span className="rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] font-semibold tracking-wide uppercase">
+              {selected.modelType} model
+            </span>
+          </div>
           <p id={sceneAltTextId} className="sr-only">
             {MODEL_ALT_TEXT[model]}
           </p>
