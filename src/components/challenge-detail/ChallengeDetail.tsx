@@ -6,12 +6,14 @@ import Link from 'next/link';
 import type { Challenge } from '../../learning/types';
 import { registerAllSimulations } from '../../simulations';
 import { globalRegistry } from '../../core/simulation/registry';
+import { validateSimulationInput } from '../../core/simulation/validation';
 
 registerAllSimulations();
 
 export const ChallengeDetail: React.FC<{ challenge: Challenge }> = ({ challenge }) => {
   const [results, setResults] = useState<Record<string, unknown>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [running, setRunning] = useState<Record<string, boolean>>({});
 
   const runSimulation = async (id: string) => {
     const simulation = globalRegistry.get(id);
@@ -19,14 +21,22 @@ export const ChallengeDetail: React.FC<{ challenge: Challenge }> = ({ challenge 
       setErrors((prev) => ({ ...prev, [id]: 'Simulation not found' }));
       return;
     }
+    const validation = validateSimulationInput(simulation.metadata.defaults ?? {}, simulation.metadata);
+    if (!validation.ok) {
+      setErrors((prev) => ({ ...prev, [id]: validation.errors.join(' ') }));
+      return;
+    }
+    setRunning((prev) => ({ ...prev, [id]: true }));
     try {
       const contract = simulation.create();
       await contract.initialize();
-      const result = await contract.run(simulation.metadata.defaults ?? {});
+      const result = await contract.run(validation.values);
       setResults((prev) => ({ ...prev, [id]: result }));
       setErrors((prev) => ({ ...prev, [id]: '' }));
     } catch (err) {
       setErrors((prev) => ({ ...prev, [id]: err instanceof Error ? err.message : 'Unknown error' }));
+    } finally {
+      setRunning((prev) => ({ ...prev, [id]: false }));
     }
   };
 
@@ -83,13 +93,14 @@ export const ChallengeDetail: React.FC<{ challenge: Challenge }> = ({ challenge 
                 <button
                   type="button"
                   onClick={() => runSimulation(id)}
-                  className="mt-3 rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-500"
+                  disabled={running[id]}
+                  className="mt-3 rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-500 disabled:cursor-wait disabled:opacity-60"
                 >
-                  Run
+                  {running[id] ? 'Running…' : 'Run'}
                 </button>
-                {errors[id] && <p className="mt-2 text-sm text-red-400">{errors[id]}</p>}
+                {errors[id] && <p role="alert" className="mt-2 text-sm text-red-400">{errors[id]}</p>}
                 {results[id] !== undefined && (
-                  <pre className="mt-2 max-h-48 overflow-auto rounded bg-white/5 p-2 text-xs text-white/80">
+                  <pre aria-live="polite" className="mt-2 max-h-48 overflow-auto rounded bg-white/5 p-2 text-xs text-white/80">
                     {JSON.stringify(results[id], null, 2)}
                   </pre>
                 )}
