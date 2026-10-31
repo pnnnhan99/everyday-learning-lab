@@ -67,3 +67,8 @@ The current JSON file plus in-memory fallback is prototype persistence. Before p
 4. Add Mathematics & Geometry as the next domain.
 5. Add Physics and Biology & Earth.
 6. Build Real-world Challenges after the relevant domain experiences can be reused.
+
+
+## Motion and 3D adoption
+
+See [Motion and 3D learning architecture](motion-3d-architecture.md) for tool selection, scientific-model/rendering boundaries, mobile accessibility, and the phased plan supporting issues #48 and #49. The plan adds no runtime functionality and does not mark those issues complete.
