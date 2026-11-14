@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { Clock, History, RotateCcw, Star, Trash2, Undo2, FlaskConical } from 'lucide-react';
 
 import FavoriteButton from '@/components/lab/FavoriteButton';
-import { elementTypeIcon, elementTypeLabel } from '@/components/lab/elementIcons';
+import { elementTypeIcon } from '@/components/lab/elementIcons';
+import { useDictionary, useLocale } from '@/i18n/useDictionary';
 import { useLabStore, type HistoryEntry } from '@/store/labStore';
 import { useGameStore } from '@/store/useGameStore';
 import type { Element } from '@/types/game';
@@ -15,6 +16,9 @@ interface ProfileViewProps {
 }
 
 export default function ProfileView({ elements }: ProfileViewProps) {
+  const dictionary = useDictionary();
+  const locale = useLocale();
+  const dateLocale = locale === 'vi' ? 'vi-VN' : 'en-US';
   const favorites = useLabStore((s) => s.favorites);
   const history = useLabStore((s) => s.history);
   const hydrate = useLabStore((s) => s.hydrate);
@@ -52,11 +56,11 @@ export default function ProfileView({ elements }: ProfileViewProps) {
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-6">
       <section className="rounded-2xl border border-zinc-200 p-4 dark:border-zinc-800">
         <h2 className="flex items-center gap-2 font-bold">
-          <History size={16} aria-hidden /> Local progress
+          <History size={16} aria-hidden /> {dictionary.profile.progress}
         </h2>
         <p className="mt-1 text-sm text-zinc-500">
-          {favorites.length} {favorites.length === 1 ? 'favorite' : 'favorites'} · {history.length}{' '}
-          {history.length === 1 ? 'mix' : 'mixes'} stored in this browser only. Nothing is uploaded.
+          {favorites.length} {dictionary.app.favorites} · {history.length} {dictionary.app.mixes}{' '}
+          {dictionary.profile.storedLocally}
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
           <button
@@ -65,7 +69,7 @@ export default function ProfileView({ elements }: ProfileViewProps) {
             disabled={history.length === 0}
             className="inline-flex items-center gap-1 rounded-xl border border-zinc-200 px-3 py-2 text-sm disabled:opacity-40 dark:border-zinc-700"
           >
-            <Undo2 size={14} aria-hidden /> Undo last mix
+            <Undo2 size={14} aria-hidden /> {dictionary.profile.undoLastMix}
           </button>
           <button
             type="button"
@@ -73,17 +77,17 @@ export default function ProfileView({ elements }: ProfileViewProps) {
             disabled={history.length === 0}
             className="inline-flex items-center gap-1 rounded-xl border border-zinc-200 px-3 py-2 text-sm disabled:opacity-40 dark:border-zinc-700"
           >
-            <Trash2 size={14} aria-hidden /> Clear history
+            <Trash2 size={14} aria-hidden /> {dictionary.profile.clearHistory}
           </button>
           <button
             type="button"
             onClick={resetLab}
             className="inline-flex items-center gap-1 rounded-xl border border-zinc-200 px-3 py-2 text-sm dark:border-zinc-700"
           >
-            <RotateCcw size={14} aria-hidden /> Reset lab
+            <RotateCcw size={14} aria-hidden /> {dictionary.profile.resetLab}
           </button>
           <Link href="/" className="ml-auto self-center text-xs text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300">
-            Undo and Reset affect the lab bench →
+            {dictionary.profile.undoResetNote} →
           </Link>
         </div>
       </section>
@@ -91,19 +95,19 @@ export default function ProfileView({ elements }: ProfileViewProps) {
       <section className="rounded-2xl border border-zinc-200 p-4 dark:border-zinc-800">
         <div className="flex items-center justify-between">
           <h3 className="flex items-center gap-2 font-bold">
-            <Star size={16} aria-hidden /> Favorites
+            <Star size={16} aria-hidden /> {dictionary.profile.favorites}
           </h3>
           <Link href="/elements" className="text-xs font-medium text-blue-600 hover:underline dark:text-blue-400">
-            Browse elements
+            {dictionary.profile.browseElements}
           </Link>
         </div>
         {favorites.length === 0 ? (
           <p className="mt-2 text-sm text-zinc-500">
-            No favorites yet. Open the{' '}
+            {dictionary.profile.noFavorites}{' '}
             <Link href="/elements" className="text-blue-600 hover:underline dark:text-blue-400">
-              elements catalog
+              {dictionary.profile.elementsCatalog}
             </Link>{' '}
-            and press Save on anything you want to keep an eye on.
+            {dictionary.profile.noFavoritesSuffix}
           </p>
         ) : (
           <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -122,8 +126,8 @@ export default function ProfileView({ elements }: ProfileViewProps) {
                     <p className="truncate text-sm font-semibold">{element?.name ?? id}</p>
                     <p className="truncate text-xs text-zinc-500">
                       {element
-                        ? `${elementTypeLabel[element.type] ?? element.type}${typeof element.ph === 'number' ? ` · pH ≈ ${element.ph}` : ''}`
-                        : 'No longer in the catalog'}
+                        ? `${dictionary.elementTypes[element.type] ?? element.type}${typeof element.ph === 'number' ? ` · pH ≈ ${element.ph}` : ''}`
+                        : dictionary.profile.noLongerInCatalog}
                     </p>
                   </div>
                   <FavoriteButton id={id} name={element?.name ?? id} />
@@ -137,19 +141,19 @@ export default function ProfileView({ elements }: ProfileViewProps) {
       <section className="rounded-2xl border border-zinc-200 p-4 dark:border-zinc-800">
         <div className="flex items-center justify-between">
           <h3 className="flex items-center gap-2 font-bold">
-            <Clock size={16} aria-hidden /> Mix history
+            <Clock size={16} aria-hidden /> {dictionary.profile.mixHistory}
           </h3>
           <Link href="/reactions" className="text-xs font-medium text-blue-600 hover:underline dark:text-blue-400">
-            Browse reactions
+            {dictionary.profile.browseReactions}
           </Link>
         </div>
         {history.length === 0 ? (
           <p className="mt-2 text-sm text-zinc-500">
-            No mixes recorded yet. Drag two substances onto the bench in the{' '}
+            {dictionary.profile.noMixes}{' '}
             <Link href="/" className="text-blue-600 hover:underline dark:text-blue-400">
-              lab
+              {dictionary.profile.lab}
             </Link>{' '}
-            and reviewed outcomes will appear here.
+            {dictionary.profile.noMixesSuffix}
           </p>
         ) : (
           <ol className="mt-3 space-y-2">
@@ -165,8 +169,8 @@ export default function ProfileView({ elements }: ProfileViewProps) {
                       {first} <span className="text-zinc-400">+</span> {second}
                     </p>
                     <p className="truncate text-xs text-zinc-500">
-                      {entry.reaction?.resultTitle ?? 'Reviewed outcome'} ·{' '}
-                      {new Date(entry.at).toLocaleString('vi-VN', {
+                      {entry.reaction?.resultTitle ?? dictionary.profile.reviewedOutcome} ·{' '}
+                      {new Date(entry.at).toLocaleString(dateLocale, {
                         dateStyle: 'short',
                         timeStyle: 'short',
                       })}
@@ -180,7 +184,9 @@ export default function ProfileView({ elements }: ProfileViewProps) {
                           : 'border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-900 dark:bg-sky-950 dark:text-sky-300'
                       }`}
                     >
-                      {entry.reaction.effectType === 'toxic' ? 'Hazard' : 'Model'}
+                      {entry.reaction.effectType === 'toxic'
+                        ? dictionary.common.hazard
+                        : dictionary.common.model}
                     </span>
                   )}
                 </li>
@@ -191,7 +197,7 @@ export default function ProfileView({ elements }: ProfileViewProps) {
       </section>
 
       <Link href="/" className="text-sm font-medium text-blue-600 hover:underline dark:text-blue-400">
-        ← Back to lab
+        ← {dictionary.profile.backToLab}
       </Link>
     </div>
   );

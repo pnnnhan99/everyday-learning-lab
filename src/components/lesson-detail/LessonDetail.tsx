@@ -4,6 +4,9 @@ import Link from 'next/link';
 import React, { useMemo, useState } from 'react';
 
 import type { Lesson, ReviewStatus } from '@/learning/types';
+import { getLab3dModelForLesson, getLocalizedLesson } from '@/learning/catalog';
+import { lab3dHref } from '@/learning/lab3d';
+import { useDictionary, useLocale } from '@/i18n/useDictionary';
 import { registerAllSimulations } from '@/simulations';
 import { globalRegistry } from '@/core/simulation/registry';
 import { validateSimulationInput } from '@/core/simulation/validation';
@@ -11,26 +14,16 @@ import { SelfCheck } from './SelfCheck';
 
 registerAllSimulations();
 
-// Maps a lesson to a 3D model on /lab/3d so learning flows into interaction.
-const LAB3D_MODEL_BY_LESSON: Record<string, string> = {
-  'chem-acids-bases-101': 'water',
-  'phys-projectile-101': 'projectile',
-  'bio-co2-o2-101': 'plant-cell',
-};
-
-const REVIEW_STATUS_LABEL: Record<ReviewStatus, string> = {
-  draft: 'Not yet scientifically reviewed',
-  'in-review': 'Scientific review in progress',
-  'expert-reviewed': 'Expert reviewed',
-};
-
 function reviewBadgeStyle(status: ReviewStatus): string {
   return status === 'expert-reviewed'
     ? 'border-emerald-400/40 bg-emerald-400/10 text-emerald-200'
     : 'border-amber-400/40 bg-amber-400/10 text-amber-200';
 }
 
-export const LessonDetail: React.FC<{ lesson: Lesson }> = ({ lesson }) => {
+export const LessonDetail: React.FC<{ lesson: Lesson }> = ({ lesson: canonicalLesson }) => {
+  const dictionary = useDictionary();
+  const locale = useLocale();
+  const lesson = getLocalizedLesson(canonicalLesson.id, locale) ?? canonicalLesson;
   const [results, setResults] = useState<Record<string, unknown>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [inputs, setInputs] = useState<Record<string, Record<string, number>>>({});
@@ -39,7 +32,7 @@ export const LessonDetail: React.FC<{ lesson: Lesson }> = ({ lesson }) => {
   const handleRunSimulation = async (simulationId: string) => {
     const simulation = globalRegistry.get(simulationId);
     if (!simulation) {
-      setErrors((prev) => ({ ...prev, [simulationId]: 'Simulation not found' }));
+      setErrors((prev) => ({ ...prev, [simulationId]: dictionary.lesson.simulationNotFound }));
       return;
     }
     const contract = simulation.create();
@@ -63,7 +56,7 @@ export const LessonDetail: React.FC<{ lesson: Lesson }> = ({ lesson }) => {
     } catch (err) {
       setErrors((prev) => ({
         ...prev,
-        [simulationId]: err instanceof Error ? err.message : 'Unknown error',
+        [simulationId]: err instanceof Error ? err.message : dictionary.lab.simulationFailed,
       }));
     } finally {
       setRunning((prev) => ({ ...prev, [simulationId]: false }));
@@ -90,31 +83,33 @@ export const LessonDetail: React.FC<{ lesson: Lesson }> = ({ lesson }) => {
   );
 
   const reviewStatus: ReviewStatus = lesson.reviewStatus ?? 'draft';
-  const lab3dModel = LAB3D_MODEL_BY_LESSON[lesson.id];
+  const lab3dModel = getLab3dModelForLesson(lesson.id);
 
   return (
     <div className="space-y-10 text-white">
       <header className="space-y-2">
-        <p className="text-xs uppercase tracking-wide text-white/40">{lesson.domain} · {lesson.difficulty}</p>
+        <p className="text-xs uppercase tracking-wide text-white/40">
+          {dictionary.domains[lesson.domain]} · {dictionary.difficulty[lesson.difficulty]}
+        </p>
         <h1 className="text-3xl font-bold tracking-tight">{lesson.title}</h1>
         <p className="text-sm text-white/60">{lesson.description}</p>
         <div className="flex flex-wrap items-center gap-3 pt-1">
-          <span
-            className={`rounded-full border px-2 py-0.5 text-xs ${reviewBadgeStyle(reviewStatus)}`}
-          >
-            {REVIEW_STATUS_LABEL[reviewStatus]}
+          <span className={`rounded-full border px-2 py-0.5 text-xs ${reviewBadgeStyle(reviewStatus)}`}>
+            {dictionary.review[reviewStatus]}
           </span>
           {lab3dModel && (
             <Link
-              href={`/lab/3d?model=${lab3dModel}`}
+              href={lab3dHref(lab3dModel)}
               className="text-sm text-sky-300 hover:text-sky-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400"
             >
-              Open the 3D model →
+              {dictionary.lesson.chooseDomain} →
             </Link>
           )}
         </div>
         {lesson.prerequisites.length > 0 && (
-          <p className="text-xs text-white/40">Prerequisites: {lesson.prerequisites.join(', ')}</p>
+          <p className="text-xs text-white/40">
+            {dictionary.lesson.prerequisites}: {lesson.prerequisites.join(', ')}
+          </p>
         )}
       </header>
 
@@ -124,7 +119,7 @@ export const LessonDetail: React.FC<{ lesson: Lesson }> = ({ lesson }) => {
           <p className="text-sm leading-relaxed text-white/70">{section.content}</p>
 
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-white/50">Objectives</h3>
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-white/50">{dictionary.lesson.objectives}</h3>
             <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-white/70">
               {section.objectives.map((objective) => (
                 <li key={objective}>{objective}</li>
@@ -133,7 +128,7 @@ export const LessonDetail: React.FC<{ lesson: Lesson }> = ({ lesson }) => {
           </div>
 
           <div className="space-y-3">
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-white/50">Applications</h3>
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-white/50">{dictionary.lesson.applications}</h3>
             {section.applications.map((app) => {
               const simulation = app.type === 'simulation' ? globalRegistry.get(app.resourceId) : undefined;
               const metadata = simulation?.metadata;
@@ -149,7 +144,9 @@ export const LessonDetail: React.FC<{ lesson: Lesson }> = ({ lesson }) => {
                       <h4 className="text-base font-medium text-white">{app.title}</h4>
                       <p className="text-sm text-white/60">{app.description}</p>
                     </div>
-                    <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/50">{app.type}</span>
+                    <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/50">
+                      {app.type === 'simulation' ? dictionary.lesson.simulationLabel : app.type}
+                    </span>
                   </div>
 
                   {app.type === 'simulation' && metadata && (
@@ -182,14 +179,14 @@ export const LessonDetail: React.FC<{ lesson: Lesson }> = ({ lesson }) => {
                         disabled={running[app.resourceId]}
                         className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-500 disabled:cursor-wait disabled:opacity-60"
                       >
-                        {running[app.resourceId] ? 'Running…' : 'Run simulation'}
+                        {running[app.resourceId] ? dictionary.lesson.running : dictionary.lesson.runSimulation}
                       </button>
 
                       {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
 
                       {result !== undefined && (
                         <div aria-live="polite" className="rounded-lg bg-white/5 p-3">
-                          <h5 className="text-xs font-semibold uppercase tracking-wide text-white/50">Result</h5>
+                          <h5 className="text-xs font-semibold uppercase tracking-wide text-white/50">{dictionary.lesson.result}</h5>
                           <pre className="mt-1 overflow-auto text-xs text-white/80">
                             {JSON.stringify(result, null, 2)}
                           </pre>
@@ -202,7 +199,7 @@ export const LessonDetail: React.FC<{ lesson: Lesson }> = ({ lesson }) => {
                         onClick={() => handleRunSimulation(app.resourceId)}
                         disabled={running[app.resourceId]}
                       >
-                        Re-run
+                        {dictionary.lesson.rerun}
                       </button>
                     </div>
                   )}
@@ -219,7 +216,7 @@ export const LessonDetail: React.FC<{ lesson: Lesson }> = ({ lesson }) => {
 
           {section.assessments.length > 0 && (
             <div className="space-y-2">
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-white/50">Self-check</h3>
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-white/50">{dictionary.lesson.selfCheck}</h3>
               {section.assessments.map((assessment) => (
                 <SelfCheck key={assessment.id} assessment={assessment} />
               ))}
@@ -230,7 +227,7 @@ export const LessonDetail: React.FC<{ lesson: Lesson }> = ({ lesson }) => {
 
       {lessonSimulations.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-xl font-semibold text-white/90">Model assumptions &amp; references</h2>
+          <h2 className="text-xl font-semibold text-white/90">{dictionary.lesson.assumptionsHeading}</h2>
           {Array.from(new Set(lessonSimulations.map((s) => s.resourceId))).map((id) => {
             const metadata = globalRegistry.get(id)?.metadata;
             if (!metadata) return null;
@@ -239,7 +236,7 @@ export const LessonDetail: React.FC<{ lesson: Lesson }> = ({ lesson }) => {
                 <summary className="cursor-pointer text-sm font-medium text-white">{metadata.name}</summary>
                 <div className="mt-3 space-y-2 text-sm text-white/70">
                   <div>
-                    <h3 className="font-semibold text-white/80">Assumptions</h3>
+                    <h3 className="font-semibold text-white/80">{dictionary.lesson.assumptions}</h3>
                     <ul className="list-disc pl-5">
                       {metadata.assumptions.map((item) => (
                         <li key={item}>{item}</li>
@@ -247,7 +244,7 @@ export const LessonDetail: React.FC<{ lesson: Lesson }> = ({ lesson }) => {
                     </ul>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-white/80">Limitations</h3>
+                    <h3 className="font-semibold text-white/80">{dictionary.lesson.limitations}</h3>
                     <ul className="list-disc pl-5">
                       {metadata.limitations.map((item) => (
                         <li key={item}>{item}</li>
@@ -256,7 +253,7 @@ export const LessonDetail: React.FC<{ lesson: Lesson }> = ({ lesson }) => {
                   </div>
                   {metadata.safetyNotes && metadata.safetyNotes.length > 0 && (
                     <div>
-                      <h3 className="font-semibold text-amber-300">Safety notes</h3>
+                      <h3 className="font-semibold text-amber-300">{dictionary.lesson.safety}</h3>
                       <ul className="list-disc pl-5 text-amber-200/80">
                         {metadata.safetyNotes.map((item) => (
                           <li key={item}>{item}</li>
@@ -265,7 +262,7 @@ export const LessonDetail: React.FC<{ lesson: Lesson }> = ({ lesson }) => {
                     </div>
                   )}
                   <div>
-                    <h3 className="font-semibold text-white/80">References</h3>
+                    <h3 className="font-semibold text-white/80">{dictionary.lesson.references}</h3>
                     <ul className="list-disc pl-5">
                       {metadata.references.map((ref) => (
                         <li key={ref.url}>
@@ -284,19 +281,14 @@ export const LessonDetail: React.FC<{ lesson: Lesson }> = ({ lesson }) => {
       )}
 
       <section className="space-y-3 rounded-xl border border-white/10 bg-white/5 p-5">
-        <h2 className="text-xl font-semibold text-white/90">Apply &amp; Reflect</h2>
-        <p className="text-sm text-white/70">
-          Try changing one input at a time and predict the result before running the model. Notice how the outcome
-          relates to the lesson objectives above.
-        </p>
-        <p className="text-sm text-white/70">
-          Reflection: which assumption in the model do you think matters most in a real-world situation, and why?
-        </p>
+        <h2 className="text-xl font-semibold text-white/90">{dictionary.lesson.applyReflect}</h2>
+        <p className="text-sm text-white/70">{dictionary.lesson.applyReflectBody}</p>
+        <p className="text-sm text-white/70">{dictionary.lesson.reflectionPrompt}</p>
       </section>
 
       {lesson.references.length > 0 && (
         <section className="space-y-2 text-sm text-white/50">
-          <h2 className="text-base font-semibold text-white/80">Lesson references</h2>
+          <h2 className="text-base font-semibold text-white/80">{dictionary.lesson.lessonReferences}</h2>
           <ul className="list-disc pl-5">
             {lesson.references.map((ref) => (
               <li key={ref}>{ref}</li>

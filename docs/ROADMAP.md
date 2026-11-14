@@ -17,6 +17,8 @@ This roadmap is ordered by dependency, not by a promise of calendar dates. Exist
 
 - [x] Define validated lesson and learning-activity schemas (`src/learning/types.ts`).
 - [x] Build subject/topic discovery (`app/explore`) and a lesson detail page (`app/learn/[slug]`).
+- [x] Add a discover-first home page (`app/page.tsx`) with the five-step learning loop and all five domains, fed by one shared catalog (`src/learning/catalog.ts`).
+- [x] Move the chemistry workspace to `/lab/chemistry` so the home route can serve discovery while preserving the existing lab.
 - [x] Connect lesson objectives to a simulation (registry + `LessonDetail`).
 - [x] Provide instructions, interactive controls, explanations, and a practical application.
 - [x] Add a short reflection question or assessment (Apply & Reflect section).
@@ -50,6 +52,19 @@ Create interdisciplinary activities only after the underlying subject experience
 - [x] `/challenges` list and `/challenges/[id]` detail with embedded simulation runners.
 
 **Exit criteria:** at least one challenge meaningfully uses concepts from two or more domains and links back to its learning resources. Achieved.
+
+## Phase 5 — Bilingual learning experience
+
+Make the existing language toggle real rather than cosmetic.
+
+- [x] Typed Vietnamese/English UI dictionary (`src/i18n/dict.ts`) with `vi` as the default and the choice persisted in `ess:locale`.
+- [x] Vietnamese editions of all four authored lessons and the greenhouse challenge, preserving ids, quiz option ids, and correct answers.
+- [x] Localized home, Explore, domain cards, lesson journey, self-check, challenge pages, navigation, in-app headers, and the simulation runner.
+- [x] Localized the elements and reactions catalogs, profile page, chemistry lab bench and outcome dialog, favorites controls, and the 3D lab (labels, controls, and WebGL fallback).
+- [x] Automation: dictionary key parity, content structural parity, EN/VI render tests for the catalog and profile views, and learner-surface coverage.
+- [ ] Localize catalog data (element/reaction names, descriptions, safety notes), admin forms, and static route metadata.
+
+**Exit criteria (current slice):** every learner-facing screen works in both languages, including catalog browsing, profile, chemistry lab, and the 3D lab. Achieved; the remaining English-only surfaces are catalog data values, admin forms, and route metadata.
 
 ## Defer until evidence supports it
 

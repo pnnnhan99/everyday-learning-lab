@@ -27,6 +27,7 @@ Everyday Learning Lab is an interactive science-learning platform for curious le
 The repository currently uses:
 
 - Next.js App Router, React, and TypeScript.
+- A discover-first home page (`/`) and Explore page that read from one shared learning catalog covering all five domains; the chemistry workspace now lives at `/lab/chemistry`.
 - Tailwind CSS for styling.
 - Zustand for client-side state.
 - dnd-kit for drag-and-drop interactions.
@@ -39,6 +40,16 @@ SQLite is suitable for traditional self-hosted/VPS deployments where the databas
 The current persistence approach is suitable only as a prototype. Local file writes and process memory are not reliable shared storage for serverless or multi-instance production deployments. See the open GitHub Issues for security, persistence, testing, scientific review, and simulation architecture work.
 
 The project implements server-side authorization for all mutation endpoints (POST, PUT, DELETE) to protect scientific content from unauthorized modification.
+
+## Languages
+
+The interface ships in Vietnamese (`vi`, the default) and English (`en`). The header language toggle updates the whole client-rendered UI immediately and remembers the choice in `localStorage` (`ess:locale`); the document `lang` attribute follows the active locale.
+
+- UI copy lives in one typed dictionary, `src/i18n/dict.ts`. Adding an English key without a Vietnamese translation fails the type check.
+- The four authored lessons and the greenhouse challenge have Vietnamese editions in `src/learning/examples/vi.ts`. They keep the same ids, section/application/assessment ids, quiz option ids, and correct answers as the English originals; `__tests__/learning/localization.test.ts` enforces that parity.
+- Every learner-facing surface is localized: home, Explore, lessons, self-checks, challenges, the elements and reactions catalogs, the profile page, the chemistry lab bench and outcome dialog, and the 3D lab (including scene labels and fallback text). Dates in the mix history follow the active locale.
+- Server-rendered catalog pages (`/elements`, `/reactions`) read data on the server and pass it to client views so the language toggle can re-render them; see `src/components/elements/ElementsView.tsx` and `src/components/reactions/ReactionsView.tsx`.
+- Still English-only: catalog data values from the database (element/reaction names, descriptions, and safety notes), admin forms, and static route metadata. Translating catalog data needs a content model with per-locale fields, and route metadata needs cookie- or segment-based locale resolution; both are intentionally left for a later slice.
 
 - A Node.js version supported by the installed Next.js version.
 - npm.
@@ -81,7 +92,8 @@ npm run validate            # Run the project's validation scripts
 
 ```text
 app/                  Next.js routes, layouts, and API handlers
-src/components/       UI, chemistry laboratory, and shared layout
+src/components/       UI, chemistry laboratory, domain cards, and shared layout
+src/learning/         Shared content catalog, lesson/challenge examples, and validation
 src/data/             Seed and authored example chemistry content
 src/i18n/             Vietnamese/English UI dictionaries
 src/lib/              Persistence, repositories, API helpers, and domain utilities

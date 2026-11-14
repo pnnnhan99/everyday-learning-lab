@@ -6,18 +6,28 @@ import Sidebar from './Sidebar';
 import Header from './Header';
 import { useUiStore } from '@/store/uiStore';
 import { useLabStore } from '@/store/labStore';
+import { getDictionary, type Dictionary } from '@/i18n/dict';
 
-const TITLES: Record<string, { title: string; subtitle: string }> = {
-  '/': { title: 'Chemistry Lab', subtitle: 'Mix everyday chemicals safely in a virtual lab' },
-  '/explore': { title: 'Explore', subtitle: 'Discover lessons across learning domains' },
-  '/challenges': { title: 'Real-world Challenges', subtitle: 'Interdisciplinary science tasks' },
-  '/lab': { title: 'Lab', subtitle: 'Pick a simulation to run with disclosed assumptions' },
-  '/lab/3d': { title: '3D Lab', subtitle: 'Visualization playground' },
-  '/elements': { title: 'Elements', subtitle: 'Browse every reviewed substance in the catalog' },
-  '/reactions': { title: 'Reactions', subtitle: 'Reviewed pairs with safety notes and sources' },
-  '/admin': { title: 'Admin', subtitle: 'Create and delete elements and reactions' },
-  '/profile': { title: 'Profile', subtitle: 'Local progress, favorites and history' },
-};
+type PageMeta = { title: string; subtitle: string };
+
+function pageMetadata(dictionary: Dictionary, pathname: string): PageMeta {
+  const { pages } = dictionary;
+
+  if (pathname === '/') return pages.home;
+  if (pathname === '/explore') return pages.explore;
+  if (pathname === '/challenges') return pages.challenges;
+  if (pathname === '/lab') return pages.lab;
+  if (pathname === '/lab/chemistry') return pages.labChemistry;
+  if (pathname === '/lab/3d') return pages.lab3d;
+  if (pathname === '/elements') return pages.elements;
+  if (pathname === '/reactions') return pages.reactions;
+  if (pathname === '/admin') return pages.admin;
+  if (pathname === '/profile') return pages.profile;
+  if (pathname.startsWith('/learn/')) return pages.lesson;
+  if (pathname.startsWith('/challenges/')) return pages.challenge;
+  if (pathname.startsWith('/lab/')) return pages.lab;
+  return { title: 'Everyday Learning Lab', subtitle: '' };
+}
 
 export default function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -25,12 +35,15 @@ export default function AppShell({ children }: { children: ReactNode }) {
   const closeSidebar = useUiStore((s) => s.closeSidebar);
   const hydrate = useUiStore((s) => s.hydrate);
   const hydrateLab = useLabStore((s) => s.hydrate);
+  const locale = useUiStore((s) => s.locale);
+  const dictionary = getDictionary(locale);
 
   useEffect(() => { hydrate(); }, [hydrate]);
   useEffect(() => { hydrateLab(); }, [hydrateLab]);
   useEffect(() => { closeSidebar(); }, [pathname, closeSidebar]);
+  useEffect(() => { document.documentElement.lang = locale; }, [locale]);
 
-  const meta = TITLES[pathname] ?? resolveMeta(pathname);
+  const meta = pageMetadata(dictionary, pathname);
 
   return (
     <div className="flex min-h-screen bg-zinc-50 dark:bg-black">
@@ -38,26 +51,23 @@ export default function AppShell({ children }: { children: ReactNode }) {
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-blue-600 focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white"
       >
-        Skip to content
+        {dictionary.app.skipToContent}
       </a>
       <Sidebar />
       {sidebarOpen && (
-        <button aria-label="Close menu" onClick={closeSidebar} className="fixed inset-0 z-30 bg-black/40 lg:hidden" />
+        <button
+          aria-label={dictionary.app.closeMenu}
+          onClick={closeSidebar}
+          className="fixed inset-0 z-30 bg-black/40 lg:hidden"
+        />
       )}
       <div className="flex min-w-0 flex-1 flex-col">
         <Header title={meta.title} subtitle={meta.subtitle} />
         <main id="main-content" tabIndex={-1} className="min-w-0 flex-1 focus:outline-none">{children}</main>
         <footer className="border-t border-zinc-200 px-4 py-3 text-xs text-zinc-500 dark:border-zinc-800">
-          Everyday Science Sim · virtual chemistry demo · toxic mixes are simulated only
+          {dictionary.app.footer}
         </footer>
       </div>
     </div>
   );
-}
-
-function resolveMeta(pathname: string): { title: string; subtitle: string } {
-  if (pathname.startsWith('/learn/')) return { title: 'Lesson', subtitle: 'Learn, simulate, apply and reflect' };
-  if (pathname.startsWith('/challenges/')) return { title: 'Challenge', subtitle: 'Interdisciplinary science task' };
-  if (pathname.startsWith('/lab/')) return { title: 'Lab', subtitle: 'Simulation runner' };
-  return { title: 'Everyday Science Sim', subtitle: '' };
 }

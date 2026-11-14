@@ -7,10 +7,3 @@ export const elementTypeIcon: Record<ElementType, typeof FlaskConical> = {
   food: Apple,
   chemical: Biohazard,
 };
-
-export const elementTypeLabel: Record<ElementType, string> = {
-  acid: 'Acid',
-  base: 'Base',
-  food: 'Food',
-  chemical: 'Chemical',
-};
