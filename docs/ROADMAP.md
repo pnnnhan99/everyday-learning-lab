@@ -53,6 +53,18 @@ Create interdisciplinary activities only after the underlying subject experience
 
 **Exit criteria:** at least one challenge meaningfully uses concepts from two or more domains and links back to its learning resources. Achieved.
 
+## Phase 5 — Bilingual learning experience
+
+Make the existing language toggle real rather than cosmetic.
+
+- [x] Typed Vietnamese/English UI dictionary (`src/i18n/dict.ts`) with `vi` as the default and the choice persisted in `ess:locale`.
+- [x] Vietnamese editions of all four authored lessons and the greenhouse challenge, preserving ids, quiz option ids, and correct answers.
+- [x] Localized home, Explore, domain cards, lesson journey, self-check, challenge pages, navigation, in-app headers, and the simulation runner.
+- [x] Automation: dictionary key parity, content structural parity, and EN/VI render tests.
+- [ ] Localize catalog data (element/reaction names, descriptions, safety notes), admin forms, profile details, static route metadata, and 3D scene labels.
+
+**Exit criteria (current slice):** the learner journey from Home through Explore, lesson, self-check, simulation, and challenge works in both languages. Achieved; the remaining English-only surfaces are listed above.
+
 ## Defer until evidence supports it
 
 - Full LMS, grades, classes, teacher dashboards, or social features.

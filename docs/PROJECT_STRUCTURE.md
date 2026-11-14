@@ -39,6 +39,8 @@ scripts/                  Data and persistence validation
 - Element and reaction routes use server-side validation; mutation routes use a maintainer-token guard.
 - Element and reaction persistence is abstracted behind repository interfaces and currently uses SQLite via `better-sqlite3`. See [persistence.md](persistence.md).
 - `three`, `@react-three/fiber`, and `@react-three/drei` are declared dependencies. Audit actual usage before introducing new 3D infrastructure.
+- `src/i18n/` holds the typed Vietnamese/English dictionary and the `useDictionary`/`useLocale` hooks backed by the `locale` field in `src/store/uiStore.ts`. Client components must read copy from the dictionary instead of hardcoding English. Vietnamese lesson and challenge editions live in `src/learning/examples/vi.ts` and are resolved through `getLocalizedLesson`/`getLocalizedChallenge` in the catalog.
+- Server components cannot react to the client locale without a cookie or locale route segment. Catalog data (element/reaction records), admin forms, profile details, and 3D scene labels remain English-only.
 
 These notes describe source observed during a documentation audit. They do not guarantee the project currently passes lint, tests, validation, or production build.
 

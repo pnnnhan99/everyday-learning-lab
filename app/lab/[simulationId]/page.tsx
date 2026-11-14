@@ -7,6 +7,7 @@ import { ArrowLeft, Play, RotateCcw } from 'lucide-react';
 import { registerAllSimulations, globalRegistry } from '@/simulations';
 import { validateSimulationInput } from '@/core/simulation/validation';
 import type { SimulationContract, SimulationMetadata } from '@/core/simulation/types';
+import { useDictionary } from '@/i18n/useDictionary';
 
 registerAllSimulations();
 
@@ -61,6 +62,7 @@ function inputKeys(metadata: SimulationMetadata): string[] {
 
 export default function LabSimulationPage({ params }: { params: Promise<{ simulationId: string }> }) {
   const { simulationId } = use(params);
+  const dictionary = useDictionary();
   const sim = globalRegistry.get(simulationId);
 
   const [result, setResult] = useState<unknown>(undefined);
@@ -76,12 +78,12 @@ export default function LabSimulationPage({ params }: { params: Promise<{ simula
     return (
       <div className="flex-1 p-6">
         <div className="mx-auto max-w-4xl space-y-3">
-          <h1 className="text-2xl font-semibold">Simulation not found</h1>
+          <h1 className="text-2xl font-semibold">{dictionary.lab.simulationNotFound}</h1>
           <p className="text-sm text-zinc-600 dark:text-zinc-300">
-            No simulation is registered with id <code className="font-mono">{simulationId}</code>.
+            {dictionary.lab.noSimulation} <code className="font-mono">{simulationId}</code>.
           </p>
           <Link href="/lab" className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400">
-            <ArrowLeft size={14} /> Back to all simulations
+            <ArrowLeft size={14} /> {dictionary.lab.backToAll}
           </Link>
         </div>
       </div>
@@ -108,7 +110,7 @@ export default function LabSimulationPage({ params }: { params: Promise<{ simula
       setResult(value);
       setError('');
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Simulation failed to run.');
+      setError(e instanceof Error ? e.message : dictionary.lab.simulationFailed);
     } finally {
       setRunning(false);
     }
@@ -131,7 +133,7 @@ export default function LabSimulationPage({ params }: { params: Promise<{ simula
             href="/lab"
             className="inline-flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
           >
-            <ArrowLeft size={13} /> All simulations
+            <ArrowLeft size={13} /> {dictionary.lab.allSimulations}
           </Link>
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-2xl font-semibold">{metadata.name}</h1>
@@ -143,9 +145,9 @@ export default function LabSimulationPage({ params }: { params: Promise<{ simula
         </header>
 
         <section className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900/40">
-          <h2 className="text-[11px] font-medium tracking-widest text-zinc-500 uppercase">Inputs</h2>
+          <h2 className="text-[11px] font-medium tracking-widest text-zinc-500 uppercase">{dictionary.lab.inputsHeading}</h2>
           {keys.length === 0 ? (
-            <p className="mt-2 text-sm text-zinc-500">This simulation takes no inputs.</p>
+            <p className="mt-2 text-sm text-zinc-500">{dictionary.lab.noInputs}</p>
           ) : (
             <div className="mt-3 grid gap-3 sm:grid-cols-3">
               {keys.map((key) => {
@@ -178,14 +180,14 @@ export default function LabSimulationPage({ params }: { params: Promise<{ simula
               disabled={running}
               className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3.5 py-2 text-sm font-medium text-white transition hover:bg-blue-500 disabled:opacity-60"
             >
-              <Play size={14} /> {running ? 'Running…' : 'Run simulation'}
+              <Play size={14} /> {running ? dictionary.lab.running : dictionary.lab.runSimulation}
             </button>
             <button
               type="button"
               onClick={reset}
               className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-900"
             >
-              <RotateCcw size={14} /> Reset inputs
+              <RotateCcw size={14} /> {dictionary.lab.resetInputs}
             </button>
             {error && (
               <span role="alert" className="text-sm text-red-600 dark:text-red-400">
@@ -199,7 +201,7 @@ export default function LabSimulationPage({ params }: { params: Promise<{ simula
               role="alert"
               className="mt-3 rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:border-red-900 dark:bg-red-950/50 dark:text-red-200"
             >
-              <p className="font-medium">Fix the inputs before running:</p>
+              <p className="font-medium">{dictionary.lab.fixInputs}</p>
               <ul className="mt-1 list-disc pl-5">
                 {validationErrors.map((message) => (
                   <li key={message}>{message}</li>
@@ -211,7 +213,7 @@ export default function LabSimulationPage({ params }: { params: Promise<{ simula
 
         {view ? (
           <section className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900/40" data-testid="sim-result">
-            <h2 className="text-[11px] font-medium tracking-widest text-zinc-500 uppercase">Result</h2>
+            <h2 className="text-[11px] font-medium tracking-widest text-zinc-500 uppercase">{dictionary.lab.result}</h2>
             {view.scalars.length > 0 && (
               <div className="mt-3 grid gap-3 sm:grid-cols-3">
                 {view.scalars.map((item) => (
@@ -230,11 +232,11 @@ export default function LabSimulationPage({ params }: { params: Promise<{ simula
                 {view.lists.map((item) => (
                   <li key={item.key} className="rounded-lg border border-zinc-200 bg-zinc-50 p-3 text-sm dark:border-zinc-800 dark:bg-zinc-950/60">
                     <p className="text-zinc-600 dark:text-zinc-300">
-                      {humanize(item.key)} · <span className="font-medium">{item.length} values</span>
+                      {humanize(item.key)} · <span className="font-medium">{item.length} {dictionary.lab.values}</span>
                     </p>
                     <details className="mt-1">
                       <summary className="cursor-pointer text-xs text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300">
-                        Preview
+                        {dictionary.lab.preview}
                       </summary>
                       <pre className="mt-1 overflow-auto text-[11px] text-zinc-500">{item.preview} …</pre>
                     </details>
@@ -257,15 +259,15 @@ export default function LabSimulationPage({ params }: { params: Promise<{ simula
 
         {metadata.safetyNotes && metadata.safetyNotes.length > 0 && (
           <aside className="rounded-lg border border-amber-300/50 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
-            <strong>Safety note:</strong> {metadata.safetyNotes.join(' ')}
+            <strong>{dictionary.lab.safetyNote}</strong> {metadata.safetyNotes.join(' ')}
           </aside>
         )}
 
         <details className="rounded-xl border border-zinc-200 bg-white p-3 text-sm text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900/40 dark:text-zinc-300">
-          <summary className="cursor-pointer font-medium text-zinc-800 dark:text-zinc-100">Model metadata</summary>
+          <summary className="cursor-pointer font-medium text-zinc-800 dark:text-zinc-100">{dictionary.lab.modelMetadata}</summary>
           <div className="mt-3 space-y-3">
             <div>
-              <strong className="text-zinc-900 dark:text-zinc-100">Assumptions</strong>
+              <strong className="text-zinc-900 dark:text-zinc-100">{dictionary.lab.assumptions}</strong>
               <ul className="mt-1 list-disc pl-5">
                 {metadata.assumptions.map((a) => (
                   <li key={a}>{a}</li>
@@ -273,7 +275,7 @@ export default function LabSimulationPage({ params }: { params: Promise<{ simula
               </ul>
             </div>
             <div>
-              <strong className="text-zinc-900 dark:text-zinc-100">Limitations</strong>
+              <strong className="text-zinc-900 dark:text-zinc-100">{dictionary.lab.limitations}</strong>
               <ul className="mt-1 list-disc pl-5">
                 {metadata.limitations.map((a) => (
                   <li key={a}>{a}</li>
@@ -281,7 +283,7 @@ export default function LabSimulationPage({ params }: { params: Promise<{ simula
               </ul>
             </div>
             <div>
-              <strong className="text-zinc-900 dark:text-zinc-100">References</strong>
+              <strong className="text-zinc-900 dark:text-zinc-100">{dictionary.lab.references}</strong>
               <ul className="mt-1 list-disc pl-5">
                 {metadata.references.map((r) => (
                   <li key={r.url}>

@@ -4,11 +4,13 @@ import React, { useState } from 'react';
 
 import type { Assessment } from '@/learning/types';
 import { gradeQuiz } from '@/learning/quiz';
+import { useDictionary } from '@/i18n/useDictionary';
 
 // Renders an inline quiz self-check: one radio group per item, immediate
 // feedback per answer, and a running score. All state is local; nothing is
 // persisted, so no progress is claimed to be saved.
 export const SelfCheck: React.FC<{ assessment: Assessment }> = ({ assessment }) => {
+  const dictionary = useDictionary();
   const items = assessment.items ?? [];
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
@@ -31,7 +33,7 @@ export const SelfCheck: React.FC<{ assessment: Assessment }> = ({ assessment }) 
         <h4 className="text-sm font-medium text-white">{assessment.title}</h4>
         <p className="text-sm text-white/60">{assessment.description}</p>
         <p className="mt-1 text-xs italic text-white/40">
-          {assessment.itemIds.length} item(s) in this {assessment.type}.
+          {assessment.itemIds.length} {dictionary.lesson.itemsInAssessment} {assessment.type}.
         </p>
       </div>
     );
@@ -101,7 +103,7 @@ export const SelfCheck: React.FC<{ assessment: Assessment }> = ({ assessment }) 
                   }`}
                 >
                   <strong className="font-semibold">
-                    {result.isCorrect ? 'Correct. ' : 'Not quite. '}
+                    {result.isCorrect ? `${dictionary.lesson.correct} ` : `${dictionary.lesson.notQuite} `}
                   </strong>
                   {item.explanation}
                 </p>
@@ -116,23 +118,23 @@ export const SelfCheck: React.FC<{ assessment: Assessment }> = ({ assessment }) 
               type="submit"
               className="rounded bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400"
             >
-              Check answers
+              {dictionary.lesson.checkAnswers}
             </button>
           ) : (
             <>
               <p className="text-sm text-white/70">
-                Score: <strong className="text-white">{graded?.correctCount}</strong> / {graded?.total}
+                {dictionary.lesson.score}: <strong className="text-white">{graded?.correctCount}</strong> / {graded?.total}
               </p>
               <button
                 type="button"
                 onClick={handleReset}
                 className="rounded border border-white/15 px-3 py-1.5 text-sm text-white/80 hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400"
               >
-                Try again
+                {dictionary.lesson.tryAgain}
               </button>
             </>
           )}
-          <p className="text-xs text-white/40">Answers are checked in your browser only.</p>
+          <p className="text-xs text-white/40">{dictionary.lesson.answersLocal}</p>
         </div>
       </form>
     </div>

@@ -41,6 +41,14 @@ The current persistence approach is suitable only as a prototype. Local file wri
 
 The project implements server-side authorization for all mutation endpoints (POST, PUT, DELETE) to protect scientific content from unauthorized modification.
 
+## Languages
+
+The interface ships in Vietnamese (`vi`, the default) and English (`en`). The header language toggle updates the whole client-rendered UI immediately and remembers the choice in `localStorage` (`ess:locale`); the document `lang` attribute follows the active locale.
+
+- UI copy lives in one typed dictionary, `src/i18n/dict.ts`. Adding an English key without a Vietnamese translation fails the type check.
+- The four authored lessons and the greenhouse challenge have Vietnamese editions in `src/learning/examples/vi.ts`. They keep the same ids, section/application/assessment ids, quiz option ids, and correct answers as the English originals; `__tests__/learning/localization.test.ts` enforces that parity.
+- Catalog data (element and reaction names, descriptions, and safety notes from the database), admin forms, profile details, static route metadata, and 3D scene labels are still English-only. Server components cannot switch language without a cookie or route segment, so those surfaces are intentionally left for a later slice.
+
 - A Node.js version supported by the installed Next.js version.
 - npm.
 

@@ -1,11 +1,19 @@
-import type { Challenge, Lesson, ReviewStatus } from './types';
+import type { Challenge, Lesson } from './types';
 import type { Lab3DModel } from './lab3d';
+import type { Locale } from '@/i18n/dict';
 
 import { biologyCO2O2Lesson } from './examples/biology-co2-o2';
 import { chemistryAcidsBasesLesson } from './examples/chemistry-acids-bases';
 import { mathematicsFractionsLesson } from './examples/mathematics-fractions';
 import { physicsProjectileLesson } from './examples/physics-projectile';
 import { greenhouseCarbonChallenge } from './examples/challenge-greenhouse-carbon';
+import {
+  biologyCO2O2LessonVi,
+  chemistryAcidsBasesLessonVi,
+  greenhouseCarbonChallengeVi,
+  mathematicsFractionsLessonVi,
+  physicsProjectileLessonVi,
+} from './examples/vi';
 
 // Single source of truth for discoverable learning content. Routes, the home
 // page, Explore, and the sitemap all read from here instead of keeping their
@@ -23,12 +31,36 @@ export const challenges: readonly Challenge[] = [greenhouseCarbonChallenge];
 const lessonsById = new Map<string, Lesson>(lessons.map((lesson) => [lesson.id, lesson]));
 const challengesById = new Map<string, Challenge>(challenges.map((challenge) => [challenge.id, challenge]));
 
+const localizedLessons: Record<Locale, ReadonlyMap<string, Lesson>> = {
+  en: lessonsById,
+  vi: new Map<string, Lesson>(
+    [mathematicsFractionsLessonVi, chemistryAcidsBasesLessonVi, physicsProjectileLessonVi, biologyCO2O2LessonVi].map(
+      (lesson) => [lesson.id, lesson],
+    ),
+  ),
+};
+
+const localizedChallenges: Record<Locale, ReadonlyMap<string, Challenge>> = {
+  en: challengesById,
+  vi: new Map<string, Challenge>([[greenhouseCarbonChallengeVi.id, greenhouseCarbonChallengeVi]]),
+};
+
 export function getLessonById(id: string | undefined): Lesson | undefined {
   return id ? lessonsById.get(id) : undefined;
 }
 
 export function getChallengeById(id: string | undefined): Challenge | undefined {
   return id ? challengesById.get(id) : undefined;
+}
+
+export function getLocalizedLesson(id: string | undefined, locale: Locale): Lesson | undefined {
+  if (!id) return undefined;
+  return localizedLessons[locale]?.get(id) ?? lessonsById.get(id);
+}
+
+export function getLocalizedChallenge(id: string | undefined, locale: Locale): Challenge | undefined {
+  if (!id) return undefined;
+  return localizedChallenges[locale]?.get(id) ?? challengesById.get(id);
 }
 
 export function getLessonHref(id: string): string {
@@ -42,7 +74,6 @@ export function getChallengeHref(id: string): string {
 interface LearningDomainBase {
   key: Lesson['domain'];
   label: string;
-  summary: string;
 }
 
 export interface LessonDomain extends LearningDomainBase {
@@ -61,34 +92,29 @@ export const learningDomains: readonly LearningDomain[] = [
   {
     key: 'mathematics',
     label: 'Mathematics & Geometry',
-    summary: 'Build number sense with visual fraction models, comparison tools, and everyday measurement.',
     lessonId: mathematicsFractionsLesson.id,
   },
   {
     key: 'chemistry',
     label: 'Chemistry',
-    summary: 'Meet acids, bases, and the gases they release, then inspect a water molecule in three dimensions.',
     lessonId: chemistryAcidsBasesLesson.id,
     lab3dModel: 'water',
   },
   {
     key: 'physics',
     label: 'Physics',
-    summary: 'Change launch speed and angle to predict range, peak height, and flight time.',
     lessonId: physicsProjectileLesson.id,
     lab3dModel: 'projectile',
   },
   {
     key: 'biology',
     label: 'Biology & Earth',
-    summary: 'Follow the balance between photosynthesis and respiration, with a labelled plant-cell model.',
     lessonId: biologyCO2O2Lesson.id,
     lab3dModel: 'plant-cell',
   },
   {
     key: 'realworld',
     label: 'Real-world Challenges',
-    summary: 'Combine concepts from more than one domain to explain a question grounded in everyday life.',
     challengeId: greenhouseCarbonChallenge.id,
   },
 ];
@@ -111,46 +137,12 @@ export function getLab3dModelForLesson(lessonId: string): Lab3DModel | undefined
   )?.lab3dModel;
 }
 
-export const learningLoop = [
-  {
-    key: 'discover',
-    label: 'Discover',
-    description: 'Start from a real-world question or puzzling phenomenon.',
-  },
-  {
-    key: 'learn',
-    label: 'Learn',
-    description: 'Read a focused explanation with objectives, examples, and sources.',
-  },
-  {
-    key: 'experiment',
-    label: 'Experiment',
-    description: 'Change one input at a time and compare the model with your prediction.',
-  },
-  {
-    key: 'apply',
-    label: 'Apply',
-    description: 'Connect the idea to a practical situation you recognise.',
-  },
-  {
-    key: 'reflect',
-    label: 'Reflect',
-    description: 'Check your understanding and note which assumptions matter most.',
-  },
-] as const;
-
 export const lab3dShowcase: readonly {
   model: Lab3DModel;
-  label: string;
-  domain: string;
+  domain: 'chemistry' | 'physics' | 'biology';
 }[] = [
-  { model: 'water', label: 'Water molecule', domain: 'Chemistry' },
-  { model: 'projectile', label: 'Projectile motion', domain: 'Physics' },
-  { model: 'plant-cell', label: 'Plant cell', domain: 'Biology' },
+  { model: 'water', domain: 'chemistry' },
+  { model: 'projectile', domain: 'physics' },
+  { model: 'plant-cell', domain: 'biology' },
 ];
 
-export const REVIEW_STATUS_LABELS: Record<ReviewStatus, string> = {
-  draft: 'Not yet scientifically reviewed',
-  'in-review': 'Scientific review in progress',
-  'expert-reviewed': 'Expert reviewed',
-};

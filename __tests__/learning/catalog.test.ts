@@ -8,10 +8,12 @@ import {
   getDomainLesson,
   getLab3dModelForLesson,
   getLessonById,
+  getLocalizedChallenge,
+  getLocalizedLesson,
   learningDomains,
-  learningLoop,
   lessons,
 } from '@/learning/catalog';
+import { getDictionary } from '@/i18n/dict';
 import { isLab3DModel } from '@/learning/lab3d';
 import { globalRegistry, registerAllSimulations } from '@/simulations';
 
@@ -72,13 +74,29 @@ describe('learning catalog', () => {
   });
 
   it('describes the five-step learning loop in order', () => {
-    expect(learningLoop.map((step) => step.key)).toEqual([
+    expect(getDictionary('en').home.loop.map((step) => step.key)).toEqual([
       'discover',
       'learn',
       'experiment',
       'apply',
       'reflect',
     ]);
+  });
+
+  it('resolves localized lessons and challenges, falling back to English', () => {
+    const chemistry = getLocalizedLesson('chem-acids-bases-101', 'vi');
+    expect(chemistry?.title).toBe('Hiểu về axit và bazơ');
+    expect(chemistry?.sections.map((section) => section.id)).toEqual(
+      getLessonById('chem-acids-bases-101')?.sections.map((section) => section.id),
+    );
+
+    const challenge = getLocalizedChallenge('challenge-greenhouse-carbon', 'vi');
+    expect(challenge?.language).toBe('vi');
+    expect(challenge?.id).toBe(getChallengeById('challenge-greenhouse-carbon')?.id);
+
+    expect(getLocalizedLesson('chem-acids-bases-101', 'en')).toBe(getLessonById('chem-acids-bases-101'));
+    expect(getLocalizedLesson('missing-lesson', 'vi')).toBeUndefined();
+    expect(getLocalizedChallenge(undefined, 'vi')).toBeUndefined();
   });
 
   it('maps lessons only to supported 3D model ids', () => {
