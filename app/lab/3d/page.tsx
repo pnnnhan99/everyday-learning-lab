@@ -7,7 +7,7 @@ import { co2o2Simulation } from '@/domains/biology/simulations/co2-o2';
 import type { CO2O2Result } from '@/domains/biology/simulations/co2-o2';
 import { projectileSimulation } from '@/domains/physics/simulations/projectile';
 import type { ProjectileResult } from '@/domains/physics/simulations/projectile';
-import type { Lab3DModel } from '@/components/lab3d/Scene';
+import type { Lab3DModel } from '@/learning/lab3d';
 import { resolveInitialModel } from '@/components/lab3d/params';
 import { SceneErrorBoundary } from '@/components/lab3d/SceneErrorBoundary';
 

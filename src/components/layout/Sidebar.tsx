@@ -2,13 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FlaskConical, Atom, TestTubes, ShieldPlus, User, Compass, Puzzle, Boxes, Beaker } from 'lucide-react';
+import { FlaskConical, Atom, TestTubes, ShieldPlus, User, Compass, Puzzle, Boxes, Beaker, House } from 'lucide-react';
 import { useUiStore } from '@/store/uiStore';
 
 const LINKS = [
-  { href: '/', label: 'Lab', icon: FlaskConical },
+  { href: '/', label: 'Home', icon: House },
   { href: '/explore', label: 'Explore', icon: Compass },
   { href: '/challenges', label: 'Challenges', icon: Puzzle },
+  { href: '/lab/chemistry', label: 'Chemistry Lab', icon: FlaskConical },
   { href: '/lab', label: 'Simulations', icon: Beaker },
   { href: '/lab/3d', label: '3D Lab', icon: Boxes },
   { href: '/elements', label: 'Elements', icon: Atom },

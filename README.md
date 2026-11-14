@@ -27,6 +27,7 @@ Everyday Learning Lab is an interactive science-learning platform for curious le
 The repository currently uses:
 
 - Next.js App Router, React, and TypeScript.
+- A discover-first home page (`/`) and Explore page that read from one shared learning catalog covering all five domains; the chemistry workspace now lives at `/lab/chemistry`.
 - Tailwind CSS for styling.
 - Zustand for client-side state.
 - dnd-kit for drag-and-drop interactions.
@@ -81,7 +82,8 @@ npm run validate            # Run the project's validation scripts
 
 ```text
 app/                  Next.js routes, layouts, and API handlers
-src/components/       UI, chemistry laboratory, and shared layout
+src/components/       UI, chemistry laboratory, domain cards, and shared layout
+src/learning/         Shared content catalog, lesson/challenge examples, and validation
 src/data/             Seed and authored example chemistry content
 src/i18n/             Vietnamese/English UI dictionaries
 src/lib/              Persistence, repositories, API helpers, and domain utilities

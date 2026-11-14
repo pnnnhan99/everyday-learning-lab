@@ -17,6 +17,8 @@ This roadmap is ordered by dependency, not by a promise of calendar dates. Exist
 
 - [x] Define validated lesson and learning-activity schemas (`src/learning/types.ts`).
 - [x] Build subject/topic discovery (`app/explore`) and a lesson detail page (`app/learn/[slug]`).
+- [x] Add a discover-first home page (`app/page.tsx`) with the five-step learning loop and all five domains, fed by one shared catalog (`src/learning/catalog.ts`).
+- [x] Move the chemistry workspace to `/lab/chemistry` so the home route can serve discovery while preserving the existing lab.
 - [x] Connect lesson objectives to a simulation (registry + `LessonDetail`).
 - [x] Provide instructions, interactive controls, explanations, and a practical application.
 - [x] Add a short reflection question or assessment (Apply & Reflect section).

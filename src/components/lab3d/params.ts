@@ -1,13 +1,9 @@
-import type { Lab3DModel } from './Scene';
-
-export const LAB3D_MODEL_IDS: readonly string[] = ['water', 'projectile', 'plant-cell'];
-
-export function isLab3DModel(value: string | null | undefined): value is Lab3DModel {
-  return typeof value === 'string' && LAB3D_MODEL_IDS.includes(value);
-}
-
-// Resolves the model for /lab/3d?model=… — unknown or missing values fall
-// back to 'water' so a stale link never breaks the page.
-export function resolveInitialModel(value: string | null | undefined): Lab3DModel {
-  return isLab3DModel(value) ? value : 'water';
-}
+// Compatibility boundary for callers that import lab3d helpers from this
+// module. The definitions live in the shared learning layer so the content
+// catalog and the renderer agree on the supported model IDs.
+export {
+  LAB3D_MODEL_IDS,
+  isLab3DModel,
+  resolveInitialModel,
+} from '@/learning/lab3d';
+export type { Lab3DModel } from '@/learning/lab3d';

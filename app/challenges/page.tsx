@@ -1,10 +1,8 @@
 import Link from 'next/link';
 import { FlaskConical, GraduationCap, ListChecks, Rocket } from 'lucide-react';
 
-import { greenhouseCarbonChallenge } from '@/learning/examples/challenge-greenhouse-carbon';
+import { challenges } from '@/learning/catalog';
 import type { Challenge } from '@/learning/types';
-
-const challenges: Challenge[] = [greenhouseCarbonChallenge];
 
 const DIFFICULTY_STYLES: Record<Challenge['difficulty'], string> = {
   beginner:

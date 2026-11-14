@@ -5,7 +5,9 @@ import { Canvas } from '@react-three/fiber';
 import { useMemo } from 'react';
 import { Quaternion, Vector3 } from 'three';
 
-export type Lab3DModel = 'water' | 'projectile' | 'plant-cell';
+import type { Lab3DModel } from '@/learning/lab3d';
+
+export type { Lab3DModel };
 type Point3 = [number, number, number];
 type TrajectoryPoint = { x: number; y: number };
 

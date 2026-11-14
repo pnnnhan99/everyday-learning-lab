@@ -11,14 +11,17 @@ app/
   elements/             Element catalog
   reactions/            Reaction catalog
   profile/              Profile/preferences page
+  lab/chemistry/        Existing drag-and-drop chemistry workspace
   layout.tsx             Root layout and metadata
-  page.tsx               Current chemistry laboratory entry point
+  page.tsx               Discover-first home page
 src/
   components/
     admin/               Admin UI
     lab/                 Chemistry lab components
     laboratory/          Drag-and-drop chemistry workspace
+    learning/            Reusable domain cards
     layout/              App shell and navigation
+  learning/              Shared content catalog, lab3d model ids, and examples
   data/                  Seed/example chemistry data
   i18n/                  Vietnamese/English UI dictionaries
   lib/                   Repository, SQLite, API and domain utilities
@@ -31,7 +34,8 @@ scripts/                  Data and persistence validation
 
 ## Confirmed implementation notes
 
-- The chemistry laboratory uses drag-and-drop interactions and Zustand state.
+- `/` is a discover-first home page and `/explore` lists all five domains. Both read from `src/learning/catalog.ts`; do not add a second hardcoded domain or lesson list.
+- The chemistry laboratory uses drag-and-drop interactions and Zustand state, and is served at `/lab/chemistry`.
 - Element and reaction routes use server-side validation; mutation routes use a maintainer-token guard.
 - Element and reaction persistence is abstracted behind repository interfaces and currently uses SQLite via `better-sqlite3`. See [persistence.md](persistence.md).
 - `three`, `@react-three/fiber`, and `@react-three/drei` are declared dependencies. Audit actual usage before introducing new 3D infrastructure.

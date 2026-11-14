@@ -4,25 +4,14 @@ import Link from 'next/link';
 import React, { useMemo, useState } from 'react';
 
 import type { Lesson, ReviewStatus } from '@/learning/types';
+import { REVIEW_STATUS_LABELS, getLab3dModelForLesson } from '@/learning/catalog';
+import { lab3dHref } from '@/learning/lab3d';
 import { registerAllSimulations } from '@/simulations';
 import { globalRegistry } from '@/core/simulation/registry';
 import { validateSimulationInput } from '@/core/simulation/validation';
 import { SelfCheck } from './SelfCheck';
 
 registerAllSimulations();
-
-// Maps a lesson to a 3D model on /lab/3d so learning flows into interaction.
-const LAB3D_MODEL_BY_LESSON: Record<string, string> = {
-  'chem-acids-bases-101': 'water',
-  'phys-projectile-101': 'projectile',
-  'bio-co2-o2-101': 'plant-cell',
-};
-
-const REVIEW_STATUS_LABEL: Record<ReviewStatus, string> = {
-  draft: 'Not yet scientifically reviewed',
-  'in-review': 'Scientific review in progress',
-  'expert-reviewed': 'Expert reviewed',
-};
 
 function reviewBadgeStyle(status: ReviewStatus): string {
   return status === 'expert-reviewed'
@@ -90,7 +79,7 @@ export const LessonDetail: React.FC<{ lesson: Lesson }> = ({ lesson }) => {
   );
 
   const reviewStatus: ReviewStatus = lesson.reviewStatus ?? 'draft';
-  const lab3dModel = LAB3D_MODEL_BY_LESSON[lesson.id];
+  const lab3dModel = getLab3dModelForLesson(lesson.id);
 
   return (
     <div className="space-y-10 text-white">
@@ -102,11 +91,11 @@ export const LessonDetail: React.FC<{ lesson: Lesson }> = ({ lesson }) => {
           <span
             className={`rounded-full border px-2 py-0.5 text-xs ${reviewBadgeStyle(reviewStatus)}`}
           >
-            {REVIEW_STATUS_LABEL[reviewStatus]}
+            {REVIEW_STATUS_LABELS[reviewStatus]}
           </span>
           {lab3dModel && (
             <Link
-              href={`/lab/3d?model=${lab3dModel}`}
+              href={lab3dHref(lab3dModel)}
               className="text-sm text-sky-300 hover:text-sky-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400"
             >
               Open the 3D model →
