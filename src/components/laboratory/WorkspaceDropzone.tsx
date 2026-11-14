@@ -5,18 +5,20 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect } from 'react';
 
 import { useGameStore } from '../../store/useGameStore';
+import { useDictionary } from '@/i18n/useDictionary';
 import type { EffectType } from '../../types/game';
 import DraggableElement from './DraggableElement';
 
 const MERGE_DURATION_MS = 700;
 const NO_REACTION_NOTICE_MS = 2400;
 
-const EFFECT_STYLES: Record<EffectType, { label: string; accent: string; halo: string }> = {
-  toxic: { label: 'Hazard', accent: 'from-orange-500 to-rose-500', halo: 'shadow-orange-500/40' },
-  informational: { label: 'Model', accent: 'from-sky-400 to-cyan-300', halo: 'shadow-sky-500/40' },
+const EFFECT_STYLES: Record<EffectType, { accent: string; halo: string }> = {
+  toxic: { accent: 'from-orange-500 to-rose-500', halo: 'shadow-orange-500/40' },
+  informational: { accent: 'from-sky-400 to-cyan-300', halo: 'shadow-sky-500/40' },
 };
 
 export default function WorkspaceDropzone() {
+  const dictionary = useDictionary();
   const workspace = useGameStore((state) => state.workspace);
   const activeReaction = useGameStore((state) => state.activeReaction);
   const status = useGameStore((state) => state.status);
@@ -52,6 +54,11 @@ export default function WorkspaceDropzone() {
 
   const isMerging = status === 'merging';
   const effect = activeReaction ? EFFECT_STYLES[activeReaction.effectType] : null;
+  const effectLabel = activeReaction
+    ? activeReaction.effectType === 'toxic'
+      ? dictionary.common.hazard
+      : dictionary.common.model
+    : '';
 
   return (
     <section className="flex flex-col items-center gap-4">
@@ -59,9 +66,7 @@ export default function WorkspaceDropzone() {
         role="note"
         className="w-full max-w-2xl rounded-xl border border-amber-300/30 bg-amber-300/10 px-4 py-3 text-sm text-amber-100"
       >
-        <strong>Simulation only.</strong> These simplified learning models are not lab protocols. Never
-        mix household chemicals based on a result. Never mix bleach with vinegar, acids, ammonia, or
-        other cleaners.
+        {dictionary.labBench.safetyNotice}
       </aside>
       <div
         ref={setNodeRef}
@@ -73,13 +78,11 @@ export default function WorkspaceDropzone() {
         }`}
       >
         <span className="pointer-events-none absolute inset-x-0 top-4 text-center text-[11px] font-medium tracking-widest text-white/40 uppercase">
-          Lab Bench
+          {dictionary.labBench.bench}
         </span>
 
         {workspace.length === 0 ? (
-          <p className="text-center text-sm text-white/50">
-            Drag two substances here to see how they react.
-          </p>
+          <p className="text-center text-sm text-white/50">{dictionary.labBench.dragTwo}</p>
         ) : null}
 
         {workspace.map((element, index) => {
@@ -117,7 +120,7 @@ export default function WorkspaceDropzone() {
           disabled={workspace.length === 0}
           className="rounded-lg border border-white/15 px-3 py-1.5 text-xs font-medium text-white/70 transition enabled:hover:bg-white/10 disabled:opacity-40"
         >
-          Clear bench
+          {dictionary.labBench.clear}
         </button>
         <AnimatePresence>
           {noReaction ? (
@@ -127,7 +130,7 @@ export default function WorkspaceDropzone() {
               exit={{ opacity: 0, y: -6 }}
               className="text-xs text-white/60"
             >
-              No reviewed outcome is available for this pair. That does not mean they are safe to mix.
+              {dictionary.labBench.noOutcome}
             </motion.span>
           ) : null}
         </AnimatePresence>
@@ -156,17 +159,17 @@ export default function WorkspaceDropzone() {
               <span
                 className={`rounded-full bg-linear-to-r ${effect.accent} px-3 py-1 text-[11px] font-semibold tracking-wide text-zinc-950 uppercase`}
               >
-                {effect.label}
+                {effectLabel}
               </span>
             </div>
 
             <div className="mt-3 space-y-3 text-sm leading-relaxed text-white/75">
               <p>
-                <strong className="text-white">Modeled outcome: </strong>
+                <strong className="text-white">{dictionary.labBench.modeledOutcome}: </strong>
                 {activeReaction.observation}
               </p>
               <p>
-                <strong className="text-white">Explanation: </strong>
+                <strong className="text-white">{dictionary.labBench.explanation}: </strong>
                 {activeReaction.explanation}
               </p>
             </div>
@@ -177,13 +180,13 @@ export default function WorkspaceDropzone() {
 
             <div className="mt-4 space-y-2 text-xs text-white/60">
               <p>
-                Review status:{' '}
+                {dictionary.common.reviewStatus}:{' '}
                 {activeReaction.reviewStatus === 'hazard-reviewed'
-                  ? 'Hazard communication reviewed'
-                  : 'Scientific claims reviewed'}
+                  ? dictionary.labBench.reviewedHazard
+                  : dictionary.labBench.reviewedScience}
               </p>
-              <p>Model assumptions: {activeReaction.assumptions.join(' ')}</p>
-              <p className="font-medium text-white/75">References</p>
+              <p>{dictionary.labBench.assumptions}: {activeReaction.assumptions.join(' ')}</p>
+              <p className="font-medium text-white/75">{dictionary.labBench.references}</p>
               <ul className="list-inside list-disc space-y-1">
                 {activeReaction.references.map((reference) => (
                   <li key={reference.url}>
@@ -206,7 +209,7 @@ export default function WorkspaceDropzone() {
               onClick={clearWorkspace}
               className="mt-5 w-full rounded-xl bg-white/10 py-2.5 text-sm font-semibold text-white transition hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:outline-none"
             >
-              Back to the bench
+              {dictionary.labBench.backToBench}
             </button>
           </motion.div>
         ) : null}

@@ -10,15 +10,22 @@ import type { ProjectileResult } from '@/domains/physics/simulations/projectile'
 import type { Lab3DModel } from '@/learning/lab3d';
 import { resolveInitialModel } from '@/components/lab3d/params';
 import { SceneErrorBoundary } from '@/components/lab3d/SceneErrorBoundary';
+import { useDictionary } from '@/i18n/useDictionary';
+import type { Dictionary } from '@/i18n/dict';
 
 const Scene = dynamic(() => import('@/components/lab3d/Scene'), {
   ssr: false,
-  loading: () => (
-    <div className="flex h-full w-full items-center justify-center text-sm text-white/60" role="status">
-      Loading the 3D model…
-    </div>
-  ),
+  loading: () => <SceneLoading />,
 });
+
+function SceneLoading() {
+  const dictionary = useDictionary();
+  return (
+    <div className="flex h-full w-full items-center justify-center text-sm text-white/60" role="status">
+      {dictionary.lab3d.loadingModel}
+    </div>
+  );
+}
 
 function subscribeReducedMotion(callback: () => void) {
   const query = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -30,24 +37,16 @@ function getReducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
-const models: Array<{ id: Lab3DModel; label: string; domain: string; modelType: 'Illustrative' | 'Quantitative' }> = [
-  { id: 'water', label: 'Water molecule', domain: 'Chemistry', modelType: 'Illustrative' },
-  { id: 'projectile', label: 'Projectile motion', domain: 'Physics', modelType: 'Quantitative' },
-  { id: 'plant-cell', label: 'Plant cell', domain: 'Biology', modelType: 'Illustrative' },
-];
-
-// A short, non-visual description of each scene. Announced to assistive tech
-// and shown as a fallback if the canvas cannot render.
-const MODEL_ALT_TEXT: Record<Lab3DModel, string> = {
-  water:
-    'A water molecule shown as one large oxygen atom bonded to two smaller hydrogen atoms. Atom sizes are illustrative, not to scale.',
-  projectile:
-    'A parabolic arc traced from a launch point across flat ground, with a marker at the midpoint of the flight path.',
-  'plant-cell':
-    'A round plant cell with a nucleus, a large central vacuole, and several green chloroplasts. The cell wall is drawn as a wireframe shell.',
-};
+function modelAltText(model: Lab3DModel, dictionary: Dictionary): string {
+  const t = dictionary.lab3d;
+  if (model === 'water') return t.altWater;
+  if (model === 'projectile') return t.altProjectile;
+  return t.altPlantCell;
+}
 
 function Lab3DPageInner() {
+  const dictionary = useDictionary();
+  const t = dictionary.lab3d;
   const searchParams = useSearchParams();
   const initialModel = searchParams.get('model');
   const reducedMotion = useSyncExternalStore(subscribeReducedMotion, getReducedMotion, () => false);
@@ -62,6 +61,12 @@ function Lab3DPageInner() {
   const [plantError, setPlantError] = useState<string | null>(null);
   const sceneAltTextId = useId();
 
+  const models: Array<{ id: Lab3DModel; label: string; domain: string; modelType: string }> = [
+    { id: 'water', label: dictionary.home.modelLabels.water, domain: dictionary.domains.chemistry, modelType: t.modelTypeIllustrative },
+    { id: 'projectile', label: dictionary.home.modelLabels.projectile, domain: dictionary.domains.physics, modelType: t.modelTypeQuantitative },
+    { id: 'plant-cell', label: dictionary.home.modelLabels['plant-cell'], domain: dictionary.domains.biology, modelType: t.modelTypeIllustrative },
+  ];
+
   useEffect(() => {
     let cancelled = false;
     Promise.resolve(projectileSimulation.create().run({ speed, angle, gravity: 9.81 }))
@@ -74,13 +79,13 @@ function Lab3DPageInner() {
       .catch((err: unknown) => {
         if (!cancelled) {
           setProjectile(null);
-          setProjectileError(err instanceof Error ? err.message : 'Could not compute the trajectory.');
+          setProjectileError(err instanceof Error ? err.message : t.tryDifferent);
         }
       });
     return () => {
       cancelled = true;
     };
-  }, [speed, angle]);
+  }, [speed, angle, t.tryDifferent]);
 
   useEffect(() => {
     let cancelled = false;
@@ -94,13 +99,13 @@ function Lab3DPageInner() {
       .catch((err: unknown) => {
         if (!cancelled) {
           setPlant(null);
-          setPlantError(err instanceof Error ? err.message : 'Could not compute the gas-exchange rates.');
+          setPlantError(err instanceof Error ? err.message : t.tryDifferentSunlight);
         }
       });
     return () => {
       cancelled = true;
     };
-  }, [sunlight]);
+  }, [sunlight, t.tryDifferentSunlight]);
   const selected = models.find((item) => item.id === model) ?? models[0];
 
   return (
@@ -108,16 +113,13 @@ function Lab3DPageInner() {
       <div className="mx-auto max-w-5xl space-y-6">
         <header className="space-y-2">
           <p className="text-xs font-semibold tracking-[0.24em] text-sky-600 uppercase dark:text-sky-300">
-            Interactive 3D Lab
+            {t.eyebrow}
           </p>
-          <h1 className="text-3xl font-bold tracking-tight">Explore science in three dimensions</h1>
-          <p className="max-w-3xl text-sm leading-6 text-zinc-600 dark:text-zinc-300">
-            Rotate and zoom the model, change the available parameters, and compare the visualization with a simple scientific model.
-            Every view includes assumptions and limitations so an illustration is not mistaken for a complete scientific solver.
-          </p>
+          <h1 className="text-3xl font-bold tracking-tight">{t.title}</h1>
+          <p className="max-w-3xl text-sm leading-6 text-zinc-600 dark:text-zinc-300">{t.intro}</p>
         </header>
 
-        <div className="flex flex-wrap gap-2" role="group" aria-label="Choose a science model">
+        <div className="flex flex-wrap gap-2" role="group" aria-label={t.chooseModel}>
           {models.map((item) => (
             <button
               key={item.id}
@@ -135,15 +137,15 @@ function Lab3DPageInner() {
           ))}
         </div>
 
-        <section aria-label={`Interactive 3D ${selected.label} model`} className="overflow-hidden rounded-2xl border border-zinc-200 bg-slate-950 dark:border-zinc-800">
+        <section aria-label={`${t.sceneLabel}: ${selected.label}`} className="overflow-hidden rounded-2xl border border-zinc-200 bg-slate-950 dark:border-zinc-800">
           <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3 text-white">
             <p className="text-sm font-medium">{selected.domain}: {selected.label}</p>
             <span className="rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] font-semibold tracking-wide uppercase">
-              {selected.modelType} model
+              {selected.modelType}
             </span>
           </div>
           <p id={sceneAltTextId} className="sr-only">
-            {MODEL_ALT_TEXT[model]}
+            {modelAltText(model, dictionary)}
           </p>
           <div className="h-[340px] w-full sm:h-[460px]" role="img" aria-describedby={sceneAltTextId}>
             <SceneErrorBoundary>
@@ -153,15 +155,17 @@ function Lab3DPageInner() {
                 reducedMotion={reducedMotion}
                 trajectory={projectile?.trajectory ?? []}
                 sunlight={sunlight}
+                labels={{ launch: t.launch, nucleus: t.nucleus, vacuole: t.vacuole }}
+                fallbackText={t.webglUnavailable}
               />
             </SceneErrorBoundary>
           </div>
           <p className="border-t border-white/10 px-4 py-3 text-xs text-white/60">
             <span aria-hidden="true">
-              Controls: drag to rotate, scroll or pinch to zoom. Motion preference: {reducedMotion ? 'reduced' : 'standard'}.
+              {t.controls} {t.motionPreference}: {reducedMotion ? t.reduced : t.standard}.
             </span>
             <span className="sr-only">
-              Use the controls below the model to change the launch or lighting parameters. Motion preference: {reducedMotion ? 'reduced' : 'standard'}.
+              {t.controlsSr} {t.motionPreference}: {reducedMotion ? t.reduced : t.standard}.
             </span>
           </p>
         </section>
@@ -169,22 +173,19 @@ function Lab3DPageInner() {
         {model === 'water' && (
           <section className="grid gap-4 sm:grid-cols-2">
             <article className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900/40">
-              <h2 className="font-semibold">What you are seeing</h2>
-              <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-300">
-                Water has the chemical formula H₂O. Each molecule contains two hydrogen atoms bonded to one oxygen atom.
-                Spheres represent atoms and cylinders represent bonds.
-              </p>
+              <h2 className="font-semibold">{t.whatSeeing}</h2>
+              <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-300">{t.waterBody}</p>
             </article>
             <article className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900/40">
-              <h2 className="font-semibold">Element key</h2>
+              <h2 className="font-semibold">{t.elementKey}</h2>
               <ul className="mt-3 space-y-3 text-sm text-zinc-700 dark:text-zinc-300">
-                <li className="flex items-center gap-3"><span aria-hidden="true" className="h-4 w-4 rounded-full bg-red-500" /><span><strong>Oxygen (O)</strong> — one atom, shown in red.</span></li>
-                <li className="flex items-center gap-3"><span aria-hidden="true" className="h-4 w-4 rounded-full border border-slate-300 bg-slate-50" /><span><strong>Hydrogen (H)</strong> — two atoms, shown in white.</span></li>
-                <li className="flex items-center gap-3"><span aria-hidden="true" className="h-1 w-5 rounded bg-slate-300" /><span><strong>Bonds</strong> — simplified connectors between atoms.</span></li>
+                <li className="flex items-center gap-3"><span aria-hidden="true" className="h-4 w-4 rounded-full bg-red-500" /><span><strong>{t.oxygenAtom}</strong> — {t.oxygenNote}</span></li>
+                <li className="flex items-center gap-3"><span aria-hidden="true" className="h-4 w-4 rounded-full border border-slate-300 bg-slate-50" /><span><strong>{t.hydrogenAtom}</strong> — {t.hydrogenNote}</span></li>
+                <li className="flex items-center gap-3"><span aria-hidden="true" className="h-1 w-5 rounded bg-slate-300" /><span><strong>{t.bonds}</strong> — {t.bondsNote}</span></li>
               </ul>
             </article>
             <aside className="sm:col-span-2 rounded-xl border border-amber-300/50 bg-amber-50 p-4 text-sm leading-6 text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
-              <strong className="text-amber-900 dark:text-amber-100">Limitations:</strong> atom sizes and distances are not to scale. This scene illustrates connectivity only; it does not calculate electron orbitals, bond energy, or molecular behavior.
+              <strong className="text-amber-900 dark:text-amber-100">{t.limitations}:</strong> {t.waterLimitations}
             </aside>
           </section>
         )}
@@ -192,56 +193,56 @@ function Lab3DPageInner() {
         {model === 'projectile' && (
           <section className="space-y-4 rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900/40">
             <div>
-              <h2 className="font-semibold">Change the launch conditions</h2>
-              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">The trajectory and calculated values update using the existing projectile-motion model.</p>
+              <h2 className="font-semibold">{t.launchConditions}</h2>
+              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">{t.trajectoryNote}</p>
             </div>
             <div className="grid gap-5 sm:grid-cols-2">
               <label className="space-y-2 text-sm">
-                <span className="flex justify-between"><span>Launch speed</span><strong>{speed} m/s</strong></span>
+                <span className="flex justify-between"><span>{t.launchSpeed}</span><strong>{speed} m/s</strong></span>
                 <input className="w-full accent-sky-500" type="range" min="5" max="30" step="1" value={speed} onChange={(event) => setSpeed(Number(event.target.value))} />
               </label>
               <label className="space-y-2 text-sm">
-                <span className="flex justify-between"><span>Launch angle</span><strong>{angle}°</strong></span>
+                <span className="flex justify-between"><span>{t.launchAngle}</span><strong>{angle}°</strong></span>
                 <input className="w-full accent-sky-500" type="range" min="15" max="75" step="1" value={angle} onChange={(event) => setAngle(Number(event.target.value))} />
               </label>
             </div>
             {projectileError ? (
               <p role="alert" className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-900 dark:bg-red-950/50 dark:text-red-200">
-                {projectileError} Try a different speed or angle.
+                {projectileError} {t.tryDifferent}
               </p>
             ) : (
               <div aria-live="polite" className="grid grid-cols-3 gap-3">
-                <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-950/60"><p className="text-xs text-zinc-500">Range</p><p className="mt-1 text-lg font-semibold">{projectile ? `${projectile.range.toFixed(1)} m` : 'Calculating…'}</p></div>
-                <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-950/60"><p className="text-xs text-zinc-500">Peak height</p><p className="mt-1 text-lg font-semibold">{projectile ? `${projectile.maxHeight.toFixed(1)} m` : 'Calculating…'}</p></div>
-                <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-950/60"><p className="text-xs text-zinc-500">Flight time</p><p className="mt-1 text-lg font-semibold">{projectile ? `${projectile.flightTime.toFixed(2)} s` : 'Calculating…'}</p></div>
+                <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-950/60"><p className="text-xs text-zinc-500">{t.range}</p><p className="mt-1 text-lg font-semibold">{projectile ? `${projectile.range.toFixed(1)} m` : t.calculating}</p></div>
+                <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-950/60"><p className="text-xs text-zinc-500">{t.peakHeight}</p><p className="mt-1 text-lg font-semibold">{projectile ? `${projectile.maxHeight.toFixed(1)} m` : t.calculating}</p></div>
+                <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-950/60"><p className="text-xs text-zinc-500">{t.flightTime}</p><p className="mt-1 text-lg font-semibold">{projectile ? `${projectile.flightTime.toFixed(2)} s` : t.calculating}</p></div>
               </div>
             )}
-            <p className="text-xs leading-5 text-zinc-500">Assumptions: no air resistance, constant gravity (9.81 m/s²), and equal launch/landing heights. Educational model only; never use it to aim real projectiles.</p>
+            <p className="text-xs leading-5 text-zinc-500">{t.projectileAssumptions}</p>
           </section>
         )}
 
         {model === 'plant-cell' && (
           <section className="space-y-4 rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900/40">
             <div>
-              <h2 className="font-semibold">Light and plant gas exchange</h2>
-              <p className="mt-1 text-sm leading-6 text-zinc-600 dark:text-zinc-300">The cell drawing is illustrative. Adjust light to see how the existing simplified photosynthesis/respiration model responds.</p>
+              <h2 className="font-semibold">{t.plantHeading}</h2>
+              <p className="mt-1 text-sm leading-6 text-zinc-600 dark:text-zinc-300">{t.plantBody}</p>
             </div>
             <label className="block space-y-2 text-sm">
-              <span className="flex justify-between"><span>Relative sunlight</span><strong>{Math.round(sunlight * 100)}%</strong></span>
+              <span className="flex justify-between"><span>{t.sunlight}</span><strong>{Math.round(sunlight * 100)}%</strong></span>
               <input className="w-full accent-lime-500" type="range" min="0" max="1" step="0.05" value={sunlight} onChange={(event) => setSunlight(Number(event.target.value))} />
             </label>
             {plantError ? (
               <p role="alert" className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-900 dark:bg-red-950/50 dark:text-red-200">
-                {plantError} Try a different sunlight level.
+                {plantError} {t.tryDifferentSunlight}
               </p>
             ) : (
               <div aria-live="polite" className="grid gap-3 sm:grid-cols-3">
-                <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-950/60"><p className="text-xs text-zinc-500">Photosynthesis rate</p><p className="mt-1 text-lg font-semibold">{plant ? plant.photosynthesisRate.toFixed(1) : 'Calculating…'}</p></div>
-                <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-950/60"><p className="text-xs text-zinc-500">Respiration rate</p><p className="mt-1 text-lg font-semibold">{plant ? plant.respirationRate.toFixed(1) : 'Calculating…'}</p></div>
-                <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-950/60"><p className="text-xs text-zinc-500">Net rate</p><p className="mt-1 text-lg font-semibold">{plant ? plant.netRate.toFixed(1) : 'Calculating…'}</p></div>
+                <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-950/60"><p className="text-xs text-zinc-500">{t.photosynthesisRate}</p><p className="mt-1 text-lg font-semibold">{plant ? plant.photosynthesisRate.toFixed(1) : t.calculating}</p></div>
+                <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-950/60"><p className="text-xs text-zinc-500">{t.respirationRate}</p><p className="mt-1 text-lg font-semibold">{plant ? plant.respirationRate.toFixed(1) : t.calculating}</p></div>
+                <div className="rounded-lg bg-zinc-50 p-3 dark:bg-zinc-950/60"><p className="text-xs text-zinc-500">{t.netRate}</p><p className="mt-1 text-lg font-semibold">{plant ? plant.netRate.toFixed(1) : t.calculating}</p></div>
               </div>
             )}
-            <p className="text-xs leading-5 text-zinc-500">Model limits: heuristic relative rates, not calibrated physiological measurements. CO₂, water, and leaf area are held constant.</p>
+            <p className="text-xs leading-5 text-zinc-500">{t.plantLimits}</p>
           </section>
         )}
       </div>
@@ -249,15 +250,18 @@ function Lab3DPageInner() {
   );
 }
 
+function Lab3DLoading() {
+  const dictionary = useDictionary();
+  return (
+    <div className="flex h-full w-full items-center justify-center py-16 text-sm text-zinc-500" role="status">
+      {dictionary.lab3d.loadingLab}
+    </div>
+  );
+}
+
 export default function Lab3DPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex h-full w-full items-center justify-center py-16 text-sm text-zinc-500" role="status">
-          Loading the 3D lab…
-        </div>
-      }
-    >
+    <Suspense fallback={<Lab3DLoading />}>
       <Lab3DPageInner />
     </Suspense>
   );

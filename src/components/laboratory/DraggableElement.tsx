@@ -4,6 +4,7 @@ import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { motion } from 'framer-motion';
 
+import { useDictionary } from '@/i18n/useDictionary';
 import type { Element, ElementType } from '../../types/game';
 
 const TYPE_STYLES: Record<ElementType, { ring: string; badge: string; glow: string }> = {
@@ -35,6 +36,7 @@ interface ElementCardProps {
 }
 
 export function ElementCard({ element, onRemove }: ElementCardProps) {
+  const dictionary = useDictionary();
   const styles = TYPE_STYLES[element.type];
 
   return (
@@ -55,7 +57,7 @@ export function ElementCard({ element, onRemove }: ElementCardProps) {
       <span
         className={`relative w-fit rounded-full px-2 py-0.5 text-[10px] font-medium tracking-wide uppercase ring-1 ${styles.badge}`}
       >
-        {element.type}
+        {dictionary.elementTypes[element.type] ?? element.type}
       </span>
       <span className="relative text-[11px] leading-snug text-white/70">{element.description}</span>
 
@@ -66,7 +68,7 @@ export function ElementCard({ element, onRemove }: ElementCardProps) {
           onPointerDown={(event) => event.stopPropagation()}
           className="relative mt-1 w-full rounded-lg border border-white/15 bg-white/5 py-1 text-[11px] font-medium text-white/80 transition hover:border-white/30 hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none"
         >
-          Remove
+          {dictionary.common.remove}
         </button>
       ) : null}
     </motion.div>

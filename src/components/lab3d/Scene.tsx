@@ -76,7 +76,7 @@ function WaterMolecule() {
   );
 }
 
-function ProjectilePath({ trajectory }: { trajectory: TrajectoryPoint[] }) {
+function ProjectilePath({ trajectory, label }: { trajectory: TrajectoryPoint[]; label: string }) {
   const points = useMemo(() => {
     const maxX = trajectory[trajectory.length - 1]?.x ?? 1;
     const scale = 5 / Math.max(maxX, 1);
@@ -97,13 +97,13 @@ function ProjectilePath({ trajectory }: { trajectory: TrajectoryPoint[] }) {
         <meshStandardMaterial color="#fbbf24" emissive="#92400e" emissiveIntensity={0.35} />
       </mesh>
       <Html position={[0, -0.4, 0]} center distanceFactor={8} style={{ pointerEvents: 'none' }}>
-        <span className="whitespace-nowrap rounded bg-slate-950/80 px-2 py-1 text-xs text-white">Launch</span>
+        <span className="whitespace-nowrap rounded bg-slate-950/80 px-2 py-1 text-xs text-white">{label}</span>
       </Html>
     </group>
   );
 }
 
-function PlantCell({ sunlight }: { sunlight: number }) {
+function PlantCell({ sunlight, labels }: { sunlight: number; labels: { nucleus: string; vacuole: string } }) {
   const chloroplasts: Point3[] = [
     [-0.72, 0.55, 0.2],
     [0.65, 0.52, -0.25],
@@ -142,10 +142,10 @@ function PlantCell({ sunlight }: { sunlight: number }) {
         </mesh>
       ))}
       <Html position={[-0.22, 0.65, 0.25]} center distanceFactor={8} style={{ pointerEvents: 'none' }}>
-        <span className="rounded bg-slate-950/80 px-2 py-0.5 text-xs text-white">Nucleus</span>
+        <span className="rounded bg-slate-950/80 px-2 py-0.5 text-xs text-white">{labels.nucleus}</span>
       </Html>
       <Html position={[0.45, -0.9, 0.1]} center distanceFactor={8} style={{ pointerEvents: 'none' }}>
-        <span className="rounded bg-slate-950/80 px-2 py-0.5 text-xs text-white">Vacuole</span>
+        <span className="rounded bg-slate-950/80 px-2 py-0.5 text-xs text-white">{labels.vacuole}</span>
       </Html>
     </group>
   );
@@ -156,25 +156,31 @@ export default function Scene({
   reducedMotion = false,
   trajectory = [],
   sunlight = 0.8,
+  labels,
+  fallbackText,
 }: {
   model?: Lab3DModel;
   reducedMotion?: boolean;
   trajectory?: TrajectoryPoint[];
   sunlight?: number;
+  labels?: { launch: string; nucleus: string; vacuole: string };
+  fallbackText?: string;
 }) {
+  const sceneLabels = labels ?? { launch: 'Launch', nucleus: 'Nucleus', vacuole: 'Vacuole' };
+
   return (
     <Canvas
       camera={{ position: [3.2, 2.4, 5.2], fov: 42 }}
       dpr={[1, 1.5]}
-      fallback={<div className="flex h-full items-center justify-center p-6 text-center text-sm text-white/70">WebGL is unavailable in this browser. Use the explanation and model notes below to continue learning.</div>}
+      fallback={<div className="flex h-full items-center justify-center p-6 text-center text-sm text-white/70">{fallbackText ?? 'WebGL is unavailable in this browser. Use the explanation and model notes below to continue learning.'}</div>}
     >
       <color attach="background" args={['#07111f']} />
       <ambientLight intensity={0.8 + sunlight * 0.3} />
       <directionalLight position={[4, 5, 5]} intensity={1.2 + sunlight * 0.8} />
       <pointLight position={[-4, -2, -3]} intensity={0.7} color="#38bdf8" />
       {model === 'water' && <WaterMolecule />}
-      {model === 'projectile' && trajectory.length > 1 && <ProjectilePath trajectory={trajectory} />}
-      {model === 'plant-cell' && <PlantCell sunlight={sunlight} />}
+      {model === 'projectile' && trajectory.length > 1 && <ProjectilePath trajectory={trajectory} label={sceneLabels.launch} />}
+      {model === 'plant-cell' && <PlantCell sunlight={sunlight} labels={sceneLabels} />}
       <OrbitControls
         makeDefault
         enableDamping={!reducedMotion}

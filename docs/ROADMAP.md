@@ -60,10 +60,11 @@ Make the existing language toggle real rather than cosmetic.
 - [x] Typed Vietnamese/English UI dictionary (`src/i18n/dict.ts`) with `vi` as the default and the choice persisted in `ess:locale`.
 - [x] Vietnamese editions of all four authored lessons and the greenhouse challenge, preserving ids, quiz option ids, and correct answers.
 - [x] Localized home, Explore, domain cards, lesson journey, self-check, challenge pages, navigation, in-app headers, and the simulation runner.
-- [x] Automation: dictionary key parity, content structural parity, and EN/VI render tests.
-- [ ] Localize catalog data (element/reaction names, descriptions, safety notes), admin forms, profile details, static route metadata, and 3D scene labels.
+- [x] Localized the elements and reactions catalogs, profile page, chemistry lab bench and outcome dialog, favorites controls, and the 3D lab (labels, controls, and WebGL fallback).
+- [x] Automation: dictionary key parity, content structural parity, EN/VI render tests for the catalog and profile views, and learner-surface coverage.
+- [ ] Localize catalog data (element/reaction names, descriptions, safety notes), admin forms, and static route metadata.
 
-**Exit criteria (current slice):** the learner journey from Home through Explore, lesson, self-check, simulation, and challenge works in both languages. Achieved; the remaining English-only surfaces are listed above.
+**Exit criteria (current slice):** every learner-facing screen works in both languages, including catalog browsing, profile, chemistry lab, and the 3D lab. Achieved; the remaining English-only surfaces are catalog data values, admin forms, and route metadata.
 
 ## Defer until evidence supports it
 

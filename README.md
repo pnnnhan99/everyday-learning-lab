@@ -47,7 +47,9 @@ The interface ships in Vietnamese (`vi`, the default) and English (`en`). The he
 
 - UI copy lives in one typed dictionary, `src/i18n/dict.ts`. Adding an English key without a Vietnamese translation fails the type check.
 - The four authored lessons and the greenhouse challenge have Vietnamese editions in `src/learning/examples/vi.ts`. They keep the same ids, section/application/assessment ids, quiz option ids, and correct answers as the English originals; `__tests__/learning/localization.test.ts` enforces that parity.
-- Catalog data (element and reaction names, descriptions, and safety notes from the database), admin forms, profile details, static route metadata, and 3D scene labels are still English-only. Server components cannot switch language without a cookie or route segment, so those surfaces are intentionally left for a later slice.
+- Every learner-facing surface is localized: home, Explore, lessons, self-checks, challenges, the elements and reactions catalogs, the profile page, the chemistry lab bench and outcome dialog, and the 3D lab (including scene labels and fallback text). Dates in the mix history follow the active locale.
+- Server-rendered catalog pages (`/elements`, `/reactions`) read data on the server and pass it to client views so the language toggle can re-render them; see `src/components/elements/ElementsView.tsx` and `src/components/reactions/ReactionsView.tsx`.
+- Still English-only: catalog data values from the database (element/reaction names, descriptions, and safety notes), admin forms, and static route metadata. Translating catalog data needs a content model with per-locale fields, and route metadata needs cookie- or segment-based locale resolution; both are intentionally left for a later slice.
 
 - A Node.js version supported by the installed Next.js version.
 - npm.
