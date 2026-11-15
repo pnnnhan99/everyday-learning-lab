@@ -3,8 +3,9 @@
 import Link from 'next/link';
 import { FlaskConical, Search } from 'lucide-react';
 
-import { useDictionary } from '@/i18n/useDictionary';
-import type { EffectType, Reaction } from '@/types/game';
+import { useDictionary, useLocale } from '@/i18n/useDictionary';
+import { localizeElement, localizeReaction } from '@/i18n/catalog';
+import type { EffectType, Element, Reaction } from '@/types/game';
 
 const EFFECT_FILTERS: Array<'all' | EffectType> = ['all', 'toxic', 'informational'];
 
@@ -26,8 +27,7 @@ const EFFECT_BADGES: Record<EffectType, string> = {
 
 function ReactionCard({ reaction, names }: { reaction: Reaction; names: Record<string, string> }) {
   const dictionary = useDictionary();
-  const badge = EFFECT_BADGES[reaction.effectType];
-  const effectLabel =
+  const badge = EFFECT_BADGES[reaction.effectType];  const effectLabel =
     reaction.effectType === 'toxic' ? dictionary.common.hazard : dictionary.common.model;
   const first = names[reaction.element1Id] ?? reaction.element1Id;
   const second = names[reaction.element2Id] ?? reaction.element2Id;
@@ -112,7 +112,7 @@ interface ReactionsViewProps {
   currentPage: number;
   totalPages: number;
   hasFilters: boolean;
-  names: Record<string, string>;
+  elements: Element[];
 }
 
 export default function ReactionsView({
@@ -123,10 +123,14 @@ export default function ReactionsView({
   currentPage,
   totalPages,
   hasFilters,
-  names,
+  elements,
 }: ReactionsViewProps) {
   const dictionary = useDictionary();
+  const locale = useLocale();
   const t = dictionary.reactions;
+  const names = Object.fromEntries(
+    elements.map((element) => [element.id, localizeElement(element, locale).name]),
+  );
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-6">
@@ -191,10 +195,10 @@ export default function ReactionsView({
           </div>
         ) : (
           <div className="grid gap-3 lg:grid-cols-2">
-            {visible.map((reaction) => (
+            {visible.map((raw) => (
               <ReactionCard
-                key={`${reaction.element1Id}-${reaction.element2Id}`}
-                reaction={reaction}
+                key={`${raw.element1Id}-${raw.element2Id}`}
+                reaction={localizeReaction(raw, locale)}
                 names={names}
               />
             ))}

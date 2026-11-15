@@ -133,6 +133,7 @@ describe('seeded element shape', () => {
     const response = await GET(makeRequest('http://localhost/api/elements/vinegar', 'GET'), makeContext('vinegar'))
     const json = await response.json()
     const element: Element = json.data
-    expect(Object.keys(element).sort()).toEqual(['description', 'icon', 'id', 'name', 'type'])
+    expect(Object.keys(element).sort()).toEqual(['description', 'icon', 'id', 'name', 'type', 'vi'])
+    expect(element.vi?.name).toBe('Giấm')
   })
 })

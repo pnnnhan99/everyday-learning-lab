@@ -4,7 +4,8 @@ import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { motion } from 'framer-motion';
 
-import { useDictionary } from '@/i18n/useDictionary';
+import { useDictionary, useLocale } from '@/i18n/useDictionary';
+import { localizeElement } from '@/i18n/catalog';
 import type { Element, ElementType } from '../../types/game';
 
 const TYPE_STYLES: Record<ElementType, { ring: string; badge: string; glow: string }> = {
@@ -35,8 +36,10 @@ interface ElementCardProps {
   onRemove?: (elementId: string) => void;
 }
 
-export function ElementCard({ element, onRemove }: ElementCardProps) {
+export function ElementCard({ element: raw, onRemove }: ElementCardProps) {
   const dictionary = useDictionary();
+  const locale = useLocale();
+  const element = localizeElement(raw, locale);
   const styles = TYPE_STYLES[element.type];
 
   return (

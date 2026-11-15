@@ -61,10 +61,11 @@ Make the existing language toggle real rather than cosmetic.
 - [x] Vietnamese editions of all four authored lessons and the greenhouse challenge, preserving ids, quiz option ids, and correct answers.
 - [x] Localized home, Explore, domain cards, lesson journey, self-check, challenge pages, navigation, in-app headers, and the simulation runner.
 - [x] Localized the elements and reactions catalogs, profile page, chemistry lab bench and outcome dialog, favorites controls, and the 3D lab (labels, controls, and WebGL fallback).
-- [x] Automation: dictionary key parity, content structural parity, EN/VI render tests for the catalog and profile views, and learner-surface coverage.
-- [ ] Localize catalog data (element/reaction names, descriptions, safety notes), admin forms, and static route metadata.
+- [x] Vietnamese editions for catalog content: element names/descriptions and reaction titles, observations, explanations, assumptions, and safety guidance, with English fallback for untranslated records and a migration for existing databases.
+- [x] Automation: dictionary key parity, content structural parity, EN/VI render tests for the catalog and profile views, catalog translation completeness, and learner-surface coverage.
+- [ ] Localize admin forms (translation editing) and static route metadata.
 
-**Exit criteria (current slice):** every learner-facing screen works in both languages, including catalog browsing, profile, chemistry lab, and the 3D lab. Achieved; the remaining English-only surfaces are catalog data values, admin forms, and route metadata.
+**Exit criteria (current slice):** every learner-facing screen and all seeded catalog content work in both languages. Achieved; admin translation editing and route metadata remain.
 
 ## Defer until evidence supports it
 

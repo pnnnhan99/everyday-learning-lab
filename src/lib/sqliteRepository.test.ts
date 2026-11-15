@@ -21,6 +21,7 @@ describe('SqliteElementRepository', () => {
     type: 'chemical',
     ph: 7,
     safetyLevel: 1,
+    vi: { name: 'Nước', description: 'H₂O' },
   }
 
   describe('getAll', () => {
@@ -39,6 +40,7 @@ describe('SqliteElementRepository', () => {
       expect(result).not.toBeNull()
       expect(result?.name).toBe('Lemon Juice')
       expect(result?.type).toBe('acid')
+      expect(result?.vi?.name).toBe('Nước chanh')
     })
 
     it('returns null for a non-existent id', async () => {
@@ -53,6 +55,12 @@ describe('SqliteElementRepository', () => {
       expect(result.id).toBe('water')
       expect(result.createdAt).toBeDefined()
       expect(result.updatedAt).toBeDefined()
+    })
+
+    it('round-trips the Vietnamese edition', async () => {
+      await elementRepo.create(sampleElement)
+      const stored = await elementRepo.getById('water')
+      expect(stored?.vi).toEqual(sampleElement.vi)
     })
 
     it('throws when the id already exists', async () => {
@@ -125,6 +133,13 @@ describe('SqliteReactionRepository', () => {
     references: [
       { title: 'Ref', publisher: 'Pub', url: 'https://example.com/ref' },
     ],
+    vi: {
+      resultTitle: 'Khí clo',
+      observation: 'Có thể giải phóng khí clo',
+      explanation: 'Axit hóa nước tẩy có thể giải phóng khí clo',
+      assumptions: ['Công thức khác nhau', 'Điều kiện khác nhau'],
+      safetyGuidance: 'Không trộn thuốc tẩy với giấm',
+    },
   }
 
   describe('getAll', () => {
@@ -163,6 +178,12 @@ describe('SqliteReactionRepository', () => {
       expect(result?.references).toHaveLength(1)
       expect(result?.references[0].title).toBe('No, vinegar is not always safe')
     })
+
+    it('reads the seeded Vietnamese edition', async () => {
+      const result = await reactionRepo.findByPair('bleach', 'vinegar')
+      expect(result?.vi?.resultTitle).toBe('Khí clo')
+      expect(result?.vi?.assumptions).toHaveLength(2)
+    })
   })
 
   describe('create', () => {
@@ -177,6 +198,18 @@ describe('SqliteReactionRepository', () => {
       expect(result.resultTitle).toBe('New Reaction')
       expect(result.createdAt).toBeDefined()
       expect(result.updatedAt).toBeDefined()
+    })
+
+    it('round-trips the Vietnamese edition', async () => {
+      const reaction: Reaction = {
+        ...sampleReaction,
+        element1Id: 'lemon',
+        element2Id: 'bleach',
+        resultTitle: 'New Reaction',
+      }
+      await reactionRepo.create(reaction)
+      const stored = await reactionRepo.findByPair('lemon', 'bleach')
+      expect(stored?.vi).toEqual(sampleReaction.vi)
     })
 
     it('throws when a reaction pair already exists (same order)', async () => {

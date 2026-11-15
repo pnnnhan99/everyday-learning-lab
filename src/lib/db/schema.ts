@@ -11,6 +11,7 @@ export const elements = sqliteTable('elements', {
   imageUrl: text('imageUrl'),
   createdAt: text('createdAt'),
   updatedAt: text('updatedAt'),
+  vi: text('vi'),
 });
 
 export const scientificReferences = sqliteTable('scientificReferences', {
@@ -32,4 +33,5 @@ export const reactions = sqliteTable('reactions', {
   reviewStatus: text('reviewStatus').notNull(),
   createdAt: text('createdAt'),
   updatedAt: text('updatedAt'),
+  vi: text('vi'),
 });

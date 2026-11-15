@@ -16,7 +16,8 @@ CREATE TABLE IF NOT EXISTS elements (
   safety_level INTEGER,
   image_url TEXT,
   created_at TEXT,
-  updated_at TEXT
+  updated_at TEXT,
+  vi TEXT
 );
 
 CREATE TABLE IF NOT EXISTS reactions (
@@ -33,6 +34,7 @@ CREATE TABLE IF NOT EXISTS reactions (
   created_at TEXT,
   updated_at TEXT,
   normalized_pair TEXT NOT NULL,
+  vi TEXT,
   PRIMARY KEY (normalized_pair),
   FOREIGN KEY (element1_id) REFERENCES elements(id),
   FOREIGN KEY (element2_id) REFERENCES elements(id)
@@ -44,18 +46,18 @@ CREATE INDEX IF NOT EXISTS idx_reactions_e2 ON reactions(element2_id);
 
 const INSERT_ELEMENT_SQL = `
   INSERT OR IGNORE INTO elements
-    (id, name, icon, description, type, ph, safety_level, image_url, created_at, updated_at)
+    (id, name, icon, description, type, ph, safety_level, image_url, created_at, updated_at, vi)
   VALUES
-    (@id, @name, @icon, @description, @type, @ph, @safety_level, @image_url, @created_at, @updated_at)
+    (@id, @name, @icon, @description, @type, @ph, @safety_level, @image_url, @created_at, @updated_at, @vi)
 `;
 
 const INSERT_REACTION_SQL = `
     INSERT OR IGNORE INTO reactions
       (element1_id, element2_id, result_title, observation, explanation,
-       effect_type, review_status, safety_guidance, assumptions, "references", created_at, updated_at, normalized_pair)
+       effect_type, review_status, safety_guidance, assumptions, "references", created_at, updated_at, normalized_pair, vi)
     VALUES
       (@element1_id, @element2_id, @result_title, @observation, @explanation,
-       @effect_type, @review_status, @safety_guidance, @assumptions, @references, @created_at, @updated_at, @normalized_pair)
+       @effect_type, @review_status, @safety_guidance, @assumptions, @references, @created_at, @updated_at, @normalized_pair, @vi)
 `;
 
 function elementToRow(el: Element): Record<string, unknown> {
@@ -70,6 +72,7 @@ function elementToRow(el: Element): Record<string, unknown> {
     image_url: el.imageUrl ?? null,
     created_at: el.createdAt ?? null,
     updated_at: el.updatedAt ?? null,
+    vi: el.vi ? JSON.stringify(el.vi) : null,
   };
 }
 
@@ -88,11 +91,22 @@ function reactionToRow(r: Reaction): Record<string, unknown> {
     created_at: r.createdAt ?? null,
     updated_at: r.updatedAt ?? null,
     normalized_pair: normalizePair(r.element1Id, r.element2Id),
+    vi: r.vi ? JSON.stringify(r.vi) : null,
   };
+}
+
+function ensureColumn(db: Database.Database, table: 'elements' | 'reactions', column: string, definition: string): void {
+  const columns = db.prepare(`PRAGMA table_info(${table})`).all() as Array<{ name: string }>;
+  if (!columns.some((entry) => entry.name === column)) {
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+  }
 }
 
 export function createSchema(db: Database.Database): void {
   db.exec(SCHEMA_SQL);
+  // Existing databases predate the Vietnamese edition column, so add it in place.
+  ensureColumn(db, 'elements', 'vi', 'TEXT');
+  ensureColumn(db, 'reactions', 'vi', 'TEXT');
 }
 
 export function seedDatabase(db: Database.Database): void {
@@ -103,6 +117,30 @@ export function seedDatabase(db: Database.Database): void {
     for (const r of rxs) insertReaction.run(reactionToRow(r));
   });
   seed(seedElements, seedReactions);
+}
+
+/**
+ * Fills the Vietnamese edition for seed records created before that column
+ * existed. Maintainer-authored rows and rows that already have a translation
+ * are left untouched.
+ */
+export function backfillSeedTranslations(db: Database.Database): void {
+  const updateElement = db.prepare('UPDATE elements SET vi = @vi WHERE id = @id AND vi IS NULL');
+  const updateReaction = db.prepare('UPDATE reactions SET vi = @vi WHERE normalized_pair = @pair AND vi IS NULL');
+  const backfill = db.transaction((els: Element[], rxs: Reaction[]) => {
+    for (const el of els) {
+      if (el.vi) updateElement.run({ id: el.id, vi: JSON.stringify(el.vi) });
+    }
+    for (const r of rxs) {
+      if (r.vi) {
+        updateReaction.run({
+          pair: normalizePair(r.element1Id, r.element2Id),
+          vi: JSON.stringify(r.vi),
+        });
+      }
+    }
+  });
+  backfill(seedElements, seedReactions);
 }
 
 export function countElements(db: Database.Database): number {
@@ -121,6 +159,7 @@ export function runMigration(dbPathArg?: string): Database.Database {
     if (countElements(db) === 0) {
       seedDatabase(db);
     }
+    backfillSeedTranslations(db);
     return db;
   } catch {
     db.close();

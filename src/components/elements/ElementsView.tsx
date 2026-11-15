@@ -5,7 +5,8 @@ import { PackageOpen, Search } from 'lucide-react';
 
 import FavoriteButton from '@/components/lab/FavoriteButton';
 import { elementTypeIcon } from '@/components/lab/elementIcons';
-import { useDictionary } from '@/i18n/useDictionary';
+import { useDictionary, useLocale } from '@/i18n/useDictionary';
+import { localizeElement } from '@/i18n/catalog';
 import type { Element, ElementType } from '@/types/game';
 
 const TYPE_FILTERS: Array<'all' | ElementType> = ['all', 'acid', 'base', 'food', 'chemical'];
@@ -39,6 +40,7 @@ export default function ElementsView({
   hasFilters,
 }: ElementsViewProps) {
   const dictionary = useDictionary();
+  const locale = useLocale();
   const t = dictionary.elements;
 
   return (
@@ -100,7 +102,8 @@ export default function ElementsView({
           </div>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {visible.map((el) => {
+            {visible.map((raw) => {
+              const el = localizeElement(raw, locale);
               const Icon = elementTypeIcon[el.type] ?? elementTypeIcon.chemical;
               return (
                 <article key={el.id} className="flex flex-col rounded-2xl border border-zinc-200 p-4 dark:border-zinc-800">

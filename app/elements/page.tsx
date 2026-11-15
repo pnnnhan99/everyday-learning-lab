@@ -26,7 +26,9 @@ export default async function ElementsPage({
       query === '' ||
       el.name.toLowerCase().includes(query) ||
       el.id.toLowerCase().includes(query) ||
-      el.description.toLowerCase().includes(query);
+      el.description.toLowerCase().includes(query) ||
+      (el.vi?.name.toLowerCase().includes(query) ?? false) ||
+      (el.vi?.description.toLowerCase().includes(query) ?? false);
     const matchesType = activeType === 'all' || el.type === activeType;
     return matchesQuery && matchesType;
   });

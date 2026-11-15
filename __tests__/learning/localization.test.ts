@@ -10,6 +10,8 @@ import {
 import { challenges, getLessonById, lessons } from '@/learning/catalog';
 import { dictionary, getDictionary } from '@/i18n/dict';
 import type { Locale } from '@/i18n/dict';
+import { localizeElement, localizeReaction } from '@/i18n/catalog';
+import { elements, reactions } from '@/data/mockReactions';
 import type { Challenge, Lesson } from '@/learning/types';
 
 const localizedLessons: Record<string, Lesson> = {
@@ -131,5 +133,55 @@ describe('localized learning content', () => {
     expect(vi.steps).toHaveLength(en!.steps.length);
     expect(vi.evidence).toHaveLength(en!.evidence.length);
     expect(vi.requiredConcepts).toHaveLength(en!.requiredConcepts.length);
+  });
+});
+
+describe('localized catalog data', () => {
+  it('ships a complete Vietnamese edition for every seeded element', () => {
+    expect(elements.length).toBeGreaterThan(0);
+    for (const element of elements) {
+      expect(element.vi, `${element.id} is missing a Vietnamese edition`).toBeDefined();
+      expect(element.vi!.name.trim()).not.toBe('');
+      expect(element.vi!.description.trim()).not.toBe('');
+    }
+  });
+
+  it('ships a complete Vietnamese edition for every seeded reaction', () => {
+    expect(reactions.length).toBeGreaterThan(0);
+    for (const reaction of reactions) {
+      expect(reaction.vi, `${reaction.resultTitle} is missing a Vietnamese edition`).toBeDefined();
+      expect(reaction.vi!.resultTitle.trim()).not.toBe('');
+      expect(reaction.vi!.observation.trim()).not.toBe('');
+      expect(reaction.vi!.explanation.trim()).not.toBe('');
+      expect(reaction.vi!.safetyGuidance.trim()).not.toBe('');
+      expect(reaction.vi!.assumptions).toHaveLength(reaction.assumptions.length);
+      expect(reaction.vi!.assumptions.every((assumption) => assumption.trim() !== '')).toBe(true);
+    }
+  });
+
+  it('resolves element text for the active locale and falls back to English', () => {
+    const [element] = elements;
+
+    expect(localizeElement(element, 'en')).toBe(element);
+    expect(localizeElement(element, 'vi').name).toBe(element.vi!.name);
+    expect(localizeElement(element, 'vi').description).toBe(element.vi!.description);
+
+    const untranslated = { ...element, vi: undefined };
+    expect(localizeElement(untranslated, 'vi').name).toBe(element.name);
+  });
+
+  it('resolves reaction text for the active locale and falls back to English', () => {
+    const [reaction] = reactions;
+
+    expect(localizeReaction(reaction, 'en')).toBe(reaction);
+    const vi = localizeReaction(reaction, 'vi');
+    expect(vi.resultTitle).toBe(reaction.vi!.resultTitle);
+    expect(vi.observation).toBe(reaction.vi!.observation);
+    expect(vi.explanation).toBe(reaction.vi!.explanation);
+    expect(vi.safetyGuidance).toBe(reaction.vi!.safetyGuidance);
+    expect(vi.assumptions).toEqual(reaction.vi!.assumptions);
+
+    const untranslated = { ...reaction, vi: undefined };
+    expect(localizeReaction(untranslated, 'vi').resultTitle).toBe(reaction.resultTitle);
   });
 });
