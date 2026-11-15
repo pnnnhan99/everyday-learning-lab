@@ -68,6 +68,25 @@ describe('Learning content validation', () => {
       expect(result.ok).toBe(false);
       expect(result.error).toContain('LearningContent.domain must be one of');
     });
+
+    it('rejects blank required text and malformed string arrays', () => {
+      const base = {
+        id: 'lc1',
+        title: 'Test Content',
+        description: 'A test content',
+        domain: 'chemistry',
+        difficulty: 'beginner',
+        language: 'en',
+        prerequisites: [],
+        references: []
+      };
+
+      expect(validateLearningContent({ ...base, title: '  ' }).ok).toBe(false);
+      expect(validateLearningContent({ ...base, description: '' }).ok).toBe(false);
+      expect(validateLearningContent({ ...base, language: '' }).ok).toBe(false);
+      expect(validateLearningContent({ ...base, prerequisites: ['ok', ''] }).ok).toBe(false);
+      expect(validateLearningContent({ ...base, references: 'not-an-array' }).ok).toBe(false);
+    });
   });
 
   describe('validateLesson', () => {
@@ -118,6 +137,66 @@ describe('Learning content validation', () => {
         expect(result.value.sections[0].applications.length).toBe(1);
         expect(result.value.sections[0].assessments.length).toBe(1);
       }
+    });
+
+    const validLesson = {
+      id: 'lesson1',
+      title: 'Test Lesson',
+      description: 'A test lesson',
+      domain: 'chemistry',
+      difficulty: 'intermediate',
+      language: 'en',
+      prerequisites: [],
+      references: [],
+      sections: [
+        {
+          id: 'sec1',
+          title: 'Section 1',
+          content: 'Content 1',
+          objectives: ['obj1'],
+          applications: [],
+          assessments: []
+        }
+      ]
+    };
+
+    it('rejects empty sections and duplicate section ids', () => {
+      expect(validateLesson({ ...validLesson, sections: [] }).ok).toBe(false);
+      const duplicate = {
+        ...validLesson,
+        sections: [validLesson.sections[0], { ...validLesson.sections[0] }]
+      };
+      const result = validateLesson(duplicate);
+      expect(result.ok).toBe(false);
+      if (!result.ok) expect(result.error).toContain('duplicate section id');
+    });
+
+    it('validates nested applications and assessments', () => {
+      const missingResource = {
+        ...validLesson,
+        sections: [
+          {
+            ...validLesson.sections[0],
+            applications: [
+              { id: 'app1', title: 'App', description: 'Desc', type: 'simulation', resourceId: '' }
+            ]
+          }
+        ]
+      };
+      expect(validateLesson(missingResource).ok).toBe(false);
+
+      const invalidAssessment = {
+        ...validLesson,
+        sections: [
+          {
+            ...validLesson.sections[0],
+            assessments: [
+              { id: 'ass1', title: '', description: 'Desc', type: 'exercise', itemIds: [] }
+            ]
+          }
+        ]
+      };
+      expect(validateLesson(invalidAssessment).ok).toBe(false);
     });
   });
 

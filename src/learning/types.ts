@@ -127,14 +127,49 @@ function asRecord(input: unknown): UnknownRecord | null {
     : null;
 }
 
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+function validateStringArray(value: unknown, label: string, allowEmpty = true): string | null {
+  if (!Array.isArray(value)) return `${label} must be an array`;
+  if (!allowEmpty && value.length === 0) return `${label} must not be empty`;
+  for (const entry of value) {
+    if (!isNonEmptyString(entry)) return `${label} must contain only non-empty strings`;
+  }
+  return null;
+}
+
+function findDuplicate(ids: string[]): string | null {
+  const seen = new Set<string>();
+  for (const id of ids) {
+    if (seen.has(id)) return id;
+    seen.add(id);
+  }
+  return null;
+}
+
 export function validateLearningContent(input: unknown): ValidationResult<LearningContent> {
   const record = asRecord(input);
   if (!record) {
     return { ok: false, error: 'Input must be an object' };
   }
-  if (typeof record.id !== 'string' || record.id.length === 0) {
-    return { ok: false, error: 'LearningContent.id is required and must be a string' };
+  if (!isNonEmptyString(record.id)) {
+    return { ok: false, error: 'LearningContent.id is required and must be a non-empty string' };
   }
+  if (!isNonEmptyString(record.title)) {
+    return { ok: false, error: 'LearningContent.title is required and must be a non-empty string' };
+  }
+  if (!isNonEmptyString(record.description)) {
+    return { ok: false, error: 'LearningContent.description is required and must be a non-empty string' };
+  }
+  if (!isNonEmptyString(record.language)) {
+    return { ok: false, error: 'LearningContent.language is required and must be a non-empty string' };
+  }
+  const prerequisitesError = validateStringArray(record.prerequisites, 'LearningContent.prerequisites');
+  if (prerequisitesError) return { ok: false, error: prerequisitesError };
+  const referencesError = validateStringArray(record.references, 'LearningContent.references');
+  if (referencesError) return { ok: false, error: referencesError };
   if (!VALID_DOMAINS.includes(record.domain as (typeof VALID_DOMAINS)[number])) {
     return {
       ok: false,
@@ -164,8 +199,17 @@ export function validateApplication(input: unknown): ValidationResult<Applicatio
   if (!record) {
     return { ok: false, error: 'Input must be an object' };
   }
-  if (typeof record.id !== 'string' || record.id.length === 0) {
-    return { ok: false, error: 'Application.id is required and must be a string' };
+  if (!isNonEmptyString(record.id)) {
+    return { ok: false, error: 'Application.id is required and must be a non-empty string' };
+  }
+  if (!isNonEmptyString(record.title)) {
+    return { ok: false, error: 'Application.title is required and must be a non-empty string' };
+  }
+  if (!isNonEmptyString(record.description)) {
+    return { ok: false, error: 'Application.description is required and must be a non-empty string' };
+  }
+  if (!isNonEmptyString(record.resourceId)) {
+    return { ok: false, error: 'Application.resourceId is required and must be a non-empty string' };
   }
   if (!VALID_APP_TYPES.includes(record.type as (typeof VALID_APP_TYPES)[number])) {
     return {
@@ -181,8 +225,14 @@ export function validateAssessment(input: unknown): ValidationResult<Assessment>
   if (!record) {
     return { ok: false, error: 'Input must be an object' };
   }
-  if (typeof record.id !== 'string' || record.id.length === 0) {
-    return { ok: false, error: 'Assessment.id is required and must be a string' };
+  if (!isNonEmptyString(record.id)) {
+    return { ok: false, error: 'Assessment.id is required and must be a non-empty string' };
+  }
+  if (!isNonEmptyString(record.title)) {
+    return { ok: false, error: 'Assessment.title is required and must be a non-empty string' };
+  }
+  if (!isNonEmptyString(record.description)) {
+    return { ok: false, error: 'Assessment.description is required and must be a non-empty string' };
   }
   if (!VALID_ASSESSMENT_TYPES.includes(record.type as (typeof VALID_ASSESSMENT_TYPES)[number])) {
     return {
@@ -190,15 +240,23 @@ export function validateAssessment(input: unknown): ValidationResult<Assessment>
       error: `Assessment.type must be one of: ${VALID_ASSESSMENT_TYPES.join(', ')}`
     };
   }
+  const itemIdsError = validateStringArray(record.itemIds, 'Assessment.itemIds');
+  if (itemIdsError) return { ok: false, error: itemIdsError };
   if (record.items !== undefined) {
     if (!Array.isArray(record.items)) {
       return { ok: false, error: 'Assessment.items must be an array when present' };
     }
+    const itemIdSet = new Set<string>();
     for (const item of record.items) {
       const quizError = validateQuizItem(item);
       if (quizError) {
         return { ok: false, error: quizError };
       }
+      const itemId = (item as { id: string }).id;
+      if (itemIdSet.has(itemId)) {
+        return { ok: false, error: `Assessment "${record.id}" has a duplicate item id "${itemId}"` };
+      }
+      itemIdSet.add(itemId);
     }
   }
   if (record.type === 'quiz') {
@@ -239,8 +297,42 @@ export function validateSection(input: unknown): ValidationResult<Section> {
   if (!record) {
     return { ok: false, error: 'Input must be an object' };
   }
-  if (typeof record.id !== 'string' || record.id.length === 0) {
-    return { ok: false, error: 'Section.id is required and must be a string' };
+  if (!isNonEmptyString(record.id)) {
+    return { ok: false, error: 'Section.id is required and must be a non-empty string' };
+  }
+  if (!isNonEmptyString(record.title)) {
+    return { ok: false, error: `Section "${record.id}" needs a title` };
+  }
+  if (!isNonEmptyString(record.content)) {
+    return { ok: false, error: `Section "${record.id}" needs content` };
+  }
+  const objectivesError = validateStringArray(record.objectives, `Section "${record.id}" objectives`);
+  if (objectivesError) return { ok: false, error: objectivesError };
+  if (!Array.isArray(record.applications)) {
+    return { ok: false, error: `Section "${record.id}" applications must be an array` };
+  }
+  const applicationIds: string[] = [];
+  for (const application of record.applications) {
+    const result = validateApplication(application);
+    if (!result.ok) return { ok: false, error: result.error };
+    applicationIds.push(result.value.id);
+  }
+  const duplicateApplicationId = findDuplicate(applicationIds);
+  if (duplicateApplicationId) {
+    return { ok: false, error: `Section "${record.id}" has a duplicate application id "${duplicateApplicationId}"` };
+  }
+  if (!Array.isArray(record.assessments)) {
+    return { ok: false, error: `Section "${record.id}" assessments must be an array` };
+  }
+  const assessmentIds: string[] = [];
+  for (const assessment of record.assessments) {
+    const result = validateAssessment(assessment);
+    if (!result.ok) return { ok: false, error: result.error };
+    assessmentIds.push(result.value.id);
+  }
+  const duplicateAssessmentId = findDuplicate(assessmentIds);
+  if (duplicateAssessmentId) {
+    return { ok: false, error: `Section "${record.id}" has a duplicate assessment id "${duplicateAssessmentId}"` };
   }
   return { ok: true, value: input as Section };
 }
@@ -251,8 +343,18 @@ export function validateLesson(input: unknown): ValidationResult<Lesson> {
     return { ok: false, error: contentResult.error };
   }
   const record = asRecord(input) as UnknownRecord;
-  if (!Array.isArray(record.sections)) {
-    return { ok: false, error: 'Lesson.sections must be an array' };
+  if (!Array.isArray(record.sections) || record.sections.length === 0) {
+    return { ok: false, error: 'Lesson.sections must be a non-empty array' };
+  }
+  const sectionIds: string[] = [];
+  for (const section of record.sections) {
+    const result = validateSection(section);
+    if (!result.ok) return { ok: false, error: result.error };
+    sectionIds.push(result.value.id);
+  }
+  const duplicateSectionId = findDuplicate(sectionIds);
+  if (duplicateSectionId) {
+    return { ok: false, error: `Lesson "${record.id}" has a duplicate section id "${duplicateSectionId}"` };
   }
   return { ok: true, value: input as Lesson };
 }
@@ -263,29 +365,27 @@ export function validateChallenge(input: unknown): ValidationResult<Challenge> {
     return { ok: false, error: contentResult.error };
   }
   const record = asRecord(input) as UnknownRecord;
-  if (typeof record.realWorldQuestion !== 'string' || record.realWorldQuestion.length === 0) {
-    return { ok: false, error: 'Challenge.realWorldQuestion is required and must be a string' };
+  if (!isNonEmptyString(record.realWorldQuestion)) {
+    return { ok: false, error: 'Challenge.realWorldQuestion is required and must be a non-empty string' };
   }
-  if (!Array.isArray(record.requiredConcepts) || record.requiredConcepts.length === 0) {
-    return { ok: false, error: 'Challenge.requiredConcepts must be a non-empty array' };
+  const requiredConceptsError = validateStringArray(record.requiredConcepts, 'Challenge.requiredConcepts', false);
+  if (requiredConceptsError) return { ok: false, error: requiredConceptsError };
+  const stepsError = validateStringArray(record.steps, 'Challenge.steps', false);
+  if (stepsError) return { ok: false, error: stepsError };
+  const evidenceError = validateStringArray(record.evidence, 'Challenge.evidence', false);
+  if (evidenceError) return { ok: false, error: evidenceError };
+  const constraintsError = validateStringArray(record.constraints, 'Challenge.constraints', false);
+  if (constraintsError) return { ok: false, error: constraintsError };
+  if (!isNonEmptyString(record.evaluation)) {
+    return { ok: false, error: 'Challenge.evaluation is required and must be a non-empty string' };
   }
-  if (!Array.isArray(record.steps) || record.steps.length === 0) {
-    return { ok: false, error: 'Challenge.steps must be a non-empty array' };
-  }
-  if (!Array.isArray(record.evidence)) {
-    return { ok: false, error: 'Challenge.evidence must be an array' };
-  }
-  if (!Array.isArray(record.constraints)) {
-    return { ok: false, error: 'Challenge.constraints must be an array' };
-  }
-  if (typeof record.evaluation !== 'string' || record.evaluation.length === 0) {
-    return { ok: false, error: 'Challenge.evaluation is required and must be a string' };
-  }
-  if (!Array.isArray(record.linkedSimulationIds) || record.linkedSimulationIds.length === 0) {
-    return { ok: false, error: 'Challenge.linkedSimulationIds must be a non-empty array' };
-  }
-  if (!Array.isArray(record.relatedLessonIds)) {
-    return { ok: false, error: 'Challenge.relatedLessonIds must be an array' };
-  }
+  const simulationsError = validateStringArray(
+    record.linkedSimulationIds,
+    'Challenge.linkedSimulationIds',
+    false,
+  );
+  if (simulationsError) return { ok: false, error: simulationsError };
+  const lessonsError = validateStringArray(record.relatedLessonIds, 'Challenge.relatedLessonIds');
+  if (lessonsError) return { ok: false, error: lessonsError };
   return { ok: true, value: input as Challenge };
 }

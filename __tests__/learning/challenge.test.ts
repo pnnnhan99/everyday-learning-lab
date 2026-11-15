@@ -58,4 +58,22 @@ describe('validateChallenge', () => {
     expect(greenhouseCarbonChallenge.linkedSimulationIds.length).toBeGreaterThan(0);
     expect(greenhouseCarbonChallenge.domain).toBe('realworld');
   });
+
+  it('rejects blank entries in learner-facing lists and related lesson ids', () => {
+    const valid = {
+      ...base,
+      realWorldQuestion: 'q',
+      requiredConcepts: ['a'],
+      steps: ['s'],
+      evidence: ['e'],
+      constraints: ['c'],
+      evaluation: 'e',
+      linkedSimulationIds: ['x'],
+      relatedLessonIds: ['lesson-1'],
+    };
+    expect(validateChallenge(valid).ok).toBe(true);
+    expect(validateChallenge({ ...valid, steps: [' '] }).ok).toBe(false);
+    expect(validateChallenge({ ...valid, evidence: [] }).ok).toBe(false);
+    expect(validateChallenge({ ...valid, relatedLessonIds: [''] }).ok).toBe(false);
+  });
 });
