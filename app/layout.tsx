@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AppShell from "@/components/layout/AppShell";
+import { SITE_DESCRIPTION, SITE_NAME, getSiteUrl } from "@/lib/site";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,13 +16,24 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Everyday Science Sim — Virtual Chemistry Lab",
-  description: "Trộn hoá chất gia dụng trong phòng lab ảo: tra cứu phản ứng, cảnh báo độc, lịch sử và quản trị dữ liệu.",
-  metadataBase: new URL("https://everyday-science-sim.local"),
+  title: {
+    default: SITE_NAME,
+    template: `%s · ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  metadataBase: new URL(getSiteUrl()),
   openGraph: {
-    title: "Everyday Science Sim",
-    description: "Virtual chemistry lab with safe simulated reactions.",
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    siteName: SITE_NAME,
+    locale: 'vi_VN',
     type: "website",
+  },
+  twitter: {
+    card: 'summary',
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
   },
 };
 

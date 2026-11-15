@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 
 import HomeView from '@/components/home/HomeView';
+import { SITE_DESCRIPTION, SITE_NAME } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: 'Everyday Learning Lab — Interactive Science Lessons & Simulations',
-  description:
-    'Discover a question, learn the concept, experiment with a model, apply it to everyday life, and reflect on what you found.',
+  title: { absolute: `${SITE_NAME} — Interactive Science Lessons & Simulations` },
+  description: SITE_DESCRIPTION,
 };
 
 export default function Home() {
