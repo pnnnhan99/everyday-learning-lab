@@ -19,20 +19,6 @@ export function unauthorizedResponse(): NextResponse {
   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 }
 
-export function getMaintainerToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem('maintainerToken');
-}
+// Browser-side session helpers live in `maintainerSession.ts` so client
+// components never pull `next/server` into their bundle.
 
-export function setMaintainerToken(token: string): void {
-  if (typeof window !== 'undefined') localStorage.setItem('maintainerToken', token);
-}
-
-export function clearMaintainerToken(): void {
-  if (typeof window !== 'undefined') localStorage.removeItem('maintainerToken');
-}
-
-export function isMaintainer(): boolean {
-  if (typeof window === 'undefined') return false;
-  return localStorage.getItem('maintainerToken') !== null;
-}
