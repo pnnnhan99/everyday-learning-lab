@@ -1,4 +1,4 @@
-import { getMaintainerToken } from '@/lib/auth';
+import { getMaintainerToken } from '@/lib/maintainerSession';
 
 export class ApiError extends Error {
   status: number;
