@@ -1,6 +1,8 @@
 import type { MetadataRoute } from 'next';
 
 import { challenges, lessons, getChallengeHref, getLessonHref } from '@/learning/catalog';
+import { getSiteUrl } from '@/lib/site';
+import { globalRegistry, registerAllSimulations } from '@/simulations';
 
 const staticPaths = [
   '/',
@@ -15,12 +17,14 @@ const staticPaths = [
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = 'https://everyday-science-sim.local';
+  registerAllSimulations();
+  const base = getSiteUrl();
   const lastModified = new Date();
 
   const dynamicPaths = [
     ...lessons.map((lesson) => getLessonHref(lesson.id)),
     ...challenges.map((challenge) => getChallengeHref(challenge.id)),
+    ...globalRegistry.list().map((simulation) => `/lab/${simulation.id}`),
   ];
 
   return [...staticPaths, ...dynamicPaths].map((path) => ({

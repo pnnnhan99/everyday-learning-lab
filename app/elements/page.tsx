@@ -1,6 +1,13 @@
+import type { Metadata } from 'next';
+
 import ElementsView from '@/components/elements/ElementsView';
 import { listElements } from '@/lib/db';
 import type { ElementType } from '@/types/game';
+
+export const metadata: Metadata = {
+  title: 'Elements',
+  description: 'Browse every reviewed substance in the catalog, with Vietnamese and English descriptions.',
+};
 
 const PAGE_SIZE = 12;
 const TYPE_FILTERS: Array<'all' | ElementType> = ['all', 'acid', 'base', 'food', 'chemical'];

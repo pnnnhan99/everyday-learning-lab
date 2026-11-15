@@ -1,6 +1,13 @@
+import type { Metadata } from 'next';
+
 import ReactionsView from '@/components/reactions/ReactionsView';
 import { listElements, listReactions } from '@/lib/db';
 import type { EffectType } from '@/types/game';
+
+export const metadata: Metadata = {
+  title: 'Reactions',
+  description: 'Reviewed reaction pairs with observations, safety notes, assumptions, and sources.',
+};
 
 const PAGE_SIZE = 10;
 const EFFECT_FILTERS: Array<'all' | EffectType> = ['all', 'toxic', 'informational'];

@@ -52,7 +52,7 @@ The interface ships in Vietnamese (`vi`, the default) and English (`en`). The he
 - Catalog records carry an optional Vietnamese edition (`vi` on `Element` and `Reaction`). Seed data includes reviewed Vietnamese names, descriptions, observations, explanations, assumptions, and safety guidance. `src/i18n/catalog.ts` resolves the edition for the active locale and falls back to the reviewed English text when a record has no translation, so a missing translation never blanks a field.
 - Server-rendered catalog pages (`/elements`, `/reactions`) read data on the server and pass it to client views so the language toggle can re-render them; see `src/components/elements/ElementsView.tsx` and `src/components/reactions/ReactionsView.tsx`. Search matches both English and Vietnamese text.
 - The SQLite schema stores the Vietnamese edition in a `vi` column. Fresh databases seed it, and `runMigration` backfills it for existing seed rows without overwriting maintainer edits; citations stay in their original language.
-- Still English-only: admin forms (they cannot edit the Vietnamese edition yet) and static route metadata. Editing translations needs admin fields plus review workflow, and route metadata needs cookie- or segment-based locale resolution; both are intentionally left for a later slice.
+- Still English-only: admin forms (they cannot edit the Vietnamese edition yet). Route metadata is generated on the server for every page, but it follows the default Vietnamese content and does not switch with the client-side locale toggle; per-locale routing remains a later slice. Editing translations needs admin fields plus a review workflow.
 
 - A Node.js version supported by the installed Next.js version.
 - npm.
@@ -90,6 +90,16 @@ npm run validate:mutations  # Validate mutation API safeguards
 npm run validate:persistence # Validate persistence behavior
 npm run validate            # Run the project's validation scripts
 ```
+
+## Site URL, metadata, and discoverability
+
+Page titles and descriptions are defined per route with the Next.js Metadata API, and the web manifest and `sitemap.xml` use the same product name. Set the public origin once per deployment:
+
+```bash
+NEXT_PUBLIC_SITE_URL=https://your-domain.example
+```
+
+When it is unset or invalid, canonical URLs and the sitemap fall back to the documented placeholder `https://everyday-learning-lab.example`; set the variable before publishing a deployment.
 
 ## Project structure
 
