@@ -1,58 +1,20 @@
 'use client';
 
-import { use, useMemo, useState } from 'react';
+import { use, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Play, RotateCcw } from 'lucide-react';
 
 import { registerAllSimulations, globalRegistry } from '@/simulations';
 import { validateSimulationInput } from '@/core/simulation/validation';
-import type { SimulationContract, SimulationMetadata } from '@/core/simulation/types';
+import type { SimulationContract } from '@/core/simulation/types';
 import { useDictionary } from '@/i18n/useDictionary';
-import { formatNumber, humanizeKey, type SavedValue } from '@/lib/simRuns';
+import { type SavedValue } from '@/lib/simRuns';
+import { describeResult } from '@/lib/simulationView';
 import RunComparison from '@/components/lab/RunComparison';
+import { SimulationInputs } from '@/components/simulation/SimulationInputs';
+import { SimulationResult } from '@/components/simulation/SimulationResult';
 
 registerAllSimulations();
-
-interface ResultView {
-  scalars: Array<{ key: string; value: number; unit?: string }>;
-  lists: Array<{ key: string; length: number; preview: string }>;
-  others: Array<{ key: string; value: string }>;
-}
-
-function humanize(key: string): string {
-  return humanizeKey(key);
-}
-
-function describeResult(result: unknown, metadata: SimulationMetadata): ResultView {
-  const view: ResultView = { scalars: [], lists: [], others: [] };
-  if (result === null || typeof result !== 'object') {
-    return { scalars: [], lists: [], others: [{ key: 'Result', value: String(result) }] };
-  }
-
-  for (const [key, value] of Object.entries(result as Record<string, unknown>)) {
-    const unit = metadata.units?.[key];
-    if (typeof value === 'number' && Number.isFinite(value)) {
-      view.scalars.push({ key, value, unit });
-    } else if (Array.isArray(value)) {
-      view.lists.push({
-        key,
-        length: value.length,
-        preview: JSON.stringify(value.slice(0, 3)).slice(0, 160),
-      });
-    } else if (typeof value === 'object' && value !== null) {
-      view.others.push({ key, value: JSON.stringify(value, null, 2) });
-    } else {
-      view.others.push({ key, value: String(value) });
-    }
-  }
-  return view;
-}
-
-function inputKeys(metadata: SimulationMetadata): string[] {
-  const keys = new Set<string>(Object.keys(metadata.validInputRanges ?? {}));
-  for (const key of Object.keys(metadata.defaults ?? {})) keys.add(key);
-  return Array.from(keys);
-}
 
 export default function LabSimulationPage({ params }: { params: Promise<{ simulationId: string }> }) {
   const { simulationId } = use(params);
@@ -66,8 +28,6 @@ export default function LabSimulationPage({ params }: { params: Promise<{ simula
   const [inputs, setInputs] = useState<Record<string, number>>(() => sim?.metadata.defaults ?? {});
   const [lastRunInputs, setLastRunInputs] = useState<SavedValue[] | null>(null);
 
-  const ranges = useMemo(() => sim?.metadata.validInputRanges ?? {}, [sim]);
-  const keys = useMemo(() => (sim ? inputKeys(sim.metadata) : []), [sim]);
 
   if (!sim) {
     return (
@@ -126,8 +86,6 @@ export default function LabSimulationPage({ params }: { params: Promise<{ simula
     setValidationErrors([]);
   }
 
-  const view = result !== undefined ? describeResult(result, metadata) : null;
-
   return (
     <div className="flex-1 p-6">
       <div className="mx-auto max-w-4xl space-y-5">
@@ -149,32 +107,13 @@ export default function LabSimulationPage({ params }: { params: Promise<{ simula
 
         <section className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900/40">
           <h2 className="text-[11px] font-medium tracking-widest text-zinc-500 uppercase">{dictionary.lab.inputsHeading}</h2>
-          {keys.length === 0 ? (
-            <p className="mt-2 text-sm text-zinc-500">{dictionary.lab.noInputs}</p>
-          ) : (
-            <div className="mt-3 grid gap-3 sm:grid-cols-3">
-              {keys.map((key) => {
-                const range = ranges[key];
-                return (
-                  <label key={key} className="flex flex-col text-xs text-zinc-600 dark:text-zinc-300">
-                    <span>
-                      {humanize(key)} {metadata.units?.[key] ? `(${metadata.units[key]})` : ''}
-                    </span>
-                    <input
-                      type="number"
-                      className="mt-1 rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-sm text-zinc-900 focus:border-blue-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950 dark:text-white"
-                      min={range?.min}
-                      max={range?.max}
-                      step="any"
-                      value={inputs[key] ?? ''}
-                      onChange={(e) => setInputs((prev) => ({ ...prev, [key]: Number(e.target.value) }))}
-                    />
-                    {range ? <span className="mt-1 text-[10px] text-zinc-400">{range.min} – {range.max}</span> : null}
-                  </label>
-                );
-              })}
-            </div>
-          )}
+          <div className="mt-3">
+            <SimulationInputs
+              metadata={metadata}
+              values={inputs}
+              onChange={(key, value) => setInputs((prev) => ({ ...prev, [key]: value }))}
+            />
+          </div>
 
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <button
@@ -214,56 +153,14 @@ export default function LabSimulationPage({ params }: { params: Promise<{ simula
           )}
         </section>
 
-        {view ? (
-          <section className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900/40" data-testid="sim-result">
-            <h2 className="text-[11px] font-medium tracking-widest text-zinc-500 uppercase">{dictionary.lab.result}</h2>
-            {view.scalars.length > 0 && (
-              <div className="mt-3 grid gap-3 sm:grid-cols-3">
-                {view.scalars.map((item) => (
-                  <div key={item.key} className="rounded-lg border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-950/60">
-                    <p className="text-[11px] text-zinc-500">{humanize(item.key)}</p>
-                    <p className="mt-1 text-lg font-semibold">
-                      {formatNumber(item.value)}
-                      {item.unit ? <span className="ml-1 text-xs font-normal text-zinc-500">{item.unit}</span> : null}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-            {view.lists.length > 0 && (
-              <ul className="mt-3 space-y-2">
-                {view.lists.map((item) => (
-                  <li key={item.key} className="rounded-lg border border-zinc-200 bg-zinc-50 p-3 text-sm dark:border-zinc-800 dark:bg-zinc-950/60">
-                    <p className="text-zinc-600 dark:text-zinc-300">
-                      {humanize(item.key)} · <span className="font-medium">{item.length} {dictionary.lab.values}</span>
-                    </p>
-                    <details className="mt-1">
-                      <summary className="cursor-pointer text-xs text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300">
-                        {dictionary.lab.preview}
-                      </summary>
-                      <pre className="mt-1 overflow-auto text-[11px] text-zinc-500">{item.preview} …</pre>
-                    </details>
-                  </li>
-                ))}
-              </ul>
-            )}
-            {view.others.length > 0 && (
-              <div className="mt-3 space-y-2">
-                {view.others.map((item) => (
-                  <div key={item.key} className="rounded-lg border border-zinc-200 bg-zinc-50 p-3 text-sm dark:border-zinc-800 dark:bg-zinc-950/60">
-                    <p className="text-zinc-600 dark:text-zinc-300">{humanize(item.key)}</p>
-                    <pre className="mt-1 overflow-auto text-xs">{item.value}</pre>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
+        {result !== undefined ? (
+          <SimulationResult result={result} metadata={metadata} testId="sim-result" />
         ) : null}
 
         <RunComparison
           simulationId={simulationId}
           inputs={lastRunInputs}
-          scalars={view ? view.scalars : null}
+          scalars={result !== undefined ? describeResult(result, metadata).scalars : null}
         />
 
         {metadata.safetyNotes && metadata.safetyNotes.length > 0 && (

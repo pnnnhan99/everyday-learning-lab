@@ -10,6 +10,8 @@ import { useDictionary, useLocale } from '@/i18n/useDictionary';
 import { registerAllSimulations } from '@/simulations';
 import { globalRegistry } from '@/core/simulation/registry';
 import { validateSimulationInput } from '@/core/simulation/validation';
+import { SimulationInputs } from '@/components/simulation/SimulationInputs';
+import { SimulationResult } from '@/components/simulation/SimulationResult';
 import { SelfCheck } from './SelfCheck';
 
 registerAllSimulations();
@@ -132,7 +134,6 @@ export const LessonDetail: React.FC<{ lesson: Lesson }> = ({ lesson: canonicalLe
             {section.applications.map((app) => {
               const simulation = app.type === 'simulation' ? globalRegistry.get(app.resourceId) : undefined;
               const metadata = simulation?.metadata;
-              const ranges = metadata?.validInputRanges ?? {};
               const current = inputs[app.resourceId] ?? metadata?.defaults ?? {};
               const result = results[app.resourceId];
               const error = errors[app.resourceId];
@@ -151,27 +152,12 @@ export const LessonDetail: React.FC<{ lesson: Lesson }> = ({ lesson: canonicalLe
 
                   {app.type === 'simulation' && metadata && (
                     <div className="mt-4 space-y-3">
-                      <div className="grid gap-3 sm:grid-cols-3">
-                        {Object.keys(ranges).map((key) => (
-                          <label key={key} className="flex flex-col text-xs text-white/60">
-                            <span>
-                              {key} ({metadata.units?.[key] ?? '—'})
-                            </span>
-                            <input
-                              type="number"
-                              className="mt-1 rounded border border-white/15 bg-black/30 px-2 py-1 text-sm text-white"
-                              min={ranges[key].min}
-                              max={ranges[key].max}
-                              step="any"
-                              value={current[key] ?? ranges[key].min}
-                              onChange={(e) => updateInput(app.resourceId, key, Number(e.target.value))}
-                            />
-                            <span className="mt-0.5 text-[10px] text-white/30">
-                              {ranges[key].min}–{ranges[key].max}
-                            </span>
-                          </label>
-                        ))}
-                      </div>
+                      <SimulationInputs
+                        metadata={metadata}
+                        values={current}
+                        tone="dark"
+                        onChange={(key, value) => updateInput(app.resourceId, key, value)}
+                      />
 
                       <button
                         type="button"
@@ -185,12 +171,7 @@ export const LessonDetail: React.FC<{ lesson: Lesson }> = ({ lesson: canonicalLe
                       {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
 
                       {result !== undefined && (
-                        <div aria-live="polite" className="rounded-lg bg-white/5 p-3">
-                          <h5 className="text-xs font-semibold uppercase tracking-wide text-white/50">{dictionary.lesson.result}</h5>
-                          <pre className="mt-1 overflow-auto text-xs text-white/80">
-                            {JSON.stringify(result, null, 2)}
-                          </pre>
-                        </div>
+                        <SimulationResult result={result} metadata={metadata} tone="dark" />
                       )}
 
                       <button

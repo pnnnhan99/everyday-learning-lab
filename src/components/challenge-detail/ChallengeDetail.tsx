@@ -4,11 +4,13 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 
 import type { Challenge } from '../../learning/types';
-import { getLocalizedChallenge } from '../../learning/catalog';
+import { getLocalizedChallenge, getLocalizedLesson } from '../../learning/catalog';
 import { useDictionary, useLocale } from '@/i18n/useDictionary';
 import { registerAllSimulations } from '../../simulations';
 import { globalRegistry } from '../../core/simulation/registry';
 import { validateSimulationInput } from '../../core/simulation/validation';
+import { SimulationInputs } from '../simulation/SimulationInputs';
+import { SimulationResult } from '../simulation/SimulationResult';
 
 registerAllSimulations();
 
@@ -18,7 +20,15 @@ export const ChallengeDetail: React.FC<{ challenge: Challenge }> = ({ challenge:
   const challenge = getLocalizedChallenge(canonicalChallenge.id, locale) ?? canonicalChallenge;
   const [results, setResults] = useState<Record<string, unknown>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [inputs, setInputs] = useState<Record<string, Record<string, number>>>({});
   const [running, setRunning] = useState<Record<string, boolean>>({});
+
+  const updateInput = (simulationId: string, key: string, value: number) => {
+    setInputs((prev) => ({
+      ...prev,
+      [simulationId]: { ...(prev[simulationId] ?? {}), [key]: value },
+    }));
+  };
 
   const runSimulation = async (id: string) => {
     const simulation = globalRegistry.get(id);
@@ -26,7 +36,8 @@ export const ChallengeDetail: React.FC<{ challenge: Challenge }> = ({ challenge:
       setErrors((prev) => ({ ...prev, [id]: dictionary.lesson.simulationNotFound }));
       return;
     }
-    const validation = validateSimulationInput(simulation.metadata.defaults ?? {}, simulation.metadata);
+    const input = inputs[id] ?? simulation.metadata.defaults ?? {};
+    const validation = validateSimulationInput(input, simulation.metadata);
     if (!validation.ok) {
       setErrors((prev) => ({ ...prev, [id]: validation.errors.join(' ') }));
       return;
@@ -45,6 +56,7 @@ export const ChallengeDetail: React.FC<{ challenge: Challenge }> = ({ challenge:
       }));
     } finally {
       setRunning((prev) => ({ ...prev, [id]: false }));
+      setInputs((prev) => ({ ...prev, [id]: prev[id] ?? input }));
     }
   };
 
@@ -100,19 +112,27 @@ export const ChallengeDetail: React.FC<{ challenge: Challenge }> = ({ challenge:
               <div key={id} className="rounded-lg border border-white/10 bg-black/20 p-4">
                 <h3 className="text-base font-medium text-white">{metadata?.name ?? id}</h3>
                 <p className="mt-1 text-xs text-white/50">{metadata?.description ?? dictionary.lesson.simulationNotFound}</p>
-                <button
-                  type="button"
-                  onClick={() => runSimulation(id)}
-                  disabled={running[id]}
-                  className="mt-3 rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-500 disabled:cursor-wait disabled:opacity-60"
-                >
-                  {running[id] ? dictionary.challenge.running : dictionary.challenge.run}
-                </button>
-                {errors[id] && <p role="alert" className="mt-2 text-sm text-red-400">{errors[id]}</p>}
-                {results[id] !== undefined && (
-                  <pre aria-live="polite" className="mt-2 max-h-48 overflow-auto rounded bg-white/5 p-2 text-xs text-white/80">
-                    {JSON.stringify(results[id], null, 2)}
-                  </pre>
+                {metadata && (
+                  <div className="mt-3 space-y-3">
+                    <SimulationInputs
+                      tone="dark"
+                      metadata={metadata}
+                      values={inputs[id] ?? metadata.defaults ?? {}}
+                      onChange={(key, value) => updateInput(id, key, value)}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => runSimulation(id)}
+                      disabled={running[id]}
+                      className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-500 disabled:cursor-wait disabled:opacity-60"
+                    >
+                      {running[id] ? dictionary.challenge.running : dictionary.challenge.run}
+                    </button>
+                    {errors[id] && <p role="alert" className="text-sm text-red-400">{errors[id]}</p>}
+                    {results[id] !== undefined && (
+                      <SimulationResult result={results[id]} metadata={metadata} tone="dark" />
+                    )}
+                  </div>
                 )}
                 {metadata && (
                   <details className="mt-3 text-xs text-white/50">
@@ -140,13 +160,16 @@ export const ChallengeDetail: React.FC<{ challenge: Challenge }> = ({ challenge:
         <section className="space-y-2">
           <h2 className="text-base font-semibold text-white/80">{dictionary.challenge.relatedLessons}</h2>
           <ul className="flex flex-wrap gap-2">
-            {challenge.relatedLessonIds.map((slug) => (
-              <li key={slug}>
-                <Link href={`/learn/${slug}`} className="rounded-full border border-white/15 px-3 py-1 text-sm text-blue-400 hover:border-white/30">
-                  {slug}
-                </Link>
-              </li>
-            ))}
+            {challenge.relatedLessonIds.map((slug) => {
+              const title = getLocalizedLesson(slug, locale)?.title ?? slug;
+              return (
+                <li key={slug}>
+                  <Link href={`/learn/${slug}`} className="rounded-full border border-white/15 px-3 py-1 text-sm text-blue-400 hover:border-white/30">
+                    {title}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </section>
       )}
