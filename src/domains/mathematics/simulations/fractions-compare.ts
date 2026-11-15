@@ -83,12 +83,16 @@ function createContract(): SimulationContract<Partial<FractionCompareInit>, Frac
     run(input?: Partial<FractionCompareInit>): FractionCompareResult {
       const na = clampInt(input?.numeratorA ?? 1, metadata.validInputRanges!.numeratorA);
       const da = clampInt(input?.denominatorA ?? 2, metadata.validInputRanges!.denominatorA);
-      const nb = clampInt(input?.numeratorB ?? 1, metadata.validInputRanges!.denominatorB);
+      const nb = clampInt(input?.numeratorB ?? 1, metadata.validInputRanges!.numeratorB);
       const db = clampInt(input?.denominatorB ?? 3, metadata.validInputRanges!.denominatorB);
       const cdIn = input?.commonDenom;
-      const cd = cdIn && Number.isFinite(cdIn)
+      const requested = cdIn && Number.isFinite(cdIn)
         ? Math.max(1, Math.min(100, Math.trunc(cdIn)))
         : lcm(da, db);
+      // A common denominator must be a multiple of both denominators, otherwise
+      // the equivalent fractions would need non-integer numerators. Fall back to
+      // the least common multiple when the requested value is not valid.
+      const cd = requested % da === 0 && requested % db === 0 ? requested : lcm(da, db);
 
       const valueA = na / da;
       const valueB = nb / db;

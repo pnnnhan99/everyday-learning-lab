@@ -35,4 +35,30 @@ describe('fractionsCompareSimulation', () => {
     expect(Number.isFinite(r.valueA)).toBe(true);
     expect(Number.isFinite(r.valueB)).toBe(true);
   });
+
+  it('compares negative and zero numerators correctly', () => {
+    const negative = run({ numeratorA: -1, denominatorA: 2, numeratorB: 1, denominatorB: 3 });
+    expect(negative.comparison).toBe('less');
+    expect(negative.crossProductL).toBe(-3);
+    expect(negative.crossProductR).toBe(2);
+
+    const zero = run({ numeratorA: 0, denominatorA: 5, numeratorB: 0, denominatorB: 7 });
+    expect(zero.comparison).toBe('equal');
+    expect(zero.valueA).toBe(0);
+  });
+
+  it('uses a valid supplied common denominator for equivalent fractions', () => {
+    const r = run({ numeratorA: 1, denominatorA: 2, numeratorB: 1, denominatorB: 3, commonDenom: 6 });
+    expect(r.commonDenom).toBe(6);
+    expect(r.equivalentA).toEqual({ num: 3, denom: 6 });
+    expect(r.equivalentB).toEqual({ num: 2, denom: 6 });
+  });
+
+  it('falls back to the least common multiple when the supplied denominator is not a multiple of both', () => {
+    const r = run({ numeratorA: 1, denominatorA: 2, numeratorB: 1, denominatorB: 3, commonDenom: 5 });
+    expect(r.commonDenom).toBe(6);
+    // Equivalents must stay exact instead of truncating fractional numerators.
+    expect(r.equivalentA).toEqual({ num: 3, denom: 6 });
+    expect(r.equivalentB).toEqual({ num: 2, denom: 6 });
+  });
 });
