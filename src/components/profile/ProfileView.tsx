@@ -7,6 +7,7 @@ import { Clock, History, RotateCcw, Star, Trash2, Undo2, FlaskConical } from 'lu
 import FavoriteButton from '@/components/lab/FavoriteButton';
 import { elementTypeIcon } from '@/components/lab/elementIcons';
 import { useDictionary, useLocale } from '@/i18n/useDictionary';
+import { localizeElement, localizeReaction } from '@/i18n/catalog';
 import { useLabStore, type HistoryEntry } from '@/store/labStore';
 import { useGameStore } from '@/store/useGameStore';
 import type { Element } from '@/types/game';
@@ -42,7 +43,7 @@ export default function ProfileView({ elements }: ProfileViewProps) {
     useGameStore.getState().clearWorkspace();
   }
 
-  const byId = new Map(elements.map((el) => [el.id, el]));
+  const byId = new Map(elements.map((el) => [el.id, localizeElement(el, locale)]));
 
   function describeEntry(entry: HistoryEntry): { first: string; second: string } {
     const [firstId, secondId] = entry.elementIds;
@@ -159,6 +160,7 @@ export default function ProfileView({ elements }: ProfileViewProps) {
           <ol className="mt-3 space-y-2">
             {history.map((entry) => {
               const { first, second } = describeEntry(entry);
+              const localizedResult = entry.reaction ? localizeReaction(entry.reaction, locale) : null;
               return (
                 <li
                   key={entry.id}
@@ -169,7 +171,7 @@ export default function ProfileView({ elements }: ProfileViewProps) {
                       {first} <span className="text-zinc-400">+</span> {second}
                     </p>
                     <p className="truncate text-xs text-zinc-500">
-                      {entry.reaction?.resultTitle ?? dictionary.profile.reviewedOutcome} ·{' '}
+                      {localizedResult?.resultTitle ?? dictionary.profile.reviewedOutcome} ·{' '}
                       {new Date(entry.at).toLocaleString(dateLocale, {
                         dateStyle: 'short',
                         timeStyle: 'short',

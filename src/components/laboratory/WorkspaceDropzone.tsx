@@ -5,7 +5,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect } from 'react';
 
 import { useGameStore } from '../../store/useGameStore';
-import { useDictionary } from '@/i18n/useDictionary';
+import { useDictionary, useLocale } from '@/i18n/useDictionary';
+import { localizeReaction } from '@/i18n/catalog';
 import type { EffectType } from '../../types/game';
 import DraggableElement from './DraggableElement';
 
@@ -19,6 +20,7 @@ const EFFECT_STYLES: Record<EffectType, { accent: string; halo: string }> = {
 
 export default function WorkspaceDropzone() {
   const dictionary = useDictionary();
+  const locale = useLocale();
   const workspace = useGameStore((state) => state.workspace);
   const activeReaction = useGameStore((state) => state.activeReaction);
   const status = useGameStore((state) => state.status);
@@ -53,6 +55,7 @@ export default function WorkspaceDropzone() {
   }, [status, clearWorkspace]);
 
   const isMerging = status === 'merging';
+  const reaction = activeReaction ? localizeReaction(activeReaction, locale) : null;
   const effect = activeReaction ? EFFECT_STYLES[activeReaction.effectType] : null;
   const effectLabel = activeReaction
     ? activeReaction.effectType === 'toxic'
@@ -137,9 +140,9 @@ export default function WorkspaceDropzone() {
       </div>
 
       <AnimatePresence>
-        {status === 'result' && activeReaction && effect ? (
+        {status === 'result' && activeReaction && reaction && effect ? (
           <motion.div
-            key={activeReaction.resultTitle}
+            key={reaction.resultTitle}
             role="dialog"
             data-testid="reaction-dialog"
             aria-modal="true"
@@ -154,7 +157,7 @@ export default function WorkspaceDropzone() {
 
             <div className="mt-4 flex items-center justify-between gap-3">
               <h2 id="reaction-result-title" className="text-xl font-bold tracking-tight text-white">
-                {activeReaction.resultTitle}
+                {reaction.resultTitle}
               </h2>
               <span
                 className={`rounded-full bg-linear-to-r ${effect.accent} px-3 py-1 text-[11px] font-semibold tracking-wide text-zinc-950 uppercase`}
@@ -166,16 +169,16 @@ export default function WorkspaceDropzone() {
             <div className="mt-3 space-y-3 text-sm leading-relaxed text-white/75">
               <p>
                 <strong className="text-white">{dictionary.labBench.modeledOutcome}: </strong>
-                {activeReaction.observation}
+                {reaction.observation}
               </p>
               <p>
                 <strong className="text-white">{dictionary.labBench.explanation}: </strong>
-                {activeReaction.explanation}
+                {reaction.explanation}
               </p>
             </div>
 
             <p className="mt-3 rounded-lg border border-rose-300/20 bg-rose-300/10 p-3 text-sm text-rose-100">
-              {activeReaction.safetyGuidance}
+              {reaction.safetyGuidance}
             </p>
 
             <div className="mt-4 space-y-2 text-xs text-white/60">
@@ -185,7 +188,7 @@ export default function WorkspaceDropzone() {
                   ? dictionary.labBench.reviewedHazard
                   : dictionary.labBench.reviewedScience}
               </p>
-              <p>{dictionary.labBench.assumptions}: {activeReaction.assumptions.join(' ')}</p>
+              <p>{dictionary.labBench.assumptions}: {reaction.assumptions.join(' ')}</p>
               <p className="font-medium text-white/75">{dictionary.labBench.references}</p>
               <ul className="list-inside list-disc space-y-1">
                 {activeReaction.references.map((reference) => (

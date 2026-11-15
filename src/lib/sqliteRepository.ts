@@ -7,7 +7,18 @@ function now(): string {
   return new Date().toISOString();
 }
 
+function parseTranslation(value: unknown): Record<string, unknown> | undefined {
+  if (typeof value !== 'string' || value.trim() === '') return undefined;
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    return typeof parsed === 'object' && parsed !== null ? (parsed as Record<string, unknown>) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 function toElement(row: Record<string, unknown>): Element {
+  const vi = parseTranslation(row.vi);
   return {
     id: row.id as string,
     name: row.name as string,
@@ -17,6 +28,7 @@ function toElement(row: Record<string, unknown>): Element {
     ...(row.ph !== null && row.ph !== undefined ? { ph: row.ph as number } : {}),
     ...(row.safety_level !== null && row.safety_level !== undefined ? { safetyLevel: row.safety_level as number as Element['safetyLevel'] } : {}),
     ...(row.image_url ? { imageUrl: row.image_url as string } : {}),
+    ...(vi ? { vi: vi as unknown as Element['vi'] } : {}),
     ...(row.created_at ? { createdAt: row.created_at as string } : {}),
     ...(row.updated_at ? { updatedAt: row.updated_at as string } : {}),
   };
@@ -34,10 +46,12 @@ function fromElement(el: Element): Record<string, unknown> {
     image_url: el.imageUrl ?? null,
     created_at: el.createdAt ?? null,
     updated_at: el.updatedAt ?? null,
+    vi: el.vi ? JSON.stringify(el.vi) : null,
   };
 }
 
 function toReaction(row: Record<string, unknown>): Reaction {
+  const vi = parseTranslation(row.vi);
   return {
     element1Id: row.element1_id as string,
     element2Id: row.element2_id as string,
@@ -49,6 +63,7 @@ function toReaction(row: Record<string, unknown>): Reaction {
     assumptions: JSON.parse(row.assumptions as string) as string[],
     safetyGuidance: row.safety_guidance as string,
     references: JSON.parse(row.references as string) as Reaction['references'],
+    ...(vi ? { vi: vi as unknown as Reaction['vi'] } : {}),
     ...(row.created_at ? { createdAt: row.created_at as string } : {}),
     ...(row.updated_at ? { updatedAt: row.updated_at as string } : {}),
   };
@@ -69,6 +84,7 @@ function fromReaction(r: Reaction): Record<string, unknown> {
     created_at: r.createdAt ?? null,
     updated_at: r.updatedAt ?? null,
     normalized_pair: normalizePair(r.element1Id, r.element2Id),
+    vi: r.vi ? JSON.stringify(r.vi) : null,
   };
 }
 
@@ -91,8 +107,8 @@ export class SqliteElementRepository implements ElementRepository {
     const element: Element = { ...el, createdAt: el.createdAt ?? nowStr, updatedAt: el.updatedAt ?? nowStr };
     try {
       db.prepare(`
-        INSERT INTO elements (id, name, icon, description, type, ph, safety_level, image_url, created_at, updated_at)
-        VALUES (@id, @name, @icon, @description, @type, @ph, @safety_level, @image_url, @created_at, @updated_at)
+        INSERT INTO elements (id, name, icon, description, type, ph, safety_level, image_url, created_at, updated_at, vi)
+        VALUES (@id, @name, @icon, @description, @type, @ph, @safety_level, @image_url, @created_at, @updated_at, @vi)
       `).run(fromElement(element));
      } catch (err) {
       if ((err as { code?: string }).code?.startsWith('SQLITE_CONSTRAINT')) {
@@ -112,7 +128,7 @@ export class SqliteElementRepository implements ElementRepository {
       UPDATE elements
       SET name = @name, icon = @icon, description = @description, type = @type,
           ph = @ph, safety_level = @safety_level, image_url = @image_url,
-          created_at = @created_at, updated_at = @updated_at
+          created_at = @created_at, updated_at = @updated_at, vi = @vi
       WHERE id = @id
     `).run(fromElement(updated));
     return updated;
@@ -145,9 +161,9 @@ export class SqliteReactionRepository implements ReactionRepository {
     try {
       db.prepare(`
         INSERT INTO reactions (element1_id, element2_id, result_title, observation, explanation,
-          effect_type, review_status, safety_guidance, assumptions, "references", created_at, updated_at, normalized_pair)
+          effect_type, review_status, safety_guidance, assumptions, "references", created_at, updated_at, normalized_pair, vi)
         VALUES (@element1_id, @element2_id, @result_title, @observation, @explanation,
-          @effect_type, @review_status, @safety_guidance, @assumptions, @references, @created_at, @updated_at, @normalized_pair)
+          @effect_type, @review_status, @safety_guidance, @assumptions, @references, @created_at, @updated_at, @normalized_pair, @vi)
       `).run(fromReaction(reaction));
     } catch (err) {
       if ((err as { code?: string }).code?.startsWith('SQLITE_CONSTRAINT')) {

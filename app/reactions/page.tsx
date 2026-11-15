@@ -23,17 +23,19 @@ export default async function ReactionsPage({
     : 'all';
 
   const [reactions, elements] = await Promise.all([listReactions(), listElements()]);
-  const names = Object.fromEntries(elements.map((el) => [el.id, el.name]));
+  const elementNames = elements.flatMap((el) => [el.name, el.vi?.name ?? '']);
 
   const filtered = reactions.filter((r) => {
     const haystack = [
       r.element1Id,
       r.element2Id,
-      names[r.element1Id] ?? '',
-      names[r.element2Id] ?? '',
+      ...elementNames,
       r.resultTitle,
       r.observation,
       r.explanation,
+      r.vi?.resultTitle ?? '',
+      r.vi?.observation ?? '',
+      r.vi?.explanation ?? '',
     ]
       .join(' ')
       .toLowerCase();
@@ -56,7 +58,7 @@ export default async function ReactionsPage({
       currentPage={currentPage}
       totalPages={totalPages}
       hasFilters={hasFilters}
-      names={names}
+      elements={elements}
     />
   );
 }

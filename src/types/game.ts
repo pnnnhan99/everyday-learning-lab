@@ -1,5 +1,10 @@
 export type ElementType = 'acid' | 'base' | 'food' | 'chemical';
 
+export interface ElementTranslation {
+  name: string;
+  description: string;
+}
+
 export interface Element {
   id: string;
   name: string;
@@ -12,6 +17,8 @@ export interface Element {
   /** Safety level for handling in real life (1 = safest, 5 = hazardous). */
   safetyLevel?: 1 | 2 | 3 | 4 | 5;
   imageUrl?: string;
+  /** Vietnamese edition of learner-facing text. Falls back to the English fields. */
+  vi?: ElementTranslation;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -25,6 +32,14 @@ export interface ScientificReference {
   url: string;
 }
 
+export interface ReactionTranslation {
+  resultTitle: string;
+  observation: string;
+  explanation: string;
+  assumptions: string[];
+  safetyGuidance: string;
+}
+
 export interface Reaction {
   element1Id: string;
   element2Id: string;
@@ -36,6 +51,8 @@ export interface Reaction {
   assumptions: string[];
   safetyGuidance: string;
   references: ScientificReference[];
+  /** Vietnamese edition of learner-facing text. Falls back to the English fields. */
+  vi?: ReactionTranslation;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -56,6 +73,42 @@ export function isReactionReviewStatus(value: unknown): value is ReactionReviewS
   return typeof value === 'string' && (REVIEW_STATUSES as string[]).includes(value);
 }
 
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && value.trim() !== '';
+}
+
+function parseElementTranslation(value: unknown): ElementTranslation | undefined {
+  if (value === undefined) return undefined;
+  if (typeof value !== 'object' || value === null) return undefined;
+  const vi = value as Record<string, unknown>;
+  if (!isNonEmptyString(vi.name) || !isNonEmptyString(vi.description)) return undefined;
+  return { name: vi.name.trim(), description: vi.description.trim() };
+}
+
+function parseReactionTranslation(value: unknown): ReactionTranslation | undefined {
+  if (value === undefined) return undefined;
+  if (typeof value !== 'object' || value === null) return undefined;
+  const vi = value as Record<string, unknown>;
+  if (
+    !isNonEmptyString(vi.resultTitle) ||
+    !isNonEmptyString(vi.observation) ||
+    !isNonEmptyString(vi.explanation) ||
+    !isNonEmptyString(vi.safetyGuidance)
+  ) {
+    return undefined;
+  }
+  if (!Array.isArray(vi.assumptions) || vi.assumptions.length === 0 || vi.assumptions.some((a) => !isNonEmptyString(a))) {
+    return undefined;
+  }
+  return {
+    resultTitle: vi.resultTitle.trim(),
+    observation: vi.observation.trim(),
+    explanation: vi.explanation.trim(),
+    safetyGuidance: vi.safetyGuidance.trim(),
+    assumptions: vi.assumptions.map((a) => a.trim()),
+  };
+}
+
 export function validateElement(input: unknown): { ok: true; value: Element } | { ok: false; error: string } {
   if (typeof input !== 'object' || input === null) return { ok: false, error: 'Element must be an object' };
   const v = input as Record<string, unknown>;
@@ -65,6 +118,10 @@ export function validateElement(input: unknown): { ok: true; value: Element } | 
   if (!isElementType(v.type)) return { ok: false, error: 'Element.type must be acid|base|food|chemical' };
   if (v.icon !== undefined && typeof v.icon !== 'string') return { ok: false, error: 'Element.icon must be a string' };
   if (v.ph !== undefined && (typeof v.ph !== 'number' || v.ph < 0 || v.ph > 14)) return { ok: false, error: 'Element.ph must be 0-14' };
+  if (v.vi !== undefined && parseElementTranslation(v.vi) === undefined) {
+    return { ok: false, error: 'Element.vi must contain name and description' };
+  }
+  const vi = parseElementTranslation(v.vi);
   return {
     ok: true,
     value: {
@@ -74,6 +131,7 @@ export function validateElement(input: unknown): { ok: true; value: Element } | 
       description: (v.description as string).trim(),
       type: v.type,
       ...(typeof v.ph === 'number' ? { ph: v.ph } : {}),
+      ...(vi ? { vi } : {}),
     },
   };
 }
@@ -97,6 +155,10 @@ export function validateReaction(input: unknown): { ok: true; value: Reaction } 
   if (!Array.isArray(v.assumptions) || v.assumptions.length === 0 || v.assumptions.some((a) => typeof a !== 'string' || a.trim() === '')) return { ok: false, error: 'Reaction.assumptions must be a non-empty array of non-empty strings' };
   if (typeof v.safetyGuidance !== 'string' || v.safetyGuidance.trim() === '') return { ok: false, error: 'Reaction.safetyGuidance is required' };
   if (!Array.isArray(v.references) || v.references.length === 0 || !v.references.every(isValidReference)) return { ok: false, error: 'Reaction.references must be a non-empty array of HTTPS-referenced sources' };
+  if (v.vi !== undefined && parseReactionTranslation(v.vi) === undefined) {
+    return { ok: false, error: 'Reaction.vi must contain resultTitle, observation, explanation, safetyGuidance, and assumptions' };
+  }
+  const vi = parseReactionTranslation(v.vi);
   return {
     ok: true,
     value: {
@@ -110,6 +172,7 @@ export function validateReaction(input: unknown): { ok: true; value: Reaction } 
       assumptions: (v.assumptions as string[]).map((a) => a.trim()),
       safetyGuidance: (v.safetyGuidance as string).trim(),
       references: v.references as ScientificReference[],
+      ...(vi ? { vi } : {}),
     },
   };
 }
