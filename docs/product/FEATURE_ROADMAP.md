@@ -57,7 +57,7 @@ Acceptance direction:
 **Goal:** enable deeper experimentation when it adds measurable learning value.
 
 Candidate capabilities:
-- compare multiple experiment runs,
+- compare multiple experiment runs — implemented for the generic simulation runner: learners can save up to five runs locally per simulation and compare inputs and scalar results side by side (`src/components/lab/RunComparison.tsx`),
 - save/share experiment configurations,
 - richer parameter controls and guided experiments,
 - additional domain simulations and 3D visualizations,

@@ -8,6 +8,8 @@ import { registerAllSimulations, globalRegistry } from '@/simulations';
 import { validateSimulationInput } from '@/core/simulation/validation';
 import type { SimulationContract, SimulationMetadata } from '@/core/simulation/types';
 import { useDictionary } from '@/i18n/useDictionary';
+import { formatNumber, humanizeKey, type SavedValue } from '@/lib/simRuns';
+import RunComparison from '@/components/lab/RunComparison';
 
 registerAllSimulations();
 
@@ -18,15 +20,7 @@ interface ResultView {
 }
 
 function humanize(key: string): string {
-  return key
-    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
-    .replace(/[_-]/g, ' ')
-    .replace(/^\w/, (c) => c.toUpperCase());
-}
-
-function formatNumber(value: number): string {
-  if (Number.isInteger(value)) return String(value);
-  return Math.abs(value) >= 100 ? value.toFixed(1) : value.toPrecision(4).replace(/\.?0+$/, '');
+  return humanizeKey(key);
 }
 
 function describeResult(result: unknown, metadata: SimulationMetadata): ResultView {
@@ -70,6 +64,7 @@ export default function LabSimulationPage({ params }: { params: Promise<{ simula
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [running, setRunning] = useState(false);
   const [inputs, setInputs] = useState<Record<string, number>>(() => sim?.metadata.defaults ?? {});
+  const [lastRunInputs, setLastRunInputs] = useState<SavedValue[] | null>(null);
 
   const ranges = useMemo(() => sim?.metadata.validInputRanges ?? {}, [sim]);
   const keys = useMemo(() => (sim ? inputKeys(sim.metadata) : []), [sim]);
@@ -108,6 +103,13 @@ export default function LabSimulationPage({ params }: { params: Promise<{ simula
       await contract.initialize();
       const value = await contract.run(validation.values);
       setResult(value);
+      setLastRunInputs(
+        Object.entries(validation.values).map(([key, inputValue]) => ({
+          key,
+          value: inputValue,
+          ...(metadata.units?.[key] ? { unit: metadata.units[key] } : {}),
+        })),
+      );
       setError('');
     } catch (e) {
       setError(e instanceof Error ? e.message : dictionary.lab.simulationFailed);
@@ -119,6 +121,7 @@ export default function LabSimulationPage({ params }: { params: Promise<{ simula
   function reset() {
     setInputs(metadata.defaults ?? {});
     setResult(undefined);
+    setLastRunInputs(null);
     setError('');
     setValidationErrors([]);
   }
@@ -256,6 +259,12 @@ export default function LabSimulationPage({ params }: { params: Promise<{ simula
             )}
           </section>
         ) : null}
+
+        <RunComparison
+          simulationId={simulationId}
+          inputs={lastRunInputs}
+          scalars={view ? view.scalars : null}
+        />
 
         {metadata.safetyNotes && metadata.safetyNotes.length > 0 && (
           <aside className="rounded-lg border border-amber-300/50 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
