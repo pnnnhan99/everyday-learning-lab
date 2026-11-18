@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { ArrowUpRight, X } from 'lucide-react';
 
 import { periodicTableReferences } from '@/data/periodic-table/references';
@@ -80,21 +81,63 @@ export default function PeriodicElementDetails({
   onClose,
 }: PeriodicElementDetailsProps) {
   const t = dictionary.periodicTable;
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const closeRef = useRef<HTMLButtonElement | null>(null);
 
-  if (!element) {
-    return (
-      <aside
-        aria-labelledby="periodic-details-placeholder"
-        className="rounded-2xl border border-dashed border-zinc-300 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900/40"
-      >
-        <h2 id="periodic-details-placeholder" className="text-base font-semibold">
-          {t.details}
-        </h2>
-        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">{t.selectPrompt}</p>
-        <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">{t.selectPromptHint}</p>
-      </aside>
-    );
-  }
+  useEffect(() => {
+    if (!element) return;
+
+    const previouslyFocused =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    closeRef.current?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+
+      const panel = panelRef.current;
+      if (!panel) return;
+
+      const focusable = Array.from(
+        panel.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((node) => node.offsetParent !== null || node === panel);
+
+      if (focusable.length === 0) {
+        event.preventDefault();
+        panel.focus();
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      previouslyFocused?.focus();
+    };
+  }, [element, onClose]);
+
+  if (!element) return null;
 
   const name = element.name[locale];
   const alternateName = element.name[locale === 'vi' ? 'en' : 'vi'];
@@ -107,263 +150,274 @@ export default function PeriodicElementDetails({
     .filter((reference): reference is (typeof periodicTableReferences)[number] => Boolean(reference));
 
   return (
-    <aside
-      id="periodic-element-details"
-      aria-labelledby="periodic-details-heading"
-      className="rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900/40"
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 p-3 backdrop-blur-sm sm:items-center sm:p-6"
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
     >
-      <p aria-live="polite" className="sr-only">
-        {t.showingDetails} {name}
-      </p>
+      <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="periodic-details-heading"
+        tabIndex={-1}
+        className="relative my-auto max-h-[calc(100dvh-1.5rem)] w-full max-w-4xl overflow-y-auto rounded-2xl border border-zinc-200 bg-white shadow-2xl focus:outline-none dark:border-zinc-700 dark:bg-zinc-900"
+      >
+        <p aria-live="polite" className="sr-only">
+          {t.showingDetails} {name}
+        </p>
 
-      <div className="flex items-start justify-between gap-3 border-b border-zinc-200 p-4 dark:border-zinc-800">
-        <div className="flex items-start gap-3">
-          <span
-            aria-hidden
-            className="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
-          >
-            <span className="font-mono text-[10px] opacity-70">{element.atomicNumber}</span>
-            <span className="text-2xl font-bold leading-none">{element.symbol}</span>
-          </span>
-          <div>
-            <h2 id="periodic-details-heading" className="text-xl font-bold tracking-tight">
-              {name}
-            </h2>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              {alternateName} · {t.categories[element.category]}
-            </p>
-            <p className="mt-1 font-mono text-xs text-zinc-500 dark:text-zinc-400">
-              {t.atomicMass}: {formatValue(element.atomicMass, locale)}{' '}
-              <DataQualityBadge qualifier={element.atomicMass.qualifier} dictionary={dictionary} />
-            </p>
-          </div>
-        </div>
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label={t.close}
-          className="rounded-lg border border-zinc-200 p-1.5 text-zinc-500 hover:bg-zinc-50 hover:text-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:border-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
-        >
-          <X size={16} aria-hidden />
-        </button>
-      </div>
-
-      <div className="space-y-5 p-4">
-        <section aria-labelledby="periodic-identity">
-          <h3 id="periodic-identity" className="text-sm font-semibold">
-            {t.identity}
-          </h3>
-          <dl className="mt-2 grid grid-cols-2 gap-x-4">
-            <div className="border-b border-zinc-100 py-1.5 dark:border-zinc-800">
-              <dt className="text-xs text-zinc-500 dark:text-zinc-400">{t.atomicNumber}</dt>
-              <dd className="text-sm font-medium">{element.atomicNumber}</dd>
-            </div>
-            <div className="border-b border-zinc-100 py-1.5 dark:border-zinc-800">
-              <dt className="text-xs text-zinc-500 dark:text-zinc-400">{t.symbol}</dt>
-              <dd className="text-sm font-medium">{element.symbol}</dd>
-            </div>
-            <div className="border-b border-zinc-100 py-1.5 dark:border-zinc-800">
-              <dt className="text-xs text-zinc-500 dark:text-zinc-400">{t.category}</dt>
-              <dd className="text-sm font-medium">{t.categories[element.category]}</dd>
-            </div>
-            <div className="border-b border-zinc-100 py-1.5 dark:border-zinc-800">
-              <dt className="text-xs text-zinc-500 dark:text-zinc-400">{t.group}</dt>
-              <dd className="text-sm font-medium">
-                {element.group === null ? t.noValue : element.group}
-              </dd>
-            </div>
-            <div className="border-b border-zinc-100 py-1.5 dark:border-zinc-800">
-              <dt className="text-xs text-zinc-500 dark:text-zinc-400">{t.period}</dt>
-              <dd className="text-sm font-medium">{element.period}</dd>
-            </div>
-            <div className="border-b border-zinc-100 py-1.5 dark:border-zinc-800">
-              <dt className="text-xs text-zinc-500 dark:text-zinc-400">{t.block}</dt>
-              <dd className="text-sm font-medium">{t.blocks[element.block]}</dd>
-            </div>
-            <div className="border-b border-zinc-100 py-1.5 dark:border-zinc-800">
-              <dt className="text-xs text-zinc-500 dark:text-zinc-400">{t.standardState}</dt>
-              <dd className="flex items-center gap-1.5 text-sm font-medium">
-                {t.states[element.standardState]}
-                <DataQualityBadge qualifier={element.standardStateQualifier} dictionary={dictionary} />
-              </dd>
-            </div>
-            <div className="border-b border-zinc-100 py-1.5 dark:border-zinc-800">
-              <dt className="text-xs text-zinc-500 dark:text-zinc-400">{t.reviewStatus}</dt>
-              <dd className="text-sm font-medium">{dictionary.review[element.reviewStatus]}</dd>
-            </div>
-          </dl>
-          <p className="mt-1 text-[10px] text-zinc-500 dark:text-zinc-400">{t.conditions}</p>
-        </section>
-
-        <section aria-labelledby="periodic-structure">
-          <h3 id="periodic-structure" className="text-sm font-semibold">
-            {t.structure}
-          </h3>
-          <dl className="mt-2 grid grid-cols-3 gap-2 text-center">
-            <div className="rounded-lg bg-zinc-50 p-2 dark:bg-zinc-950/60">
-              <dt className="text-[10px] text-zinc-500 dark:text-zinc-400">{t.protons}</dt>
-              <dd className="font-semibold">{element.atomicNumber}</dd>
-            </div>
-            <div className="rounded-lg bg-zinc-50 p-2 dark:bg-zinc-950/60">
-              <dt className="text-[10px] text-zinc-500 dark:text-zinc-400">{t.electrons}</dt>
-              <dd className="font-semibold">{element.atomicNumber}</dd>
-            </div>
-            <div className="rounded-lg bg-zinc-50 p-2 dark:bg-zinc-950/60">
-              <dt className="text-[10px] text-zinc-500 dark:text-zinc-400">{t.neutrons}</dt>
-              <dd className="font-semibold">{neutrons ?? '—'}</dd>
-            </div>
-          </dl>
-          <p className="mt-1 text-[10px] text-zinc-500 dark:text-zinc-400">{t.neutronsNote}</p>
-          <div className="mt-3 rounded-lg border border-zinc-200 bg-zinc-50 p-2.5 dark:border-zinc-800 dark:bg-zinc-950/60">
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">{t.configuration}</p>
-            <p className="mt-0.5 font-mono text-sm font-medium break-words">
-              {element.electronConfiguration}
-            </p>
-            {element.electronConfigurationNote && (
-              <p className="mt-1 text-[10px] text-zinc-500 dark:text-zinc-400">
-                {element.electronConfigurationNote[locale]}
+        <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-zinc-200 bg-white/95 p-4 backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/95">
+          <div className="flex items-start gap-3">
+            <span
+              aria-hidden
+              className="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+            >
+              <span className="font-mono text-[10px] opacity-70">{element.atomicNumber}</span>
+              <span className="text-2xl font-bold leading-none">{element.symbol}</span>
+            </span>
+            <div>
+              <h2 id="periodic-details-heading" className="text-xl font-bold tracking-tight">
+                {name}
+              </h2>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                {alternateName} · {t.categories[element.category]}
               </p>
-            )}
+              <p className="mt-1 font-mono text-xs text-zinc-500 dark:text-zinc-400">
+                {t.atomicMass}: {formatValue(element.atomicMass, locale)}{' '}
+                <DataQualityBadge qualifier={element.atomicMass.qualifier} dictionary={dictionary} />
+              </p>
+            </div>
           </div>
-        </section>
+          <button
+            ref={closeRef}
+            type="button"
+            onClick={onClose}
+            aria-label={t.close}
+            className="rounded-lg border border-zinc-200 p-1.5 text-zinc-500 hover:bg-zinc-50 hover:text-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:border-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+          >
+            <X size={16} aria-hidden />
+          </button>
+        </div>
 
-        <section aria-labelledby="periodic-physical">
-          <h3 id="periodic-physical" className="text-sm font-semibold">
-            {t.physical}
-          </h3>
-          <dl className="mt-2">
-            <PropertyRow
-              label={t.meltingPoint}
-              quantity={element.physical.meltingPointK}
-              dictionary={dictionary}
-              locale={locale}
-            />
-            <PropertyRow
-              label={t.boilingPoint}
-              quantity={element.physical.boilingPointK}
-              dictionary={dictionary}
-              locale={locale}
-            />
-            <PropertyRow
-              label={t.density}
-              quantity={element.physical.densityGcm3}
-              dictionary={dictionary}
-              locale={locale}
-            />
-          </dl>
-        </section>
-
-        <section aria-labelledby="periodic-chemical">
-          <h3 id="periodic-chemical" className="text-sm font-semibold">
-            {t.chemical}
-          </h3>
-          <dl className="mt-2">
-            <div className="flex items-baseline justify-between gap-3 border-b border-zinc-100 py-1.5 dark:border-zinc-800">
-              <dt className="text-xs text-zinc-500 dark:text-zinc-400">{t.oxidationStates}</dt>
-              <dd className="text-right text-sm font-medium">
-                {element.chemical.oxidationStates.join(', ')}
-              </dd>
-            </div>
-            <div className="flex items-baseline justify-between gap-3 border-b border-zinc-100 py-1.5 dark:border-zinc-800">
-              <dt className="text-xs text-zinc-500 dark:text-zinc-400">{t.commonOxidationStates}</dt>
-              <dd className="text-right text-sm font-medium">
-                {element.chemical.commonOxidationStates.join(', ')}
-              </dd>
-            </div>
-            <PropertyRow
-              label={t.electronegativity}
-              quantity={element.chemical.electronegativity}
-              dictionary={dictionary}
-              locale={locale}
-            />
-          </dl>
-        </section>
-
-        <section aria-labelledby="periodic-occurrence">
-          <h3 id="periodic-occurrence" className="text-sm font-semibold">
-            {t.occurrence}
-          </h3>
-          <p className="mt-1.5 text-sm leading-6 text-zinc-700 dark:text-zinc-300">
-            {element.occurrence[locale]}
-          </p>
-        </section>
-
-        <section aria-labelledby="periodic-applications">
-          <h3 id="periodic-applications" className="text-sm font-semibold">
-            {t.applications}
-          </h3>
-          <ul className="mt-1.5 list-disc space-y-1 pl-5 text-sm leading-6 text-zinc-700 dark:text-zinc-300">
-            {element.applications.map((application) => (
-              <li key={application.en}>{application[locale]}</li>
-            ))}
-          </ul>
-        </section>
-
-        <section aria-labelledby="periodic-discovery">
-          <h3 id="periodic-discovery" className="text-sm font-semibold">
-            {t.discovery}
-          </h3>
-          <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
-            <dt className="text-xs text-zinc-500 dark:text-zinc-400">{t.discoveryYear}</dt>
-            <dd>{element.discovery.year ?? t.notRecorded}</dd>
-            <dt className="text-xs text-zinc-500 dark:text-zinc-400">{t.discoveredBy}</dt>
-            <dd>{element.discovery.discoveredBy ?? t.notRecorded}</dd>
-            <dt className="text-xs text-zinc-500 dark:text-zinc-400">{t.discoveryPlace}</dt>
-            <dd>{element.discovery.place?.[locale] ?? t.notRecorded}</dd>
-          </dl>
-          {element.discovery.year === null && element.discovery.discoveredBy === null && (
-            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">{t.unknownDiscovery}</p>
-          )}
-        </section>
-
-        {element.dataNotes.length > 0 && (
-          <section aria-labelledby="periodic-notes">
-            <h3 id="periodic-notes" className="text-sm font-semibold">
-              {t.dataNotes}
+        <div className="space-y-5 p-4 sm:p-6">
+          <section aria-labelledby="periodic-identity">
+            <h3 id="periodic-identity" className="text-sm font-semibold">
+              {t.identity}
             </h3>
-            <ul className="mt-1.5 list-disc space-y-1 pl-5 text-xs leading-5 text-zinc-600 dark:text-zinc-300">
-              {element.dataNotes.map((note) => (
-                <li key={note.en}>{note[locale]}</li>
+            <dl className="mt-2 grid grid-cols-2 gap-x-4">
+              <div className="border-b border-zinc-100 py-1.5 dark:border-zinc-800">
+                <dt className="text-xs text-zinc-500 dark:text-zinc-400">{t.atomicNumber}</dt>
+                <dd className="text-sm font-medium">{element.atomicNumber}</dd>
+              </div>
+              <div className="border-b border-zinc-100 py-1.5 dark:border-zinc-800">
+                <dt className="text-xs text-zinc-500 dark:text-zinc-400">{t.symbol}</dt>
+                <dd className="text-sm font-medium">{element.symbol}</dd>
+              </div>
+              <div className="border-b border-zinc-100 py-1.5 dark:border-zinc-800">
+                <dt className="text-xs text-zinc-500 dark:text-zinc-400">{t.category}</dt>
+                <dd className="text-sm font-medium">{t.categories[element.category]}</dd>
+              </div>
+              <div className="border-b border-zinc-100 py-1.5 dark:border-zinc-800">
+                <dt className="text-xs text-zinc-500 dark:text-zinc-400">{t.group}</dt>
+                <dd className="text-sm font-medium">
+                  {element.group === null ? t.noValue : element.group}
+                </dd>
+              </div>
+              <div className="border-b border-zinc-100 py-1.5 dark:border-zinc-800">
+                <dt className="text-xs text-zinc-500 dark:text-zinc-400">{t.period}</dt>
+                <dd className="text-sm font-medium">{element.period}</dd>
+              </div>
+              <div className="border-b border-zinc-100 py-1.5 dark:border-zinc-800">
+                <dt className="text-xs text-zinc-500 dark:text-zinc-400">{t.block}</dt>
+                <dd className="text-sm font-medium">{t.blocks[element.block]}</dd>
+              </div>
+              <div className="border-b border-zinc-100 py-1.5 dark:border-zinc-800">
+                <dt className="text-xs text-zinc-500 dark:text-zinc-400">{t.standardState}</dt>
+                <dd className="flex items-center gap-1.5 text-sm font-medium">
+                  {t.states[element.standardState]}
+                  <DataQualityBadge qualifier={element.standardStateQualifier} dictionary={dictionary} />
+                </dd>
+              </div>
+              <div className="border-b border-zinc-100 py-1.5 dark:border-zinc-800">
+                <dt className="text-xs text-zinc-500 dark:text-zinc-400">{t.reviewStatus}</dt>
+                <dd className="text-sm font-medium">{dictionary.review[element.reviewStatus]}</dd>
+              </div>
+            </dl>
+            <p className="mt-1 text-[10px] text-zinc-500 dark:text-zinc-400">{t.conditions}</p>
+          </section>
+
+          <section aria-labelledby="periodic-structure">
+            <h3 id="periodic-structure" className="text-sm font-semibold">
+              {t.structure}
+            </h3>
+            <dl className="mt-2 grid grid-cols-3 gap-2 text-center">
+              <div className="rounded-lg bg-zinc-50 p-2 dark:bg-zinc-950/60">
+                <dt className="text-[10px] text-zinc-500 dark:text-zinc-400">{t.protons}</dt>
+                <dd className="font-semibold">{element.atomicNumber}</dd>
+              </div>
+              <div className="rounded-lg bg-zinc-50 p-2 dark:bg-zinc-950/60">
+                <dt className="text-[10px] text-zinc-500 dark:text-zinc-400">{t.electrons}</dt>
+                <dd className="font-semibold">{element.atomicNumber}</dd>
+              </div>
+              <div className="rounded-lg bg-zinc-50 p-2 dark:bg-zinc-950/60">
+                <dt className="text-[10px] text-zinc-500 dark:text-zinc-400">{t.neutrons}</dt>
+                <dd className="font-semibold">{neutrons ?? '—'}</dd>
+              </div>
+            </dl>
+            <p className="mt-1 text-[10px] text-zinc-500 dark:text-zinc-400">{t.neutronsNote}</p>
+            <div className="mt-3 rounded-lg border border-zinc-200 bg-zinc-50 p-2.5 dark:border-zinc-800 dark:bg-zinc-950/60">
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">{t.configuration}</p>
+              <p className="mt-0.5 font-mono text-sm font-medium break-words">
+                {element.electronConfiguration}
+              </p>
+              {element.electronConfigurationNote && (
+                <p className="mt-1 text-[10px] text-zinc-500 dark:text-zinc-400">
+                  {element.electronConfigurationNote[locale]}
+                </p>
+              )}
+            </div>
+          </section>
+
+          <section aria-labelledby="periodic-physical">
+            <h3 id="periodic-physical" className="text-sm font-semibold">
+              {t.physical}
+            </h3>
+            <dl className="mt-2">
+              <PropertyRow
+                label={t.meltingPoint}
+                quantity={element.physical.meltingPointK}
+                dictionary={dictionary}
+                locale={locale}
+              />
+              <PropertyRow
+                label={t.boilingPoint}
+                quantity={element.physical.boilingPointK}
+                dictionary={dictionary}
+                locale={locale}
+              />
+              <PropertyRow
+                label={t.density}
+                quantity={element.physical.densityGcm3}
+                dictionary={dictionary}
+                locale={locale}
+              />
+            </dl>
+          </section>
+
+          <section aria-labelledby="periodic-chemical">
+            <h3 id="periodic-chemical" className="text-sm font-semibold">
+              {t.chemical}
+            </h3>
+            <dl className="mt-2">
+              <div className="flex items-baseline justify-between gap-3 border-b border-zinc-100 py-1.5 dark:border-zinc-800">
+                <dt className="text-xs text-zinc-500 dark:text-zinc-400">{t.oxidationStates}</dt>
+                <dd className="text-right text-sm font-medium">
+                  {element.chemical.oxidationStates.join(', ')}
+                </dd>
+              </div>
+              <div className="flex items-baseline justify-between gap-3 border-b border-zinc-100 py-1.5 dark:border-zinc-800">
+                <dt className="text-xs text-zinc-500 dark:text-zinc-400">{t.commonOxidationStates}</dt>
+                <dd className="text-right text-sm font-medium">
+                  {element.chemical.commonOxidationStates.join(', ')}
+                </dd>
+              </div>
+              <PropertyRow
+                label={t.electronegativity}
+                quantity={element.chemical.electronegativity}
+                dictionary={dictionary}
+                locale={locale}
+              />
+            </dl>
+          </section>
+
+          <section aria-labelledby="periodic-occurrence">
+            <h3 id="periodic-occurrence" className="text-sm font-semibold">
+              {t.occurrence}
+            </h3>
+            <p className="mt-1.5 text-sm leading-6 text-zinc-700 dark:text-zinc-300">
+              {element.occurrence[locale]}
+            </p>
+          </section>
+
+          <section aria-labelledby="periodic-applications">
+            <h3 id="periodic-applications" className="text-sm font-semibold">
+              {t.applications}
+            </h3>
+            <ul className="mt-1.5 list-disc space-y-1 pl-5 text-sm leading-6 text-zinc-700 dark:text-zinc-300">
+              {element.applications.map((application) => (
+                <li key={application.en}>{application[locale]}</li>
               ))}
             </ul>
           </section>
-        )}
 
-        <section aria-labelledby="periodic-review">
-          <h3 id="periodic-review" className="text-sm font-semibold">
-            {t.reviewStatus}
-          </h3>
-          <p className="mt-1 text-sm font-medium">{dictionary.review[element.reviewStatus]}</p>
-          <p className="mt-1 text-xs leading-5 text-zinc-500 dark:text-zinc-400">{t.reviewNote}</p>
-        </section>
+          <section aria-labelledby="periodic-discovery">
+            <h3 id="periodic-discovery" className="text-sm font-semibold">
+              {t.discovery}
+            </h3>
+            <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
+              <dt className="text-xs text-zinc-500 dark:text-zinc-400">{t.discoveryYear}</dt>
+              <dd>{element.discovery.year ?? t.notRecorded}</dd>
+              <dt className="text-xs text-zinc-500 dark:text-zinc-400">{t.discoveredBy}</dt>
+              <dd>{element.discovery.discoveredBy ?? t.notRecorded}</dd>
+              <dt className="text-xs text-zinc-500 dark:text-zinc-400">{t.discoveryPlace}</dt>
+              <dd>{element.discovery.place?.[locale] ?? t.notRecorded}</dd>
+            </dl>
+            {element.discovery.year === null && element.discovery.discoveredBy === null && (
+              <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">{t.unknownDiscovery}</p>
+            )}
+          </section>
 
-        <section aria-labelledby="periodic-references">
-          <h3 id="periodic-references" className="text-sm font-semibold">
-            {t.references}
-          </h3>
-          <ul className="mt-1.5 space-y-1.5 text-xs">
-            {references.map((reference) => (
-              <li key={reference.id}>
-                <a
-                  href={reference.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-start gap-1 font-medium text-blue-700 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:text-blue-300"
-                >
-                  <span>
-                    {reference.title} — {reference.publisher}
-                  </span>
-                  <ArrowUpRight size={12} aria-hidden className="mt-0.5 shrink-0" />
-                </a>
-              </li>
-            ))}
-          </ul>
-        </section>
+          {element.dataNotes.length > 0 && (
+            <section aria-labelledby="periodic-notes">
+              <h3 id="periodic-notes" className="text-sm font-semibold">
+                {t.dataNotes}
+              </h3>
+              <ul className="mt-1.5 list-disc space-y-1 pl-5 text-xs leading-5 text-zinc-600 dark:text-zinc-300">
+                {element.dataNotes.map((note) => (
+                  <li key={note.en}>{note[locale]}</li>
+                ))}
+              </ul>
+            </section>
+          )}
 
-        <p className="rounded-lg border border-amber-300/60 bg-amber-50 p-2.5 text-[11px] leading-5 text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
-          {t.educationalNotice}
-        </p>
+          <section aria-labelledby="periodic-review">
+            <h3 id="periodic-review" className="text-sm font-semibold">
+              {t.reviewStatus}
+            </h3>
+            <p className="mt-1 text-sm font-medium">{dictionary.review[element.reviewStatus]}</p>
+            <p className="mt-1 text-xs leading-5 text-zinc-500 dark:text-zinc-400">{t.reviewNote}</p>
+          </section>
+
+          <section aria-labelledby="periodic-references">
+            <h3 id="periodic-references" className="text-sm font-semibold">
+              {t.references}
+            </h3>
+            <ul className="mt-1.5 space-y-1.5 text-xs">
+              {references.map((reference) => (
+                <li key={reference.id}>
+                  <a
+                    href={reference.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-start gap-1 font-medium text-blue-700 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:text-blue-300"
+                  >
+                    <span>
+                      {reference.title} — {reference.publisher}
+                    </span>
+                    <ArrowUpRight size={12} aria-hidden className="mt-0.5 shrink-0" />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <p className="rounded-lg border border-amber-300/60 bg-amber-50 p-2.5 text-[11px] leading-5 text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
+            {t.educationalNotice}
+          </p>
+        </div>
       </div>
-    </aside>
+    </div>
   );
 }

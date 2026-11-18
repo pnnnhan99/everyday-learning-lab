@@ -12,7 +12,7 @@ isotopes and electron configuration. Do not merge the two models.
 
 | English overview | English details |
 | --- | --- |
-| ![Periodic table in English with search, filters and all 118 elements](assets/periodic-table/overview-en.png) | ![Iron details panel showing classification, structure and properties](assets/periodic-table/details-en.png) |
+| ![Periodic table in English with search, filters and all 118 elements](assets/periodic-table/overview-en.png) | ![Iron details dialog showing classification, structure and properties](assets/periodic-table/details-en.png) |
 
 | Vietnamese overview | Mobile layout with horizontal scrolling |
 | --- | --- |
@@ -29,15 +29,16 @@ isotopes and electron configuration. Do not merge the two models.
 - A category legend that also acts as a filter. The legend and cells use text
   codes and accessible labels, so category is never communicated by colour
   alone.
-- A details panel with identity, atomic structure, electron configuration,
-  physical and chemical properties, natural occurrence, applications,
-  discovery, references, review status and explicit data notes.
+- A modal details dialog with identity, atomic structure, electron
+  configuration, physical and chemical properties, natural occurrence,
+  applications, discovery, references, review status and explicit data notes.
+  Clicking or tapping a cell opens it; Escape, the close button or the backdrop
+  closes it.
 - Complete Vietnamese and English copy. Element names, occurrence text,
   applications, category names and every control are localized.
 - Roving-tabindex keyboard navigation across the grid: arrow keys, Home and End
-  move focus; Enter or Space opens the focused element. Focus rings are
-  visible, and animations are limited to colour transitions that respect
-  `prefers-reduced-motion`.
+  move focus; Enter or Space opens the focused element in the details dialog.
+  Focus rings are visible, and animations respect `prefers-reduced-motion`.
 - Horizontal scrolling on small screens so the scientific 18-column structure
   is preserved instead of reflowed.
 
@@ -178,8 +179,12 @@ position helper and the 18-column layout tests as well.
 - `aria-pressed` exposes the selected element; a visible ring marks it.
 - Exactly one cell is in the tab order at a time; arrow keys move the roving
   tab stop and focus.
-- `aria-live` announces the selected element in the details panel and the
+- `aria-live` announces the selected element in the details dialog and the
   filtered result count.
+- The details view is a modal `dialog` with `aria-modal="true"`, a labelled
+  heading and focus placed on the close button when it opens. Tab and
+  Shift+Tab stay inside the dialog, Escape and the backdrop close it, focus
+  returns to the element that opened it, and background scrolling is locked.
 - The grid keeps focus visible and uses `motion-reduce:transition-none`.
 - The legend includes category abbreviations and full localized names.
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Atom } from 'lucide-react';
 
 import { periodicElements, getPeriodicElement } from '@/data/periodic-table/elements';
@@ -25,7 +25,6 @@ export default function PeriodicTableView() {
   const t = dictionary.periodicTable;
   const [filters, setFilters] = useState<PeriodicTableFilterState>(EMPTY_FILTERS);
   const [selectedAtomicNumber, setSelectedAtomicNumber] = useState<number | null>(null);
-  const detailsRef = useRef<HTMLDivElement | null>(null);
   const selected = selectedAtomicNumber === null ? null : getPeriodicElement(selectedAtomicNumber) ?? null;
   const activeFilters = hasActiveFilters(filters);
 
@@ -40,12 +39,7 @@ export default function PeriodicTableView() {
     );
   }, [activeFilters, filters]);
 
-  useEffect(() => {
-    if (selectedAtomicNumber === null || !detailsRef.current) return;
-    if (!window.matchMedia('(max-width: 1023px)').matches) return;
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    detailsRef.current.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
-  }, [selectedAtomicNumber]);
+  const closeDetails = useCallback(() => setSelectedAtomicNumber(null), []);
 
   const selectCategory = (category: ElementCategory | 'all') => {
     setFilters((current) => ({ ...current, category }));
@@ -112,14 +106,12 @@ export default function PeriodicTableView() {
           onSelect={setSelectedAtomicNumber}
         />
 
-        <div ref={detailsRef} className="scroll-mt-20">
-          <PeriodicElementDetails
-            element={selected}
-            locale={locale}
-            dictionary={dictionary}
-            onClose={() => setSelectedAtomicNumber(null)}
-          />
-        </div>
+        <PeriodicElementDetails
+          element={selected}
+          locale={locale}
+          dictionary={dictionary}
+          onClose={closeDetails}
+        />
       </div>
     </div>
   );

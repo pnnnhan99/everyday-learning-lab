@@ -20,7 +20,7 @@ vi.mock('@/i18n/useDictionary', async () => {
 const allMatching = new Set(periodicElements.map((element) => element.atomicNumber));
 
 describe('PeriodicTableView', () => {
-  it('renders the full English table, filters, legend and empty details prompt', () => {
+  it('renders the full English table, filters, legend and no modal before selection', () => {
     i18n.locale = 'en';
     const html = renderToStaticMarkup(<PeriodicTableView />);
 
@@ -33,7 +33,7 @@ describe('PeriodicTableView', () => {
     expect(html).toContain('Element categories');
     expect(html).toContain('Lanthanides');
     expect(html).toContain('Actinides');
-    expect(html).toContain('Select an element to read its details.');
+    expect(html).not.toContain('aria-modal="true"');
     expect(html).toContain('118 / 118 elements');
 
     // First and last elements prove that the whole dataset is rendered.
@@ -55,7 +55,7 @@ describe('PeriodicTableView', () => {
     expect(html).toContain('Phân loại nguyên tố');
     expect(html).toContain('Lanthanit');
     expect(html).toContain('Actinit');
-    expect(html).toContain('Chọn một nguyên tố để xem chi tiết.');
+    expect(html).not.toContain('aria-modal="true"');
     expect(html).toContain('Hydro');
     expect(html).toContain('Oganesson');
   });
@@ -111,7 +111,21 @@ describe('PeriodicTableGrid', () => {
 });
 
 describe('PeriodicElementDetails', () => {
-  it('renders English identity, structure, properties, discovery and references', () => {
+  it('renders no markup when no element is selected', () => {
+    i18n.locale = 'en';
+    const html = renderToStaticMarkup(
+      <PeriodicElementDetails
+        element={null}
+        locale="en"
+        dictionary={getDictionary('en')}
+        onClose={() => undefined}
+      />,
+    );
+
+    expect(html).toBe('');
+  });
+
+  it('renders an accessible modal dialog with English identity, structure, properties, discovery and references', () => {
     i18n.locale = 'en';
     const html = renderToStaticMarkup(
       <PeriodicElementDetails
@@ -122,6 +136,10 @@ describe('PeriodicElementDetails', () => {
       />,
     );
 
+    expect(html).toContain('role="dialog"');
+    expect(html).toContain('aria-modal="true"');
+    expect(html).toContain('aria-labelledby="periodic-details-heading"');
+    expect(html).toContain('aria-label="Close details"');
     expect(html).toContain('Iron');
     expect(html).toContain('Sắt');
     expect(html).toContain('Atomic structure');
