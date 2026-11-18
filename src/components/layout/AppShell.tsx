@@ -19,6 +19,7 @@ function pageMetadata(dictionary: Dictionary, pathname: string): PageMeta {
   if (pathname === '/lab') return pages.lab;
   if (pathname === '/lab/chemistry') return pages.labChemistry;
   if (pathname === '/lab/3d') return pages.lab3d;
+  if (pathname === '/chemistry/periodic-table') return pages.periodicTable;
   if (pathname === '/elements') return pages.elements;
   if (pathname === '/reactions') return pages.reactions;
   if (pathname === '/admin') return pages.admin;

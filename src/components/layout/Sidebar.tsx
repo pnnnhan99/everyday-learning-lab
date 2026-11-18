@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FlaskConical, Atom, TestTubes, ShieldPlus, User, Compass, Puzzle, Boxes, Beaker, House } from 'lucide-react';
+import { FlaskConical, Atom, TestTubes, ShieldPlus, User, Compass, Puzzle, Boxes, Beaker, House, Grid3x3 } from 'lucide-react';
 import { useUiStore } from '@/store/uiStore';
 import { useDictionary } from '@/i18n/useDictionary';
 
@@ -18,6 +18,7 @@ export default function Sidebar() {
     { href: '/explore', label: dictionary.nav.explore, icon: Compass },
     { href: '/challenges', label: dictionary.nav.challenges, icon: Puzzle },
     { href: '/lab/chemistry', label: dictionary.nav.chemistryLab, icon: FlaskConical },
+    { href: '/chemistry/periodic-table', label: dictionary.nav.periodicTable, icon: Grid3x3 },
     { href: '/lab', label: dictionary.nav.simulations, icon: Beaker },
     { href: '/lab/3d', label: dictionary.nav.lab3d, icon: Boxes },
     { href: '/elements', label: dictionary.nav.elements, icon: Atom },

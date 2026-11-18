@@ -29,6 +29,7 @@ The repository currently uses:
 - Next.js App Router, React, and TypeScript.
 - A discover-first home page (`/`) and Explore page that read from one shared learning catalog covering all five domains; the chemistry workspace now lives at `/lab/chemistry`.
 - A generic simulation runner at `/lab/[simulationId]` that renders declared inputs, runs the typed contract, and can save the five newest runs in this browser so learners can compare inputs and numeric results side by side. Saved runs live under `ess:sim-runs:<simulationId>` and never leave the device.
+- An interactive periodic table at `/chemistry/periodic-table` covering all 118 officially recognised elements, with bilingual search, category/group/period filters, keyboard navigation and sourced detail panels. Its static, validated dataset is independent of the SQLite substance catalogue; see [docs/periodic-table.md](docs/periodic-table.md).
 - Tailwind CSS for styling.
 - Zustand for client-side state.
 - dnd-kit for drag-and-drop interactions.
@@ -105,9 +106,9 @@ When it is unset or invalid, canonical URLs and the sitemap fall back to the doc
 
 ```text
 app/                  Next.js routes, layouts, and API handlers
-src/components/       UI, chemistry laboratory, domain cards, and shared layout
+src/components/       UI, chemistry laboratory, periodic table, domain cards, and shared layout
 src/learning/         Shared content catalog, lesson/challenge examples, and validation
-src/data/             Seed and authored example chemistry content
+src/data/             Seed and authored chemistry content, including the periodic-table dataset
 src/i18n/             Vietnamese/English UI dictionaries
 src/lib/              Persistence, repositories, API helpers, and domain utilities
 src/services/         Application services

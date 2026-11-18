@@ -13,6 +13,7 @@ const staticPaths = [
   '/lab',
   '/lab/chemistry',
   '/lab/3d',
+  '/chemistry/periodic-table',
   '/profile',
 ];
 

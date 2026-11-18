@@ -10,6 +10,7 @@ app/
   admin/                Content-management page
   elements/             Element catalog
   reactions/            Reaction catalog
+  chemistry/periodic-table/  Interactive periodic table
   profile/              Profile/preferences page
   lab/chemistry/        Existing drag-and-drop chemistry workspace
   layout.tsx             Root layout and metadata
@@ -21,6 +22,7 @@ src/
     laboratory/          Drag-and-drop chemistry workspace
     learning/            Reusable domain cards
     layout/              App shell and navigation
+    periodic-table/      Interactive periodic-table UI
   learning/              Shared content catalog, lab3d model ids, and examples
   data/                  Seed/example chemistry data
   i18n/                  Vietnamese/English UI dictionaries
@@ -39,6 +41,7 @@ scripts/                  Data and persistence validation
 - Element and reaction routes use server-side validation; mutation routes use a maintainer-token guard.
 - Element and reaction persistence is abstracted behind repository interfaces and currently uses SQLite via `better-sqlite3`. See [persistence.md](persistence.md).
 - `three`, `@react-three/fiber`, and `@react-three/drei` are declared dependencies. Audit actual usage before introducing new 3D infrastructure.
+- `/chemistry/periodic-table` is a client-rendered, fully bilingual reference page backed by the static `src/data/periodic-table` dataset. It is intentionally separate from `/elements` (database-backed lab substances linked to reactions). Domain types and runtime validation live in `src/types/periodic.ts`; grid/search/keyboard logic lives in `src/lib/periodic/table.ts`; maintenance and sources are documented in [periodic-table.md](periodic-table.md).
 - `src/i18n/` holds the typed Vietnamese/English dictionary and the `useDictionary`/`useLocale` hooks backed by the `locale` field in `src/store/uiStore.ts`. Client components must read copy from the dictionary instead of hardcoding English. Vietnamese lesson and challenge editions live in `src/learning/examples/vi.ts` and are resolved through `getLocalizedLesson`/`getLocalizedChallenge` in the catalog. `src/i18n/catalog.ts` does the same for database-backed element/reaction records: it reads their optional `vi` edition and falls back to English when absent. Because locale is client state, server-rendered catalog routes read data in `app/elements/page.tsx` / `app/reactions/page.tsx` and hand it to the client `ElementsView` / `ReactionsView` components.
 - Server components cannot react to the client locale without a cookie or locale route segment. Catalog data (element/reaction records), admin forms, profile details, and 3D scene labels remain English-only.
 
