@@ -2,6 +2,7 @@
 
 Status: proposed adoption plan. Documentation only; no new simulation or dependency is delivered.
 Decision date: 2026-10-31.
+Runtime status (2026-11-25): the 3D lab now uses an explicit model → scene registry and keyboard-accessible rotate/zoom/reset camera buttons backed by a testable command helper. Pause-when-hidden, quality presets, resource disposal, mobile performance measurement, scientific review, and the Rapier spike remain open.
 
 Read alongside [product architecture](PRODUCT_ARCHITECTURE.md), [simulation contract](simulation-contract.md), and [simulation registry reference](SIMULATIONS.md).
 

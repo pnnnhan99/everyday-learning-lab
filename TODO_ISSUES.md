@@ -32,7 +32,7 @@ These are source-presence checks only. They do not establish that the app builds
 
 - [x] Define a typed simulation contract independent of React rendering.
 - [x] Lazy-load 3D scenes on the client and provide loading, error, reduced-motion, and unsupported-WebGL fallbacks.
-- [x] Provide keyboard-accessible alternatives for essential scene interactions.
+- [x] Provide keyboard-accessible alternatives for essential scene interactions (camera rotate, zoom, and reset buttons; parameter controls remain native HTML inputs).
 - [x] Keep calculations and validation in independently testable domain logic.
 - [x] Label models as illustrative or quantitative and document assumptions, units, limitations, sources, and safety notes.
 

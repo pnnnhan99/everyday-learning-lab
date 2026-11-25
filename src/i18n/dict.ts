@@ -460,12 +460,18 @@ const en = {
     webglUnavailable:
       'WebGL is unavailable in this browser. Use the explanation and model notes below to continue learning.',
     controls:
-      'Controls: drag to rotate, scroll or pinch to zoom.',
+      'Controls: drag to rotate, scroll or pinch to zoom. Keyboard users can use the camera buttons below the model.',
     motionPreference: 'Motion preference',
     reduced: 'reduced',
     standard: 'standard',
+    cameraControls: 'Camera controls',
+    resetCamera: 'Reset view',
+    rotateLeft: 'Rotate left',
+    rotateRight: 'Rotate right',
+    zoomIn: 'Zoom in',
+    zoomOut: 'Zoom out',
     controlsSr:
-      'Use the controls below the model to change the launch or lighting parameters.',
+      'Use the camera buttons and the controls below the model to rotate, zoom, reset the view, or change the launch or lighting parameters.',
     whatSeeing: 'What you are seeing',
     waterBody:
       'Water has the chemical formula H₂O. Each molecule contains two hydrogen atoms bonded to one oxygen atom. Spheres represent atoms and cylinders represent bonds.',
@@ -981,11 +987,17 @@ const vi: Dictionary = {
     loadingLab: 'Đang tải phòng 3D…',
     webglUnavailable:
       'Trình duyệt này không hỗ trợ WebGL. Hãy dùng phần giải thích và ghi chú mô hình bên dưới để tiếp tục học.',
-    controls: 'Điều khiển: kéo để xoay, cuộn hoặc chụm để phóng to.',
+    controls: 'Điều khiển: kéo để xoay, cuộn hoặc chụm để phóng to. Người dùng bàn phím có thể dùng các nút điều khiển góc nhìn bên dưới mô hình.',
     motionPreference: 'Tùy chọn chuyển động',
     reduced: 'giảm',
     standard: 'tiêu chuẩn',
-    controlsSr: 'Dùng các điều khiển bên dưới mô hình để đổi tham số ném hoặc ánh sáng.',
+    cameraControls: 'Điều khiển góc nhìn',
+    resetCamera: 'Đặt lại góc nhìn',
+    rotateLeft: 'Xoay sang trái',
+    rotateRight: 'Xoay sang phải',
+    zoomIn: 'Phóng to',
+    zoomOut: 'Thu nhỏ',
+    controlsSr: 'Dùng các nút điều khiển góc nhìn và các điều khiển bên dưới mô hình để xoay, phóng to, đặt lại góc nhìn hoặc đổi tham số ném và ánh sáng.',
     whatSeeing: 'Bạn đang thấy gì',
     waterBody:
       'Nước có công thức hóa học H₂O. Mỗi phân tử gồm hai nguyên tử hydro liên kết với một nguyên tử oxy. Hình cầu biểu diễn nguyên tử, hình trụ biểu diễn liên kết.',

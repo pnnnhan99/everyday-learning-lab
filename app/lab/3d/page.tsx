@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useSearchParams } from 'next/navigation';
-import { Suspense, useEffect, useState, useSyncExternalStore, useId } from 'react';
+import { Suspense, useEffect, useRef, useState, useSyncExternalStore, useId } from 'react';
 import { co2o2Simulation } from '@/domains/biology/simulations/co2-o2';
 import type { CO2O2Result } from '@/domains/biology/simulations/co2-o2';
 import { projectileSimulation } from '@/domains/physics/simulations/projectile';
@@ -10,6 +10,8 @@ import type { ProjectileResult } from '@/domains/physics/simulations/projectile'
 import type { Lab3DModel } from '@/learning/lab3d';
 import { resolveInitialModel } from '@/components/lab3d/params';
 import { SceneErrorBoundary } from '@/components/lab3d/SceneErrorBoundary';
+import { getSceneDescriptor, LAB3D_SCENE_IDS } from '@/components/lab3d/sceneRegistry';
+import type { CameraCommand, CameraCommandInput } from '@/components/lab3d/sceneTypes';
 import { useDictionary } from '@/i18n/useDictionary';
 import type { Dictionary } from '@/i18n/dict';
 
@@ -54,6 +56,13 @@ function Lab3DPageInner() {
   const [speed, setSpeed] = useState(20);
   const [angle, setAngle] = useState(45);
   const [sunlight, setSunlight] = useState(0.8);
+  const [cameraCommand, setCameraCommand] = useState<CameraCommand | null>(null);
+  const cameraCommandId = useRef(0);
+
+  function sendCameraCommand(command: CameraCommandInput) {
+    cameraCommandId.current += 1;
+    setCameraCommand({ ...command, id: cameraCommandId.current });
+  }
 
   const [projectile, setProjectile] = useState<ProjectileResult | null>(null);
   const [plant, setPlant] = useState<CO2O2Result | null>(null);
@@ -61,11 +70,15 @@ function Lab3DPageInner() {
   const [plantError, setPlantError] = useState<string | null>(null);
   const sceneAltTextId = useId();
 
-  const models: Array<{ id: Lab3DModel; label: string; domain: string; modelType: string }> = [
-    { id: 'water', label: dictionary.home.modelLabels.water, domain: dictionary.domains.chemistry, modelType: t.modelTypeIllustrative },
-    { id: 'projectile', label: dictionary.home.modelLabels.projectile, domain: dictionary.domains.physics, modelType: t.modelTypeQuantitative },
-    { id: 'plant-cell', label: dictionary.home.modelLabels['plant-cell'], domain: dictionary.domains.biology, modelType: t.modelTypeIllustrative },
-  ];
+  const models = LAB3D_SCENE_IDS.map((id) => {
+    const descriptor = getSceneDescriptor(id);
+    return {
+      id,
+      label: dictionary.home.modelLabels[id],
+      domain: dictionary.domains[descriptor.domainKey],
+      modelType: t[descriptor.modelTypeKey],
+    };
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -125,7 +138,10 @@ function Lab3DPageInner() {
               key={item.id}
               type="button"
               aria-pressed={model === item.id}
-              onClick={() => setModel(item.id)}
+              onClick={() => {
+                setModel(item.id);
+                setCameraCommand(null);
+              }}
               className={`rounded-xl border px-4 py-2 text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600 ${
                 model === item.id
                   ? 'border-sky-500 bg-sky-50 text-sky-700 dark:border-sky-300 dark:bg-sky-300/15 dark:text-sky-100'
@@ -144,6 +160,24 @@ function Lab3DPageInner() {
               {selected.modelType}
             </span>
           </div>
+          <div className="flex flex-wrap gap-2 border-b border-white/10 px-4 py-3" role="group" aria-label={t.cameraControls}>
+            {([
+              ['rotateLeft', t.rotateLeft, { kind: 'rotate', direction: -1 }],
+              ['rotateRight', t.rotateRight, { kind: 'rotate', direction: 1 }],
+              ['zoomIn', t.zoomIn, { kind: 'zoom', direction: 1 }],
+              ['zoomOut', t.zoomOut, { kind: 'zoom', direction: -1 }],
+              ['resetCamera', t.resetCamera, { kind: 'reset' }],
+            ] as const).map(([key, label, command]) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => sendCameraCommand(command)}
+                className="min-h-10 rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-xs font-medium text-white transition hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-300 sm:text-sm"
+              >
+                {label}
+              </button>
+            ))}
+          </div>
           <p id={sceneAltTextId} className="sr-only">
             {modelAltText(model, dictionary)}
           </p>
@@ -157,6 +191,7 @@ function Lab3DPageInner() {
                 sunlight={sunlight}
                 labels={{ launch: t.launch, nucleus: t.nucleus, vacuole: t.vacuole }}
                 fallbackText={t.webglUnavailable}
+                cameraCommand={cameraCommand}
               />
             </SceneErrorBoundary>
           </div>
