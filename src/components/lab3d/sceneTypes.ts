@@ -2,6 +2,8 @@
 // Domain calculations stay in src/domains; these types only describe what a
 // scene adapter renders and how the viewer asks the camera to move.
 
+import type { Lab3DQualitySettings } from './quality';
+
 export type Point3 = [number, number, number];
 
 export type TrajectoryPoint = { x: number; y: number };
@@ -16,6 +18,7 @@ export type Lab3DSceneProps = {
   trajectory: TrajectoryPoint[];
   sunlight: number;
   labels: SceneLabels;
+  quality: Lab3DQualitySettings;
 };
 
 export type CameraCommandInput =

@@ -470,6 +470,10 @@ const en = {
     rotateRight: 'Rotate right',
     zoomIn: 'Zoom in',
     zoomOut: 'Zoom out',
+    quality: 'Detail level',
+    qualityStandard: 'Standard detail',
+    qualityLow: 'Low detail',
+    qualityNote: 'Detail level changes rendering only; model results stay the same.',
     controlsSr:
       'Use the camera buttons and the controls below the model to rotate, zoom, reset the view, or change the launch or lighting parameters.',
     whatSeeing: 'What you are seeing',
@@ -997,6 +1001,10 @@ const vi: Dictionary = {
     rotateRight: 'Xoay sang phải',
     zoomIn: 'Phóng to',
     zoomOut: 'Thu nhỏ',
+    quality: 'Mức chi tiết',
+    qualityStandard: 'Chi tiết tiêu chuẩn',
+    qualityLow: 'Chi tiết thấp',
+    qualityNote: 'Mức chi tiết chỉ đổi cách hiển thị; kết quả mô hình không đổi.',
     controlsSr: 'Dùng các nút điều khiển góc nhìn và các điều khiển bên dưới mô hình để xoay, phóng to, đặt lại góc nhìn hoặc đổi tham số ném và ánh sáng.',
     whatSeeing: 'Bạn đang thấy gì',
     waterBody:

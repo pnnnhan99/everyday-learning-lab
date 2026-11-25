@@ -10,6 +10,7 @@ import type { ProjectileResult } from '@/domains/physics/simulations/projectile'
 import type { Lab3DModel } from '@/learning/lab3d';
 import { resolveInitialModel } from '@/components/lab3d/params';
 import { SceneErrorBoundary } from '@/components/lab3d/SceneErrorBoundary';
+import { resolveQuality, type Lab3DQuality } from '@/components/lab3d/quality';
 import { getSceneDescriptor, LAB3D_SCENE_IDS } from '@/components/lab3d/sceneRegistry';
 import type { CameraCommand, CameraCommandInput } from '@/components/lab3d/sceneTypes';
 import { useDictionary } from '@/i18n/useDictionary';
@@ -57,6 +58,7 @@ function Lab3DPageInner() {
   const [angle, setAngle] = useState(45);
   const [sunlight, setSunlight] = useState(0.8);
   const [cameraCommand, setCameraCommand] = useState<CameraCommand | null>(null);
+  const [quality, setQuality] = useState<Lab3DQuality>(() => resolveQuality(searchParams.get('quality')));
   const cameraCommandId = useRef(0);
 
   function sendCameraCommand(command: CameraCommandInput) {
@@ -178,6 +180,27 @@ function Lab3DPageInner() {
               </button>
             ))}
           </div>
+          <div className="flex flex-wrap items-center gap-2 border-b border-white/10 px-4 py-3" role="group" aria-label={t.quality}>
+            {([
+              ['standard', t.qualityStandard],
+              ['low', t.qualityLow],
+            ] as const).map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={quality === value}
+                onClick={() => setQuality(value)}
+                className={`min-h-10 rounded-lg border px-3 py-2 text-xs font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-300 sm:text-sm ${
+                  quality === value
+                    ? 'border-sky-300 bg-sky-300/15 text-white'
+                    : 'border-white/20 bg-white/5 text-white/80 hover:bg-white/10'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+            <span className="text-[11px] text-white/60">{t.qualityNote}</span>
+          </div>
           <p id={sceneAltTextId} className="sr-only">
             {modelAltText(model, dictionary)}
           </p>
@@ -192,6 +215,7 @@ function Lab3DPageInner() {
                 labels={{ launch: t.launch, nucleus: t.nucleus, vacuole: t.vacuole }}
                 fallbackText={t.webglUnavailable}
                 cameraCommand={cameraCommand}
+                quality={quality}
               />
             </SceneErrorBoundary>
           </div>
