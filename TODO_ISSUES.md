@@ -53,11 +53,12 @@ Tracking issue: [#49 — First 3D learning journey across three domains](https:/
 ## Quality gate for each implementation change
 
 - [x] Tests cover deterministic logic and important boundary cases.
+- [x] A store-level lab-flow integration test covers place → merge → result/warnings/references → history/undo plus no-reaction and empty states. Browser E2E remains a separate gap.
 - [x] Lint and TypeScript checks pass.
 - [x] Relevant data/security validation scripts pass.
 - [x] Production build passes.
 - [x] Documentation reflects actual behavior.
-- [x] The related implementation acceptance criteria are verified locally. Closing remote issues remains a repository-maintainer action because GitHub issue state was inaccessible.
+- [x] The related implementation acceptance criteria are verified locally before any issue comment or closure; no issue is closed from source inspection alone.
 
 ## Verification record — 2026-10-23
 
@@ -68,6 +69,15 @@ Tracking issue: [#49 — First 3D learning journey across three domains](https:/
 - `npm run validate` — reaction, mutation-security, and persistence validation passed; persistence reported 21 passed and 0 failed.
 - `npm run build` — Next.js 16.4.2 production build passed and generated all application routes.
 - `npm audit --omit=dev` — passed with 0 production vulnerabilities after upgrading Next.js from 16.3.8 to 16.4.2. The full audit still reports advisory chains in lint/Drizzle development tooling; npm's suggested fixes downgrade major packages, so they were not applied automatically.
+
+## Verification record — 2026-11-25
+
+- `npm run lint` — passed with no errors.
+- `npx tsc --noEmit` — passed with no errors.
+- `npm run test:run` — 39 test files / 305 tests passed, including the store-level lab-flow integration test.
+- `npm run validate` — reaction/mutation checks and 21 persistence checks passed.
+- `npm run build` — production build passed after the standard Next.js security-advisory retry; no dependency upgrade was applied here.
+- Browser E2E remains absent; adding Playwright or another browser-test dependency requires an explicit decision.
 
 ## Important product constraints
 
