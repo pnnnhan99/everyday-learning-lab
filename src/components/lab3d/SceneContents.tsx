@@ -11,16 +11,18 @@ function Atom({
   radius,
   color,
   label,
+  segments,
 }: {
   position: Point3;
   radius: number;
   color: string;
   label: string;
+  segments: number;
 }) {
   return (
     <group position={position}>
       <mesh>
-        <sphereGeometry args={[radius, 32, 32]} />
+        <sphereGeometry args={[radius, segments, segments]} />
         <meshStandardMaterial color={color} roughness={0.34} metalness={0.08} />
       </mesh>
       <Html center distanceFactor={8} position={[0, radius + 0.18, 0]} style={{ pointerEvents: 'none' }}>
@@ -32,7 +34,7 @@ function Atom({
   );
 }
 
-function Bond({ start, end }: { start: Point3; end: Point3 }) {
+function Bond({ start, end, segments }: { start: Point3; end: Point3; segments: number }) {
   const { midpoint, length, rotation } = useMemo(() => {
     const from = new Vector3(...start);
     const to = new Vector3(...end);
@@ -48,13 +50,13 @@ function Bond({ start, end }: { start: Point3; end: Point3 }) {
 
   return (
     <mesh position={midpoint} quaternion={rotation}>
-      <cylinderGeometry args={[0.075, 0.075, length, 16]} />
+      <cylinderGeometry args={[0.075, 0.075, length, segments]} />
       <meshStandardMaterial color="#cbd5e1" roughness={0.5} />
     </mesh>
   );
 }
 
-export function WaterScene() {
+export function WaterScene({ quality }: Lab3DSceneProps) {
   // Illustrative geometry only: positions and radii are not to scale.
   const oxygen: Point3 = [0, 0, 0];
   const hydrogenA: Point3 = [0.72, 0.55, 0];
@@ -62,16 +64,16 @@ export function WaterScene() {
 
   return (
     <group>
-      <Bond start={oxygen} end={hydrogenA} />
-      <Bond start={oxygen} end={hydrogenB} />
-      <Atom position={oxygen} radius={0.48} color="#ef4444" label="O" />
-      <Atom position={hydrogenA} radius={0.29} color="#f8fafc" label="H" />
-      <Atom position={hydrogenB} radius={0.29} color="#f8fafc" label="H" />
+      <Bond start={oxygen} end={hydrogenA} segments={quality.cylinderSegments} />
+      <Bond start={oxygen} end={hydrogenB} segments={quality.cylinderSegments} />
+      <Atom position={oxygen} radius={0.48} color="#ef4444" label="O" segments={quality.sphereSegments} />
+      <Atom position={hydrogenA} radius={0.29} color="#f8fafc" label="H" segments={quality.sphereSegments} />
+      <Atom position={hydrogenB} radius={0.29} color="#f8fafc" label="H" segments={quality.sphereSegments} />
     </group>
   );
 }
 
-export function ProjectileScene({ trajectory, labels }: Lab3DSceneProps) {
+export function ProjectileScene({ trajectory, labels, quality }: Lab3DSceneProps) {
   const points = useMemo(() => {
     const maxX = trajectory[trajectory.length - 1]?.x ?? 1;
     const scale = 5 / Math.max(maxX, 1);
@@ -89,7 +91,7 @@ export function ProjectileScene({ trajectory, labels }: Lab3DSceneProps) {
       {points.length > 1 && <Line points={points} color="#38bdf8" lineWidth={3} />}
       {marker && (
         <mesh position={marker}>
-          <sphereGeometry args={[0.16, 24, 24]} />
+          <sphereGeometry args={[0.16, quality.sphereSegments, quality.sphereSegments]} />
           <meshStandardMaterial color="#fbbf24" emissive="#92400e" emissiveIntensity={0.35} />
         </mesh>
       )}
@@ -100,7 +102,7 @@ export function ProjectileScene({ trajectory, labels }: Lab3DSceneProps) {
   );
 }
 
-export function PlantCellScene({ sunlight, labels }: Lab3DSceneProps) {
+export function PlantCellScene({ sunlight, labels, quality }: Lab3DSceneProps) {
   const chloroplasts: Point3[] = [
     [-0.72, 0.55, 0.2],
     [0.65, 0.52, -0.25],
@@ -112,24 +114,24 @@ export function PlantCellScene({ sunlight, labels }: Lab3DSceneProps) {
   return (
     <group>
       <mesh>
-        <sphereGeometry args={[1.55, 40, 32]} />
+        <sphereGeometry args={[1.55, quality.sphereSegments, Math.round(quality.sphereSegments * 0.8)]} />
         <meshStandardMaterial color="#84cc16" wireframe roughness={0.8} />
       </mesh>
       <mesh>
-        <sphereGeometry args={[1.48, 40, 32]} />
+        <sphereGeometry args={[1.48, quality.sphereSegments, Math.round(quality.sphereSegments * 0.8)]} />
         <meshStandardMaterial color="#65a30d" transparent opacity={0.12} depthWrite={false} />
       </mesh>
       <mesh position={[-0.22, 0.05, 0.15]} scale={[0.48, 0.48, 0.42]}>
-        <sphereGeometry args={[1, 32, 24]} />
+        <sphereGeometry args={[1, quality.sphereSegments, Math.round(quality.sphereSegments * 0.75)]} />
         <meshStandardMaterial color="#c084fc" roughness={0.35} />
       </mesh>
       <mesh position={[0.36, -0.25, -0.12]} scale={[0.7, 0.86, 0.48]}>
-        <sphereGeometry args={[1, 32, 24]} />
+        <sphereGeometry args={[1, quality.sphereSegments, Math.round(quality.sphereSegments * 0.75)]} />
         <meshStandardMaterial color="#38bdf8" transparent opacity={0.72} roughness={0.4} />
       </mesh>
       {chloroplasts.map((position, index) => (
         <mesh key={index} position={position} scale={[0.24, 0.13, 0.16]}>
-          <sphereGeometry args={[1, 24, 16]} />
+          <sphereGeometry args={[1, quality.sphereSegments, Math.round(quality.sphereSegments * 0.66)]} />
           <meshStandardMaterial
             color="#22c55e"
             emissive="#16a34a"
